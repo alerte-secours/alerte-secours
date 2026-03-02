@@ -9,8 +9,8 @@ module.exports = {
   SCAN_AUTO_ARCHIVE_CRON: "0 4 * * *", // At 4:00
   RELATIVE_UNREGISTERED_RECONCILIATION_CRON: "0 4 * * *", // At 4:00
   // DEVICE_GEODATA_IOS_SILENT_PUSH_AGE: "24 hours", // When to send iOS silent push for heartbeat sync
-  DEVICE_GEODATA_NOTIFICATION_AGE: "14 days", // When to send push notification
-  DEVICE_GEODATA_CLEANUP_AGE: "15 days", // When to remove/clean data
+  DEVICE_GEODATA_NOTIFICATION_AGE: "44 days", // When to send push notification
+  DEVICE_GEODATA_CLEANUP_AGE: "45 days", // When to remove/clean data
 }
 
 // cheat on https://crontab.guru/
