@@ -1,0 +1,7 @@
+<resources>
+  <string name="app_name">Alerte Secours</string>
+  
+  <!-- French permission message for background geolocation -->
+  <string name="message_permission_required">Alerte Secours nécessite la localisation en arrière-plan pour les alertes de proximité.</string>
+  <string name="title_permission_required">Autorisation requise</string>
+</resources>

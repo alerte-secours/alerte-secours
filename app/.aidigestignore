@@ -1,0 +1,80 @@
+# Ignore everything by default
+*
+
+# First include the source directory
+!src/
+!src/**/
+!src/**/*.js
+!src/**/*.jsx
+!src/**/*.ts
+!src/**/*.tsx
+
+# Then exclude specific patterns and directories
+# Build and dependencies
+node_modules/
+build/
+dist/
+coverage/
+
+# Platform specific
+ios/
+android/
+
+# Configuration files
+*.json
+*.lock
+*.yml
+*.yaml
+*.env*
+*.config.*
+.*rc*
+Dockerfile*
+
+# Documentation
+*.md
+*.txt
+docs/
+
+# Tests and stories
+**/__tests__/
+**/*.test.*
+**/*.spec.*
+**/*.stories.*
+e2e/
+
+# Generated and utility files
+*.d.ts
+*.map
+*.log
+
+# Assets and styles
+src/assets/
+**/*.css
+**/*.scss
+**/*.style.*
+**/*.styles.*
+*.svg
+*.png
+*.jpg
+*.ttf
+
+# Common utility/boilerplate directories
+src/i18n/
+src/theme/
+src/utils/
+src/lib/
+src/components/
+src/navigation/
+src/hooks/
+src/hoc/
+
+# Auto-generated or index files
+**/index.js
+**/index.ts
+**/constants.js
+**/constants.ts
+**/types.ts
+
+# Deprecated files
+*.bak
+*.old

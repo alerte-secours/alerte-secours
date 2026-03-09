@@ -1,0 +1,117 @@
+# yaml-language-server: $schema=https://json.schemastore.org/github-workflow.json
+on:
+  workflow_dispatch:
+  # push:
+  #   tags:
+  #     - "**"
+    # branches:
+    #   - main
+
+concurrency:
+  cancel-in-progress: true
+  group: ${{ github.workflow }}-${{ github.event.ref }}
+
+jobs:
+  build-ios:
+    env:
+      GRADLE_USER_HOME: ${{ github.workspace }}/.gradle
+      # SENTRY_DSN: ${{ secrets.SENTRY_DSN }}
+    runs-on: macos-latest
+    steps:
+      - name: ⏬ Checkout code repository
+        uses: actions/checkout@v4
+
+      - name: ⬢ Setup node version
+        uses: actions/setup-node@v4
+        with:
+          node-version-file: ".node-version"
+
+      - name: 🔽 Yarn install
+        # uses: https://git.devthefuture.org/devthefuture/actions/yarn-install@v0.4.0
+        uses: devthefuture-org/actions/yarn-install@v0.4.0
+
+      - name: ✅ Lint (including a11y rules)
+        run: yarn lint
+
+      - name: ⛾ Gradle cache
+        uses: actions/cache@v3
+        with:
+          path: |
+            ${{ github.workspace }}/.gradle/caches
+            ${{ github.workspace }}/.gradle/wrapper
+          key: ${{ runner.os }}-gradle-${{ hashFiles('**/*.gradle*', '**/gradle-wrapper.properties') }}
+          restore-keys: |
+            ${{ runner.os }}-gradle-
+
+      - name: 📌 Set metadata output
+        id: vars
+        shell: bash
+        run: |
+          if [ -n "$GITHUB_HEAD_REF" ]; then
+            tag=$GITHUB_HEAD_REF
+          else
+            tag=${GITHUB_REF#refs/heads/}
+            tag=${tag#refs/tags/}
+          fi
+          echo "tag=$tag" >> $GITHUB_OUTPUT
+
+      - name: 💎 Setup Ruby (bundle)
+        uses: ruby/setup-ruby@v1
+        with:
+          ruby-version: 2.6
+          bundler-cache: true
+
+      - name: ⛾ Restore Pods cache
+        uses: actions/cache@v2
+        with:
+          path: |
+            ios/Pods
+            ~/Library/Caches/CocoaPods
+            ~/.cocoapods
+          key: ${{ runner.os }}-pods-${{ hashFiles('ios/Podfile.lock') }}
+          restore-keys: |
+            ${{ runner.os }}-pods-
+
+      - name: 🫛 Install Pods
+        run: cd ios && pod install --repo-update && cd ..
+
+
+      - name: ⚙ Setup build env vars
+        shell: bash
+        run: |
+          cat $GITHUB_WORKSPACE/.env.default >> $GITHUB_ENV
+          cat $GITHUB_WORKSPACE/.env.prod >> $GITHUB_ENV
+          echo "BUILD_TIME=$(date +%s000)" >> $GITHUB_ENV
+
+      - name: 📦 Build IOS App
+        uses: yukiarrr/ios-build-action@v1.4.0
+        with:
+          project-path: ios/MyApp.xcodeproj
+          p12-base64: ${{ secrets.IOS_P12_BASE64 }}
+          mobileprovision-base64: ${{ secrets.IOS_MOBILE_PROVISION_BASE64 }}
+          code-signing-identity: "iPhone Distribution"
+          team-id: ${{ secrets.IOS_TEAM_ID }}
+          certificate-password: ${{ secrets.IOS_CERTIFICATE_PASSWORD }}
+          workspace-path: ios/MyApp.xcworkspace
+          scheme: MyApp
+
+      - name: 🏷 Set asset name
+        shell: bash
+        run: |
+          mv output.ipa alertesecours-${{ steps.vars.outputs.tag }}.ipa
+
+      - name: 🎀 Release
+        uses: devthefuture-org/action-gh-release@v1
+        if: startsWith(github.ref, 'refs/tags/')
+        with:
+          files: |
+            alertesecours-${{ steps.vars.outputs.tag }}.ipa
+
+      # - name: 🎁 Upload app to TestFlight
+      #   uses: apple-actions/upload-testflight-build@v1
+      #   if: startsWith(github.ref, 'refs/tags/')
+      #   with:
+      #     app-path: 'alertesecours-${{ steps.vars.outputs.tag }}.ipa'
+      #     issuer-id: ${{ secrets.APPSTORE_ISSUER_ID }}
+      #     api-key-id: ${{ secrets.APPSTORE_API_KEY_ID }}
+      #     api-private-key: ${{ secrets.APPSTORE_API_PRIVATE_KEY }}

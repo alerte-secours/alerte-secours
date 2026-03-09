@@ -1,0 +1,85 @@
+<manifest xmlns:android="http://schemas.android.com/apk/res/android" xmlns:tools="http://schemas.android.com/tools">
+  <uses-permission android:name="android.permission.ACCESS_BACKGROUND_LOCATION"/>
+  <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION"/>
+  <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION"/>
+  <uses-permission android:name="android.permission.ACTIVITY_RECOGNITION"/>
+  <uses-permission android:name="android.permission.CALL_PHONE"/>
+  <uses-permission android:name="android.permission.CAMERA"/>
+  <uses-permission android:name="android.permission.INTERNET"/>
+  <uses-permission android:name="android.permission.MODIFY_AUDIO_SETTINGS"/>
+  <uses-permission android:name="android.permission.POST_NOTIFICATIONS"/>
+  <uses-permission android:name="android.permission.READ_CONTACTS"/>
+  <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE"/>
+  <uses-permission android:name="android.permission.READ_MEDIA_IMAGES"/>
+  <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED"/>
+  <uses-permission android:name="android.permission.RECORD_AUDIO"/>
+  <uses-permission android:name="android.permission.REQUEST_IGNORE_BATTERY_OPTIMIZATIONS"/>
+  <uses-permission android:name="android.permission.SYSTEM_ALERT_WINDOW"/>
+  <uses-permission android:name="android.permission.VIBRATE"/>
+  <uses-permission android:name="android.permission.WAKE_LOCK"/>
+  <uses-permission android:name="android.permission.WRITE_CONTACTS"/>
+  <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE"/>
+  <queries>
+    <intent>
+      <action android:name="android.intent.action.VIEW"/>
+      <category android:name="android.intent.category.BROWSABLE"/>
+      <data android:scheme="https"/>
+    </intent>
+    <intent>
+      <action android:name="android.intent.action.VIEW"/>
+      <data android:scheme="geo"/>
+    </intent>
+    <intent>
+      <action android:name="android.intent.action.VIEW"/>
+      <data android:scheme="waze"/>
+    </intent>
+  </queries>
+  <application android:name=".MainApplication" android:label="@string/app_name" android:icon="@mipmap/ic_launcher" android:allowBackup="true" android:theme="@style/AppTheme" android:supportsRtl="true" android:networkSecurityConfig="@xml/network_security_config" android:fullBackupContent="@xml/secure_store_backup_rules" android:dataExtractionRules="@xml/secure_store_data_extraction_rules">
+    <meta-data android:name="com.google.firebase.messaging.default_notification_color" android:resource="@color/notification_icon_color" tools:replace="android:resource"/>
+    <meta-data android:name="com.google.firebase.messaging.default_notification_icon" android:resource="@drawable/notification_icon"/>
+    <meta-data android:name="com.transistorsoft.locationmanager.license" android:value="eyJhbGciOiJFZERTQSIsImtpZCI6ImVkMjU1MTktbWFpbi12MSJ9.eyJvcyI6ImFuZHJvaWQiLCJhcHBfaWQiOiJjb20uYWxlcnRlc2Vjb3VycyIsIm9yZGVyX251bWJlciI6ODY0MCwicmVuZXdhbF91cmwiOiJodHRwczovL3Nob3AudHJhbnNpc3RvcnNvZnQuY29tL2NhcnQvMTY1MDc4NjE1MDU6MT9ub3RlPTYxOTMiLCJjdXN0b21lcl9pZCI6NTc0MiwicHJvZHVjdCI6InJlYWN0LW5hdGl2ZS1iYWNrZ3JvdW5kLWdlb2xvY2F0aW9uIiwia2V5X3ZlcnNpb24iOjEsImFsbG93ZWRfc3VmZml4ZXMiOlsiLmRldiIsIi5kZXZlbG9wbWVudCIsIi5zdGFnaW5nIiwiLnN0YWdlIiwiLnFhIiwiLnVhdCIsIi50ZXN0IiwiLmRlYnVnIl0sIm1heF9idWlsZF9zdGFtcCI6MjAyNzAyMjIsImdyYWNlX2J1aWxkcyI6MCwiZW50aXRsZW1lbnRzIjpbImNvcmUiXSwiaWF0IjoxNzY5MTI2Mjg5fQ.sCJRdXJ78r2B0BLfht-AnYXSoF5pcTxAfEkCcX6BN7FiYc8GT9RUMlqDdwacD6UlI0v6WLhQck6lPkRgCq4MDQ"/>
+    <meta-data android:name="expo.modules.notifications.default_notification_color" android:resource="@color/notification_icon_color"/>
+    <meta-data android:name="expo.modules.notifications.default_notification_icon" android:resource="@drawable/notification_icon"/>
+    <meta-data android:name="expo.modules.updates.CODE_SIGNING_CERTIFICATE" android:value="-----BEGIN CERTIFICATE-----&#xD;&#xA;MIICzTCCAbWgAwIBAgIJR0KfFDoMJrYZMA0GCSqGSIb3DQEBCwUAMA8xDTALBgNV&#xD;&#xA;BAMTBHRlc3QwIBcNMjQwODE4MTU0OTExWhgPMjEyNDA4MTgxNTQ5MTFaMA8xDTAL&#xD;&#xA;BgNVBAMTBHRlc3QwggEiMA0GCSqGSIb3DQEBAQUAA4IBDwAwggEKAoIBAQCk46qR&#xD;&#xA;a0Do2fpBDtif18a/WQNWHm/xseHsh97bZdt8ooV4PQooK6VZUbADUhhJXqqomapa&#xD;&#xA;yFMJX7sZzfBUF7/xMrWDrgS0R4FLbXijAolhpXoqMkBCx3toKUCbU4ljA+Lz/BX1&#xD;&#xA;AEqVWqAweNzNDi4bvd1PG1/sQuuEtoZuSVfTPRAjF8vVkWyn8nfkorTtMYaw2QFu&#xD;&#xA;ugs1wp7YieD4C8CIK5gMX7f8bxx3l7BR50bf+9MHJFI+eTjmoFoJFEVWbCcrOrky&#xD;&#xA;FLM0+NrMI2fZYunrN6jcKc/NKEaDKb1VDO9yrLcFQOtXJJIXz94/lS6kHDjzEgUV&#xD;&#xA;zx3uaDbAdSQsyZxxAgMBAAGjKjAoMA4GA1UdDwEB/wQEAwIHgDAWBgNVHSUBAf8E&#xD;&#xA;DDAKBggrBgEFBQcDAzANBgkqhkiG9w0BAQsFAAOCAQEASIjMvS3N9NEPeakUmYXg&#xD;&#xA;MEyjaX+N/62Pbcp4taU4G9vDB/fyDqMMef8+CWBpo/noXqzt4K6k1id7UwdZhRks&#xD;&#xA;xdBTSf1x5yzDB24mbqNAvPa2q8G6KIoNZuvLUDz35366FxR+vTHQmp2d4Yz92kIL&#xD;&#xA;EEmFr8eMHf60tfHG+em97p+evmXDyBjF3CwOvtuzog1wCF/AsJ1d0gbPPMKdAHKC&#xD;&#xA;LZHsiXJ5i/oFuYzWkDDJkO9bb6HaQplt/46iC0CyM6SsT6H8kkDVQbfQCH1JAXsL&#xD;&#xA;Knk10FbAMKJ7GWbAdsdcbNZlDMrzPprw8N/fpGc7RHdHBwKcFm44mNtrMrzEd4eX&#xD;&#xA;pQ==&#xD;&#xA;-----END CERTIFICATE-----&#xD;&#xA;"/>
+    <meta-data android:name="expo.modules.updates.CODE_SIGNING_METADATA" android:value="{&quot;keyid&quot;:&quot;main&quot;,&quot;alg&quot;:&quot;rsa-v1_5-sha256&quot;}"/>
+    <meta-data android:name="expo.modules.updates.ENABLED" android:value="true"/>
+    <meta-data android:name="expo.modules.updates.EXPO_RUNTIME_VERSION" android:value="@string/expo_runtime_version"/>
+    <meta-data android:name="expo.modules.updates.EXPO_UPDATES_CHECK_ON_LAUNCH" android:value="ERROR_RECOVERY_ONLY"/>
+    <meta-data android:name="expo.modules.updates.EXPO_UPDATES_LAUNCH_WAIT_MS" android:value="0"/>
+    <meta-data android:name="expo.modules.updates.EXPO_UPDATE_URL" android:value="https://expo-updates.alertesecours.fr/api/manifest?project=alerte-secours&amp;channel=release"/>
+    <activity android:name=".MainActivity" android:configChanges="keyboard|keyboardHidden|orientation|screenSize|screenLayout|uiMode|locale|layoutDirection" android:launchMode="singleTask" android:windowSoftInputMode="adjustResize" android:theme="@style/Theme.App.SplashScreen" android:exported="true" android:screenOrientation="portrait">
+      <intent-filter>
+        <action android:name="android.intent.action.MAIN"/>
+        <category android:name="android.intent.category.LAUNCHER"/>
+      </intent-filter>
+      <intent-filter>
+        <action android:name="android.intent.action.VIEW"/>
+        <category android:name="android.intent.category.DEFAULT"/>
+        <category android:name="android.intent.category.BROWSABLE"/>
+        <data android:scheme="com.alertesecours"/>
+        <data android:scheme="exp+alerte-secours"/>
+      </intent-filter>
+      <intent-filter>
+        <action android:name="com.alertesecours.OPEN_ALERT"/>
+        <category android:name="android.intent.category.DEFAULT"/>
+      </intent-filter>
+      <intent-filter>
+        <action android:name="com.alertesecours.OPEN_RELATIVES"/>
+        <category android:name="android.intent.category.DEFAULT"/>
+      </intent-filter>
+      <intent-filter>
+        <action android:name="com.alertesecours.OPEN_BACKGROUND_GEOLOCATION_SETTINGS"/>
+        <category android:name="android.intent.category.DEFAULT"/>
+      </intent-filter>
+      <intent-filter android:autoVerify="true" data-generated="true">
+        <action android:name="android.intent.action.VIEW"/>
+        <data android:scheme="https" android:host="app.alertesecours.fr" android:pathPrefix="/"/>
+        <category android:name="android.intent.category.BROWSABLE"/>
+        <category android:name="android.intent.category.DEFAULT"/>
+      </intent-filter>
+    </activity>
+    <activity android:name="com.facebook.react.devsupport.DevSettingsActivity" android:exported="false"/>
+    <provider android:name="com.facebook.drawee.backends.pipeline.FrescoInitProvider" tools:node="remove"/>
+    <provider android:name=".FrescoInitProvider" android:authorities="${applicationId}.frescoinit" android:exported="false" android:initOrder="100"/>
+  </application>
+</manifest>

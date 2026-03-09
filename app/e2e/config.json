@@ -1,0 +1,4 @@
+{
+  "setupFilesAfterEnv": ["./e2e/init.js"]
+}
+

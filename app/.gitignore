@@ -1,0 +1,114 @@
+# OSX
+#
+.DS_Store
+
+# Xcode
+#
+build/
+*.pbxuser
+!default.pbxuser
+*.mode1v3
+!default.mode1v3
+*.mode2v3
+!default.mode2v3
+*.perspectivev3
+!default.perspectivev3
+xcuserdata
+*.xccheckout
+*.moved-aside
+DerivedData
+*.hmap
+*.ipa
+*.xcuserstate
+# project.xcworkspace
+ios/AlerteSecours.xcodeproj/project.xcworkspace/**
+!ios/AlerteSecours.xcodeproj/project.xcworkspace/xcshareddata/swiftpm/Package.resolved
+# bunlde sourcemaps
+ios/*.map
+ios/*.hbc
+
+# Android/IntelliJ
+#
+build/
+.idea
+.gradle
+local.properties
+*.iml
+*.hprof
+.cxx/
+*.keystore
+!debug.keystore
+
+# node.js
+#
+node_modules/
+npm-debug.log
+yarn-error.log
+
+# Bundle artifacts
+*.jsbundle
+
+# CocoaPods
+/ios/Pods/
+
+# Temporary files created by Metro to check the health of the file watcher
+.metro-health-check*
+
+# Expo
+.expo/
+web-build/
+dist/
+
+# Yarn berry
+.pnp.*
+.yarn/*
+!.yarn/patches
+!.yarn/plugins
+!.yarn/releases
+!.yarn/sdks
+!.yarn/versions
+# !.yarn/cache
+
+# secrets
+/keys
+/.env.local
+/.env.prod
+/.env.staging
+
+
+## Build generated
+build/
+DerivedData
+/**/*.xcarchive/**
+
+# aidigest
+codebase.md
+
+# Build logs
+logs/
+
+# Sensitive configuration files
+ios/GoogleService-Info.plist
+ios/AlerteSecours/GoogleService-Info.plist
+ios/AlerteSecours/Supporting/Expo.plist
+android/app/google-services.json
+
+# Keep example files
+!ios/GoogleService-Info.example.plist
+!ios/AlerteSecours/GoogleService-Info.example.plist
+!ios/AlerteSecours/Supporting/Expo.example.plist
+!android/app/google-services.example.json
+
+screenshot-*.png
+
+/.data
+
+# Geodae preprocessing
+scripts/dae/node_modules/
+scripts/dae/.yarn/*
+!scripts/dae/.yarn/patches
+!scripts/dae/.yarn/plugins
+!scripts/dae/.yarn/releases
+!scripts/dae/.yarn/sdks
+!scripts/dae/.yarn/versions
+src/assets/db/*.db

@@ -1,0 +1,95 @@
+# yaml-language-server: $schema=https://json.schemastore.org/github-workflow.json
+on:
+  workflow_dispatch:
+  # push:
+  #   tags:
+  #     - "**"
+  #   branches:
+  #     - main
+
+concurrency:
+  cancel-in-progress: true
+  group: ${{ github.workflow }}-${{ github.event.ref }}
+
+jobs:
+  build-apk:
+    env:
+      RUNNER_TOOL_CACHE: /toolcache # see https://about.gitea.com/resources/tutorials/enable-gitea-actions-cache-to-accelerate-cicd and https://gitea.com/gitea/act_runner/issues/70
+      GRADLE_USER_HOME: ${{ github.workspace }}/.gradle
+    runs-on: ubuntu-latest
+    container:
+      image: devthefuture/act-runner@sha256:49abd1415cb4230866e995154733ad43f6f4c7513268dd25e412c7206d2b9e0e
+    steps:
+      - name: ⏬ Checkout code repository
+        uses: actions/checkout@v4.1.7
+
+      - name: ⬢ Setup node version
+        uses: actions/setup-node@v4
+        with:
+          node-version-file: ".node-version"
+
+      - name: 🔽 Yarn install
+        uses: https://git.devthefuture.org/devthefuture/actions/yarn-install@v0.5.0
+
+      - name: ⛾ Gradle cache
+        uses: actions/cache@v3
+        with:
+          path: |
+            ${{ github.workspace }}/.gradle/caches
+            ${{ github.workspace }}/.gradle/wrapper
+          key: ${{ runner.os }}-gradle-${{ hashFiles('**/*.gradle*', '**/gradle-wrapper.properties') }}
+          restore-keys: |
+            ${{ runner.os }}-gradle-
+
+      - name: 📌 Set metadata output
+        id: vars
+        shell: bash
+        run: |
+          if [ -n "$GITHUB_HEAD_REF" ]; then
+            tag=$GITHUB_HEAD_REF
+          else
+            tag=$GITHUB_REF
+          fi
+          tag=${tag#refs/heads/}
+          tag=${tag#refs/tags/}
+          echo "tag=$tag" >> $GITHUB_OUTPUT
+
+      - name: ⚙ Setup build env vars
+        shell: bash
+        run: |
+          cat $GITHUB_WORKSPACE/.env.default >> $GITHUB_ENV
+          cat $GITHUB_WORKSPACE/.env.prod >> $GITHUB_ENV
+          echo "BUILD_TIME=$(date +%s000)" >> $GITHUB_ENV
+
+      - name: 📦 Build APK
+        # uses: docker://reactnativecommunity/react-native-android:v12.0 # more recent
+        # uses: docker://reactnativecommunity/react-native-android:9 # actually working
+        uses: docker://ghcr.io/devthefuture-org/docker-android:9 # use mirror to workaround docker rate limit
+        # mirror using https://github.com/containers/skopeo :
+        # skopeo copy docker://reactnativecommunity/react-native-android:9 docker://ghcr.io/devthefuture-org/docker-android:9
+        with:
+          entrypoint: /bin/sh
+          args: |
+            -c "\
+              yarn expo prebuild --no-install; \
+              cd android && ./gradlew assembleRelease --no-daemon && cd ..; \
+              mv android/app/build/outputs/apk/release/app-release.apk alertesecours-${{ steps.vars.outputs.tag }}.apk; \
+            "
+
+      - name: 🎁 Publish release on repo
+        uses: https://codeberg.org/devthefuture/release-action@main
+        if: startsWith(github.ref, 'refs/tags/')
+        with:
+          title: ${{ steps.vars.outputs.tag }}
+          files: |-
+            alertesecours-${{ steps.vars.outputs.tag }}.apk
+          api_key: "${{secrets.M8A_ORG_BOT_REPO_TOKEN}}"
+
+      - name: 🎀 Publish release on minio-release
+        uses: https://git.devthefuture.org/devthefuture/actions/minio-upload@v0.5.0
+        with:
+          url: https://minio-releases.alertesecours.fr
+          local-path: alertesecours-${{ steps.vars.outputs.tag }}.apk
+          access-key: "${{secrets.MINO_RELEASE_ACCESS_KEY}}"
+          secret-key: "${{secrets.MINO_RELEASE_SECRET_KEY}}"
+          remote-path: "android/alertesecours-${{ steps.vars.outputs.tag }}.apk android/alertesecours.apk"

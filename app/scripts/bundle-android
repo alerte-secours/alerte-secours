@@ -1,0 +1,21 @@
+#!/bin/bash
+
+set -e
+
+export BUILD_TIME=$(date +%s000)
+
+ROOT_WD=$PWD
+
+# related to https://github.com/facebook/react-native/issues/25290#issuecomment-507629926
+cd android/app/src/main/res/
+# Remove all previously generated drawable resources to avoid conflicts
+rm -rf drawable-*/src_assets_img_*.png drawable-*/node_modules_*.png
+cd $ROOT_WD
+rm -rf android/app/build/generated/*
+
+cd android
+./gradlew :app:bundleDeviceArm64Release
+cd "$ROOT_WD"
+AAB_PATH="$("$ROOT_WD/scripts/find-latest-aab.sh")"
+
+echo "find your bundle here: file://$AAB_PATH"

@@ -1,0 +1,5 @@
+ios/AlerteSecours.xcodeproj/project.pbxproj merge=union
+ios/**/*.pbxproj merge=union
+
+# Treat these files as binary to prevent Git from trying to merge them
+*.pbxproj binary merge=union

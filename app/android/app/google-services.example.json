@@ -1,0 +1,31 @@
+{
+  "project_info": {
+    "project_number": "YOUR_PROJECT_NUMBER_HERE",
+    "project_id": "YOUR_PROJECT_ID_HERE",
+    "storage_bucket": "YOUR_STORAGE_BUCKET_HERE"
+  },
+  "client": [{
+    "client_info": {
+      "mobilesdk_app_id": "YOUR_MOBILESDK_APP_ID_HERE",
+      "android_client_info": {
+        "package_name": "com.alertesecours"
+      }
+    },
+    "oauth_client": [{
+      "client_id": "YOUR_CLIENT_ID_HERE",
+      "client_type": 3
+    }],
+    "api_key": [{
+      "current_key": "YOUR_API_KEY_HERE"
+    }],
+    "services": {
+      "appinvite_service": {
+        "other_platform_oauth_client": [{
+          "client_id": "YOUR_CLIENT_ID_HERE",
+          "client_type": 3
+        }]
+      }
+    }
+  }],
+  "configuration_version": "1"
+}

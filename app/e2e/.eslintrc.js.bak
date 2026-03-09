@@ -1,0 +1,13 @@
+module.exports = {
+  extends: [],
+  plugins: ["detox",  "jest"],
+  env: {
+    "detox/detox": true,
+    "jest/globals": true,
+  },
+  globals: {
+    device: false,
+    element: false,
+    by: false,
+  },
+};

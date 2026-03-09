@@ -1,0 +1,44 @@
+#!/usr/bin/env bash
+
+if [ "`adb devices -l | grep device: | grep emulator`" != ""  ]; then
+  echo Android Emulator is already running
+  exit 0
+fi
+
+# to create launcher with 'open in terminal' use: setsid sh -c android-emulator
+source ~/.bashrc
+
+shopt -s expand_aliases
+
+alias adb=~/Android/Sdk/platform-tools/adb
+alias emulator=~/Android/Sdk/emulator/emulator
+
+if [ -z "$AVD_NAME" ]; then
+  # Gather emulators that exist on this computer
+  DEVICES=( $(emulator -list-avds 2>&1 | tail -n +2) )
+
+  # Display list of emulators
+  echo "Available Emulators
+  ----------------------------------------"
+  N=1
+  for DEVICE in ${DEVICES[@]}
+  do
+    echo "$N) $DEVICE"
+    let N=$N+1
+  done
+
+  read -p "
+  Choose an emulator: " num
+
+  if [ ! $num -lt $N ] || [ ! $num -gt 0 ]; then
+    echo "Invalid Entry : $num"
+    exit 1
+  fi
+  AVD_NAME=${DEVICES[$num-1]}
+fi
+
+adb start-server
+emulator -avd $AVD_NAME -netdelay none -netspeed full 1>/dev/null 2>/dev/null & disown
+
+set -e
+adb devices -l

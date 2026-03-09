@@ -1,0 +1,277 @@
+apply plugin: "com.android.application"
+apply plugin: "org.jetbrains.kotlin.android"
+apply plugin: "com.facebook.react"
+
+def projectRoot = rootDir.getAbsoluteFile().getParentFile().getAbsolutePath()
+
+static def versionToNumber(major, minor, patch) {
+  return patch * 100 + minor * 10000 + major * 1000000
+}
+
+def getRNVersion() {
+  def version = providers.exec {
+    workingDir(projectDir)
+    commandLine("node", "-e", "console.log(require('react-native/package.json').version);")
+  }.standardOutput.asText.get().trim()
+
+  def coreVersion = version.split("-")[0]
+  def (major, minor, patch) = coreVersion.tokenize('.').collect { it.toInteger() }
+
+  return versionToNumber(
+      major,
+      minor,
+      patch
+  )
+}
+def rnVersion = getRNVersion()
+
+/**
+ * This is the configuration block to customize your React Native Android app.
+ * By default you don't need to apply any configuration, just uncomment the lines you need.
+ */
+react {
+    entryFile = file(["node", "-e", "require('expo/scripts/resolveAppEntry')", projectRoot, "android", "absolute"].execute(null, rootDir).text.trim())
+    reactNativeDir = new File(["node", "--print", "require.resolve('react-native/package.json')"].execute(null, rootDir).text.trim()).getParentFile().getAbsoluteFile()
+    hermesCommand = new File(["node", "--print", "require.resolve('react-native/package.json')"].execute(null, rootDir).text.trim()).getParentFile().getAbsolutePath() + "/sdks/hermesc/%OS-BIN%/hermesc"
+    codegenDir = new File(["node", "--print", "require.resolve('@react-native/codegen/package.json', { paths: [require.resolve('react-native/package.json')] })"].execute(null, rootDir).text.trim()).getParentFile().getAbsoluteFile()
+
+    // Use Expo CLI to bundle the app, this ensures the Metro config
+    // works correctly with Expo projects.
+    cliFile = new File(["node", "--print", "require.resolve('@expo/cli', { paths: [require.resolve('expo/package.json')] })"].execute(null, rootDir).text.trim())
+    bundleCommand = "export:embed"
+
+    if (rnVersion >= versionToNumber(0, 75, 0)) {
+        /* Autolinking */
+        autolinkLibrariesWithApp()
+    }
+}
+
+/**
+ * Set this to true to Run Proguard on Release builds to minify the Java bytecode.
+ */
+def enableProguardInReleaseBuilds = (findProperty('android.enableProguardInReleaseBuilds') ?: false).toBoolean()
+
+/**
+ * The preferred build flavor of JavaScriptCore (JSC)
+ *
+ * For example, to use the international variant, you can use:
+ * `def jscFlavor = 'org.webkit:android-jsc-intl:+'`
+ *
+ * The international variant includes ICU i18n library and necessary data
+ * allowing to use e.g. `Date.toLocaleString` and `String.localeCompare` that
+ * give correct results when using with locales other than en-US. Note that
+ * this variant is about 6MiB larger per architecture than default.
+ */
+def jscFlavor = 'org.webkit:android-jsc:+'
+
+apply from: new File(["node", "--print", "require.resolve('@sentry/react-native/package.json')"].execute().text.trim(), "../sentry.gradle")
+android {
+// @generated begin react-native-background-geolocation-project - expo prebuild (DO NOT MODIFY) sync-451bbca0f2f08c9fc8b21a201ef5b476b165ba21
+// Project background_geolocation = project(':react-native-background-geolocation')
+// apply from: "${background_geolocation.projectDir}/app.gradle"
+// @generated end react-native-background-geolocation-project
+// @generated begin react-native-background-fetch-project - expo prebuild (DO NOT MODIFY) sync-56d2d70cbc3f26369dd5e711d0ab87bf3c0aebb3
+// Project background_fetch = project(':react-native-background-fetch')
+// @generated end react-native-background-fetch-project
+    ndkVersion rootProject.ext.ndkVersion
+
+    // buildToolsVersion rootProject.ext.buildToolsVersion
+    compileSdk rootProject.ext.compileSdkVersion
+
+    namespace 'com.alertesecours'
+    defaultConfig {
+        applicationId 'com.alertesecours'
+        minSdkVersion rootProject.ext.minSdkVersion
+        targetSdkVersion rootProject.ext.targetSdkVersion
+        versionCode 241
+        versionName "1.16.10"
+        multiDexEnabled true
+        testBuildType System.getProperty('testBuildType', 'debug')
+        testInstrumentationRunner 'androidx.test.runner.AndroidJUnitRunner'
+    }
+
+    // Define ABI flavors so we can install the right dev client on emulator vs device.
+    flavorDimensions 'abi'
+    productFlavors {
+        deviceArm64 {
+            dimension 'abi'
+            ndk { abiFilters 'arm64-v8a' }
+        }
+        emulatorX86_64 {
+            dimension 'abi'
+            ndk { abiFilters 'x86_64' }
+        }
+    }
+
+    signingConfigs {
+        debug {
+            storeFile file('debug.keystore')
+            storePassword 'android'
+            keyAlias 'androiddebugkey'
+            keyPassword 'android'
+        }
+        release {
+            storeFile file(RELEASE_STORE_FILE)
+            storePassword RELEASE_STORE_PASSWORD
+            keyAlias RELEASE_KEY_ALIAS
+            keyPassword RELEASE_KEY_PASSWORD
+        }
+    }
+    buildTypes {
+        debug {
+            signingConfig signingConfigs.debug
+        }
+        release {
+            // Caution! In production, you need to generate your own keystore file.
+            // see https://reactnative.dev/docs/signed-apk-android.
+            signingConfig signingConfigs.release
+            // shrinkResources true // disabled, related to https://github.com/facebook/react-native/issues/25290#issuecomment-507700557
+            minifyEnabled true
+            proguardFiles getDefaultProguardFile("proguard-android.txt"), "proguard-rules.pro"
+// @generated begin react-native-background-geolocation-proguard - expo prebuild (DO NOT MODIFY) sync-606db7f838db1722ea0ff547adceb798272bd706
+	    // proguardFiles "${background_geolocation.projectDir}/proguard-rules.pro"
+// @generated end react-native-background-geolocation-proguard
+// @generated begin react-native-background-fetch-proguard - expo prebuild (DO NOT MODIFY) sync-7cb5d9a88ae03463dcde5b7e8571a725ecd5854f
+	    // proguardFiles "${background_fetch.projectDir}/proguard-rules.pro"
+// @generated end react-native-background-fetch-proguard
+            crunchPngs false
+            proguardFile "${rootProject.projectDir}/../node_modules/detox/android/detox/proguard-rules-app.pro"
+            // Enable R8 full mode
+            debuggable false
+            jniDebuggable false
+            renderscriptDebuggable false
+            pseudoLocalesEnabled false
+            zipAlignEnabled true
+            // Generate and preserve the mapping file
+            proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
+        }
+    }
+    packagingOptions {
+        // Resolve duplicate native libs shipped by multiple dependencies (e.g. op-sqlite + react-android).
+        // Needed for debug flavors too (merge<Variant>NativeLibs).
+        pickFirsts += [
+            'lib/**/libjsi.so',
+            'lib/**/libreactnative.so',
+        ]
+
+        jniLibs {
+            useLegacyPackaging (findProperty('expo.useLegacyPackaging')?.toBoolean() ?: false)
+        }
+    }
+}
+
+// Apply static values from `gradle.properties` to the `android.packagingOptions`
+// Accepts values in comma delimited lists, example:
+// android.packagingOptions.pickFirsts=/LICENSE,**/picasa.ini
+["pickFirsts", "excludes", "merges", "doNotStrip"].each { prop ->
+    // Split option: 'foo,bar' -> ['foo', 'bar']
+    def options = (findProperty("android.packagingOptions.$prop") ?: "").split(",");
+    // Trim all elements in place.
+    for (i in 0..<options.size()) options[i] = options[i].trim();
+    // `[] - ""` is essentially `[""].filter(Boolean)` removing all empty strings.
+    options -= ""
+
+    if (options.length > 0) {
+        println "android.packagingOptions.$prop += $options ($options.length)"
+        // Ex: android.packagingOptions.pickFirsts += '**/SCCS/**'
+        options.each {
+            android.packagingOptions[prop] += it
+        }
+    }
+}
+
+configurations.all {
+    resolutionStrategy {
+        // Force non-native UCrop artifact (no .so), avoids 64KB page size issue from 2.2.6-native
+        force "com.github.yalantis:ucrop:2.2.6"
+
+        // Force Fresco/FBJNI versions with 16KB page support (or newer)
+        force "com.facebook.fresco:fresco:3.6.0"
+        force "com.facebook.fresco:imagepipeline:3.6.0"
+        force "com.facebook.fresco:imagepipeline-base:3.6.0"
+        force "com.facebook.fresco:gifdecoder:3.6.0"
+        force "com.facebook.fresco:nativeimagetranscoder:3.6.0"
+        force "com.facebook.fresco:static-webp:3.6.0"
+        force "com.facebook.fresco:webpsupport:3.6.0"
+        force "com.facebook.fresco:animated-webp:3.6.0"
+        force "com.facebook.fresco:animated-gif:3.6.0"
+        force "com.facebook.fbjni:fbjni:0.6.0"
+    }
+    // Exclude Huawei UCS native credential libs from Play build (causes 64KB alignment)
+    exclude group: "com.huawei.hms", module: "ucs-credential"
+    exclude group: "com.huawei.hms", module: "ucs-credential-developers"
+    exclude group: "com.huawei.hms.LocationLiteSdk", module: "core"
+    // Exclude Fresco native pipeline and webp natives to drop 0x1000 .so files
+}
+
+dependencies {
+    // The version of react-native is set by the React Native Gradle Plugin
+    implementation("com.facebook.react:react-android")
+
+    // Ensure Fresco core API available for app-level initialization (MainApplication)
+    implementation("com.facebook.fresco:fresco:3.6.0")
+    // Ensure MemoryChunkType and related API are available
+    implementation("com.facebook.fresco:imagepipeline-base:3.6.0")
+    // Include native pipeline so libimagepipeline.so is present (3.6.0 expected 16KB aligned)
+    implementation("com.facebook.fresco:imagepipeline-native:3.6.0")
+
+    def isGifEnabled = (findProperty('expo.gif.enabled') ?: "") == "true";
+    def isWebpEnabled = (findProperty('expo.webp.enabled') ?: "") == "true";
+    def isWebpAnimatedEnabled = (findProperty('expo.webp.animated') ?: "") == "true";
+
+    if (isGifEnabled) {
+        // For animated gif support
+        implementation("com.facebook.fresco:animated-gif:${reactAndroidLibs.versions.fresco.get()}")
+    }
+
+    if (isWebpEnabled) {
+        // For webp support
+        implementation("com.facebook.fresco:webpsupport:${reactAndroidLibs.versions.fresco.get()}")
+        if (isWebpAnimatedEnabled) {
+            // Animated webp support
+            implementation("com.facebook.fresco:animated-webp:${reactAndroidLibs.versions.fresco.get()}")
+        }
+    }
+
+    if (hermesEnabled.toBoolean()) {
+        implementation("com.facebook.react:hermes-android")
+    } else {
+        implementation jscFlavor
+    }
+
+    implementation 'androidx.multidex:multidex:2.0.1'
+    androidTestImplementation('com.wix:detox:+')
+    implementation 'androidx.appcompat:appcompat:1.1.0'
+}
+
+if (rnVersion < versionToNumber(0, 75, 0)) {
+    apply from: new File(["node", "--print", "require.resolve('@react-native-community/cli-platform-android/package.json', { paths: [require.resolve('react-native/package.json')] })"].execute(null, rootDir).text.trim(), "../native_modules.gradle");
+    applyNativeModulesAppBuildGradle(project)
+}
+
+apply plugin: 'com.google.gms.google-services'
+
+// Add this at the end of the file
+android.applicationVariants.all { variant ->
+    variant.outputs.each { output ->
+        def versionCodes = ["armeabi-v7a": 1, "x86": 2, "arm64-v8a": 3, "x86_64": 4]
+        def abi = output.getFilter(com.android.build.OutputFile.ABI)
+        if (abi != null) {
+            output.versionCodeOverride = variant.versionCode * 1000 + versionCodes.get(abi, 0)
+        }
+        
+        output.outputFileName = "alertesecours-${variant.versionName}-${variant.buildType.name}.apk"
+    }
+    
+    if (variant.buildType.name == 'release') {
+        variant.assembleProvider.get().doLast {
+            copy {
+                from variant.mappingFileProvider.get().singleFile
+                into "${rootProject.buildDir}/outputs/mapping/${variant.name}"
+                rename { String fileName ->
+                    "mapping-${variant.name}-${variant.versionName}.txt"
+                }
+            }
+        }
+    }
+}

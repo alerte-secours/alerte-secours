@@ -1,0 +1,29 @@
+Alerte-Secours est une application mobile conçue pour créer un réseau d'entraide en temps réel lors de situations urgentes.
+
+En un simple clic, elle permet à l'utilisateur d'envoyer une alerte à ses proches, aux autres utilisateurs de l'application à proximité grâce à la géolocalisation, et directement aux services d'urgence.
+
+Fonctionalités:
+- Simplicité : Alerte-Secours, une application facile à prendre en main, que vous soyez familier ou non avec le monde digital
+- Réactivité : En situation d'urgence chaque seconde compte, on n'a pas toujours la possibilité d'effectuer des opérations complexes, toutes les fonctions essentielles restent toujours à portée de clic
+- Un fil de communication dédié est créé pour chaque alerte, permettant aux citoyens proches de l'incident d'y accéder facilement
+- Grâce à cet espace de discussion, les personnes situées à proximité de l'incident peuvent partager des informations sur la situation en cours pour soutenir l'entraide citoyenne et l'intervention des secours
+- Alerte-Secours facilite votre intervention en cas d'incident. À réception d'une alerte, notre système de géoguidance intégré vous dirige vers les lieux, sans quitter l'application. Si vous préférez, vous pouvez opter pour votre application de navigation habituelle
+
+À qui s'adresse Alerte-Secours ?
+
+À tous les citoyens
+- vous donne un maximum de chances dans les situations critiques notamment en sollicitant l'aide des personnes alentours
+- une communication directe et sans intermédiaire entre les citoyens
+- favorise l'entraide
+- vous raproche de vos concitoyens et vous relie à la communauté augmente vos chances de pouvoir devenir le héros dont votre prochain a besoin, peut-être pas très loin de vous, en ce moment même
+
+Aux services de secours
+- localiser plus efficacement les personnes en difficulté (géolocalisation, what3words, géocodage inversé)
+- confirmer la validité des informations grâce au recoupement des informations partagées par les citoyens
+- suivre en temps réel la situation sur le terrain grâce aux remontées d'informations fournies pour les citoyens
+- communiquer avec les citoyens déjà présents sur le terrain
+
+Clause de non-responsabilité
+L'application Alerte-Secours n'est pas une application officielle du gouvernement ni d'aucune agence gouvernementale.
+Elle ne représente aucune entité gouvernementale et ne doit pas être utilisée comme une source unique d'informations ou de
+conseils en cas d'urgence. Alerte-Secours est une application de soutien communautaire destinée à faciliter l'entraide et à améliorer la communication en cas de situations critiques. Pour des informations officielles et des directives spécifiques, veuillez vous référer aux sites web et aux services des autorités compétentes.

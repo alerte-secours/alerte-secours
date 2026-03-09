@@ -1,0 +1,147 @@
+require File.join(File.dirname(`node --print "require.resolve('expo/package.json')"`), "scripts/autolinking")
+require File.join(File.dirname(`node --print "require.resolve('react-native/package.json')"`), "scripts/react_native_pods")
+
+require 'json'
+require 'fileutils'
+podfile_properties = JSON.parse(File.read(File.join(__dir__, 'Podfile.properties.json'))) rescue {}
+
+ENV['RCT_NEW_ARCH_ENABLED'] = podfile_properties['newArchEnabled'] == 'true' ? '1' : '0'
+ENV['EX_DEV_CLIENT_NETWORK_INSPECTOR'] = podfile_properties['EX_DEV_CLIENT_NETWORK_INSPECTOR']
+
+ios_deployment_target = podfile_properties['ios.deploymentTarget'] || '15.1'
+platform :ios, ios_deployment_target
+install! 'cocoapods',
+  :deterministic_uuids => false
+
+prepare_react_native_project!
+
+target 'AlerteSecours' do
+  use_expo_modules!
+  # Pin TOCropViewController to 2.x for compatibility with RNImageCropPicker 0.40.x
+  pod 'TOCropViewController', '~> 2.6'
+
+
+  if ENV['EXPO_USE_COMMUNITY_AUTOLINKING'] == '1'
+    config_command = ['node', '-e', "process.argv=['', '', 'config'];require('@react-native-community/cli').run()"];
+  else
+    config_command = [
+      'node',
+      '--no-warnings',
+      '--eval',
+      'require(require.resolve(\'expo-modules-autolinking\', { paths: [require.resolve(\'expo/package.json\')] }))(process.argv.slice(1))',
+      'react-native-config',
+      '--json',
+      '--platform',
+      'ios'
+    ]
+  end
+
+  config = use_native_modules!(config_command)
+
+  use_frameworks! :linkage => podfile_properties['ios.useFrameworks'].to_sym if podfile_properties['ios.useFrameworks']
+  use_frameworks! :linkage => ENV['USE_FRAMEWORKS'].to_sym if ENV['USE_FRAMEWORKS']
+
+  use_react_native!(
+    :path => config[:reactNativePath],
+    :hermes_enabled => podfile_properties['expo.jsEngine'] == nil || podfile_properties['expo.jsEngine'] == 'hermes',
+    # An absolute path to your application root.
+    :app_path => "#{Pod::Config.instance.installation_root}/..",
+    :privacy_file_aggregation_enabled => podfile_properties['apple.privacyManifestAggregationEnabled'] != 'false',
+  )
+
+  post_install do |installer|
+# @generated begin @maplibre/maplibre-react-native-post_installer - expo prebuild (DO NOT MODIFY) sync-72b8976cc2231a4441a5b54389fb6e10bd42a1be
+    $RCTMLN.post_install(installer)
+# @generated end @maplibre/maplibre-react-native-post_installer
+    react_native_post_install(
+      installer,
+      config[:reactNativePath],
+      :mac_catalyst_enabled => false,
+      :ccache_enabled => podfile_properties['apple.ccacheEnabled'] == 'true',
+    )
+
+    # Ensure every Pods target uses an iOS deployment target compatible with our app.
+    # Fixes issues like Pods targets defaulting to iOS 9.0, which can block newer pod versions.
+    min_ios_version = Gem::Version.new(ios_deployment_target)
+    installer.pods_project.targets.each do |t|
+      t.build_configurations.each do |config|
+        current = config.build_settings['IPHONEOS_DEPLOYMENT_TARGET']
+        next if current && Gem::Version.new(current) >= min_ios_version
+        config.build_settings['IPHONEOS_DEPLOYMENT_TARGET'] = ios_deployment_target
+      end
+    end
+
+    # This is necessary for Xcode 14, because it signs resource bundles by default
+    # when building for devices.
+    installer.target_installation_results.pod_target_installation_results
+      .each do |pod_name, target_installation_result|
+      target_installation_result.resource_bundle_targets.each do |resource_bundle_target|
+        resource_bundle_target.build_configurations.each do |config|
+          config.build_settings['CODE_SIGNING_ALLOWED'] = 'NO'
+        end
+      end
+    end
+
+    # Ensure correct header destinations for ReactAppDependencyProvider to avoid CpHeader reversing into build/generated
+    installer.pods_project.targets.each do |t|
+      if t.name == 'ReactAppDependencyProvider'
+        t.build_configurations.each do |config|
+          # Public headers should live inside the framework product, not in the generated sources dir
+          config.build_settings['PUBLIC_HEADERS_FOLDER_PATH'] = '$(CONTENTS_FOLDER_PATH)/Headers'
+          # Ensure the generated headers can still be found during compilation
+          existing = config.build_settings['HEADER_SEARCH_PATHS']
+          inherited = '$(inherited)'
+          generated = '$(PROJECT_DIR)/build/generated/ios'
+          if existing.nil?
+            config.build_settings['HEADER_SEARCH_PATHS'] = "#{inherited} #{generated}"
+          elsif existing.is_a?(Array)
+            config.build_settings['HEADER_SEARCH_PATHS'] = (existing + [generated, inherited]).uniq
+          else
+            config.build_settings['HEADER_SEARCH_PATHS'] = "#{existing} #{generated} #{inherited}"
+          end
+        end
+      end
+    end
+
+    # Disable glass effect in TOCropViewController v3 to avoid iOS 18-only APIs at compile time
+    installer.pods_project.targets.each do |t|
+      if t.name == 'TOCropViewController'
+        t.build_configurations.each do |config|
+          defs = config.build_settings['GCC_PREPROCESSOR_DEFINITIONS'] || ['$(inherited)']
+          unless defs.is_a?(Array)
+            defs = [defs, '$(inherited)']
+          end
+          defs << 'TOCROPVIEWCONTROLLER_ENABLE_GLASS_EFFECT=0'
+          config.build_settings['GCC_PREPROCESSOR_DEFINITIONS'] = defs.uniq
+        end
+      end
+    end
+
+    # Patch TOCropViewController to import iOS 18-only UIKit headers when available.
+    crop_toolbar_path = File.join(__dir__, 'Pods', 'TOCropViewController', 'Objective-C', 'TOCropViewController', 'Views', 'TOCropToolbar.m')
+    if File.exist?(crop_toolbar_path)
+      contents = File.read(crop_toolbar_path)
+      needle = "#import \"TOCropToolbar.h\"\n"
+      injection = <<~'IMPORTS'
+        #if __has_include(<UIKit/UIGlassEffect.h>)
+        #import <UIKit/UIGlassEffect.h>
+        #endif
+        #if __has_include(<UIKit/UICornerConfiguration.h>)
+        #import <UIKit/UICornerConfiguration.h>
+        #endif
+        #if __has_include(<UIKit/UIButtonConfiguration.h>)
+        #import <UIKit/UIButtonConfiguration.h>
+        #endif
+
+      IMPORTS
+
+      unless contents.include?('<UIKit/UIGlassEffect.h>')
+        FileUtils.chmod('u+w', crop_toolbar_path) unless File.writable?(crop_toolbar_path)
+        contents = contents.sub(needle, needle + injection)
+        File.write(crop_toolbar_path, contents)
+      end
+    end
+
+    
+  end
+end

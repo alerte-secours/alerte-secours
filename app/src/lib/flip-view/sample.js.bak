@@ -1,0 +1,434 @@
+import React, {
+  useState,
+  useEffect,
+  useRef,
+  useMemo,
+  useCallback,
+  createRef,
+} from "react";
+import {
+  StyleSheet,
+  View,
+  Easing,
+  useWindowDimensions,
+  ImageBackground,
+} from "react-native";
+
+import Animated, { FadeOut } from "react-native-reanimated";
+import { useTheme } from "~/theme";
+
+import {
+  useFocusEffect,
+  useNavigation,
+  useIsFocused,
+} from "@react-navigation/native";
+import * as Location from "expo-location";
+import Maplibre from "@maplibre/maplibre-react-native";
+import polyline from "@mapbox/polyline";
+import booleanEqual from "@turf/boolean-equal";
+import { point } from "@turf/helpers";
+
+import FlipView from "~/lib/flip-view";
+
+import { routeToInstructions } from "~/lib/geo/osrmTextInstructions";
+import getRouteState from "~/lib/geo/getRouteState";
+
+// import regionFrom from "~/lib/geo/regionFrom";
+
+import { OSRM_CAR_URL, OSRM_FOOT_URL, OSRM_BICYCLE_URL } from "~/env";
+
+import { usePermissionsState, useAlertState, useLocationState } from "~/stores";
+import Text from "~/components/Text";
+
+import Camera from "~/containers/Map/Camera";
+import MapView from "~/containers/Map/MapView";
+import FeatureImages from "~/containers/Map/FeatureImages";
+import { BoundType } from "~/containers/Map/constants";
+import ShapePoints from "~/containers/Map/ShapePoints";
+import ShapeUserPulse from "~/containers/Map/ShapeUserPulse";
+
+import ControlButtons from "./ControlButtons";
+
+import useFeatures from "./useFeatures";
+import useBounds from "./useBounds";
+
+import useOnRegionIsChanging from "./useOnRegionIsChanging";
+import useOnRegionDidChange from "./useOnRegionDidChange";
+import useOnLongPress from "./useOnLongPress";
+import useOnPress from "./useOnPress";
+
+import TopNavigatingBar from "./TopNavigatingBar";
+
+const mapLoaderImage = require("~/assets/img/map-loader.png");
+const image2 = require("~/assets/img/logo192.png");
+
+const osmProfileUrl = {
+  car: OSRM_CAR_URL,
+  foot: OSRM_FOOT_URL,
+  bicycle: OSRM_BICYCLE_URL,
+};
+
+export default function AlertCurMap() {
+  const { navAlertCur, alertCurDeviceList } = useAlertState([
+    "navAlertCur",
+    "alertCurDeviceList",
+  ]);
+  // console.log({ navAlertCur, alertCurDeviceList });
+  const { coordinates: alertCoords } = navAlertCur.alert.location;
+
+  // console.log({ alertCoords });
+
+  const { locationForeground } = usePermissionsState(["locationForeground"]);
+
+  const [location, setLocation] = useState();
+  const [errorMsg, setErrorMsg] = useState();
+  // const [region, setRegion] = useState(initialRegion);
+  const watcher = useRef();
+
+  // function updateRegionFromLocation(location) {
+  //   const { latitude, longitude } = location.coords;
+  //   const region = regionFrom(latitude, longitude, defaultDistanceInMeter);
+  //   setRegion(region);
+  // }
+
+  useEffect(() => {
+    if (!locationForeground) {
+      setErrorMsg("Permission d'accéder à la location refusée");
+    }
+  }, [locationForeground]);
+
+  useEffect(() => {
+    if (!locationForeground) {
+      return;
+    }
+    const watchPositionOptions = {
+      accuracy: Location.Accuracy.BestForNavigation,
+      // timeInterval: 2000,
+      distanceInterval: 10,
+      mayShowUserSettingsDialog: true,
+    };
+    function watchPositionCallback(location) {
+      setLocation(location);
+      // updateRegionFromLocation(location);
+    }
+    (async () => {
+      watcher.current = await Location.watchPositionAsync(
+        watchPositionOptions,
+        watchPositionCallback,
+      );
+    })();
+    return () => {
+      if (watcher.current !== undefined) {
+        watcher.current.remove();
+      }
+    };
+  }, [locationForeground]);
+
+  const userCoords = useMemo(() => {
+    if (!location) {
+      return null;
+    }
+    const { coords } = location;
+    const { longitude, latitude } = coords;
+    return { longitude, latitude };
+  }, [location]);
+
+  const mapRef = useRef();
+  const cameraRef = useRef();
+  const currentAlertShowingRef = useRef(null);
+
+  const [boundType, setBoundType] = useState(BoundType.ALL);
+  const [clusterFeature, setClusterFeature] = useState([]);
+
+  const { alertingList } = useAlertState(["alertingList"]);
+
+  // console.log({ userCoords, alertCoords });
+  const [driving, setDriving] = useState({});
+
+  const nextIndexRef = useRef(null);
+
+  const fetchRoute = useCallback(
+    async ({ origin, target }) => {
+      console.log("Calculating route ...");
+      // http://project-osrm.org/docs/v5.5.1/api/#general-options
+      const profile = "driving"; // car, bike, foot
+      const points = [];
+
+      points.push(origin);
+      points.push(target);
+
+      const coordinates = points.map((point) => point.join(",")).join(";");
+      // const url = `${OSRM_URL}/route/v1/${profile}/${coordinates}?overview=full&steps=true&annotations=true&geometries=geojson`;
+      const osmUrl = osmProfileUrl[profile];
+      const url = `${osmUrl}/route/v1/${profile}/${coordinates}?overview=full&steps=true`;
+      const res = await fetch(url);
+      const result = await res.json();
+
+      // console.log("result", JSON.stringify(result));
+      const { routes } = result;
+      const [route] = routes;
+
+      // const { legs } = route;
+      // console.log(JSON.stringify(route));
+      // const coordinates = [];
+      // for (const leg of legs) {
+      //   for (const step of leg.steps) {
+      //     coordinates.push(step.location);
+      //   }
+      // }
+      const { geometry } = route;
+      const routeCoords = polyline.decode(geometry).map((p) => p.reverse());
+
+      return {
+        route,
+        routeCoords,
+      };
+    },
+    [profile],
+  );
+
+  const calculateRoute = useCallback(
+    async (origin) => {
+      const target = alertCoords;
+      const result = await fetchRoute({ origin, target });
+      const { route, routeCoords } = result;
+      setDriving({
+        route,
+        routeCoords,
+        origin,
+        target,
+      });
+    },
+    [fetchRoute, alertCoords],
+  );
+
+  useEffect(() => {
+    if (!userCoords) {
+      return;
+    }
+
+    const userCoordArr = [userCoords.longitude, userCoords.latitude];
+    if (!driving.origin) {
+      calculateRoute(userCoordArr);
+      return;
+    }
+
+    const { routeCoords } = driving;
+    if (!routeCoords) {
+      return;
+    }
+
+    const { origin, target } = driving;
+
+    const routePoints = [origin, ...routeCoords, target];
+    const { isOffRoute, distanceToLine, nextIndex } = getRouteState(
+      userCoordArr,
+      routePoints,
+    );
+    console.log({ isOffRoute, distanceToLine });
+    const needRouteRecalculation = isOffRoute;
+
+    if (needRouteRecalculation) {
+      console.log("Recalculating ...."); // TODO add infobulle
+      calculateRoute(userCoordArr);
+    } else {
+      if (nextIndex === nextIndexRef.current) {
+        return;
+      }
+      nextIndexRef.current = nextIndex;
+
+      const remainingRoute = routePoints.slice(nextIndex, -1);
+      setDriving({
+        route: driving.route,
+        routeCoords: remainingRoute,
+        origin: userCoordArr,
+        target,
+      });
+      // TODO, PUT data to store.alert, and change data useEffect model to avoid infinite loop
+    }
+  }, [userCoords, driving, calculateRoute]);
+  // console.log(JSON.stringify(driving));
+
+  const instructions = useMemo(() => {
+    if (!driving.route) {
+      return null;
+    }
+    return routeToInstructions(driving.route);
+  }, [driving.route]);
+
+  const { routeCoords } = driving;
+  const { superCluster, shape } = useFeatures({
+    clusterFeature,
+    alertingList,
+    userCoords,
+    routeCoords,
+  });
+  const bounds = useBounds({ boundType, alertingList, userCoords });
+  const boundsChangingRef = useRef(bounds);
+
+  const onRegionIsChanging = useOnRegionIsChanging({
+    setBoundType,
+    boundsChangingRef,
+  });
+  const onRegionDidChange = useOnRegionDidChange({
+    mapRef,
+    superCluster,
+    setClusterFeature,
+  });
+
+  const onLongPress = useOnLongPress({
+    mapRef,
+    clusterFeature,
+    cameraRef,
+    superCluster,
+    currentAlertShowingRef,
+  });
+  const onPress = useOnPress({
+    superCluster,
+    cameraRef,
+  });
+
+  const userShape = useMemo(
+    () => ({
+      type: "FeatureCollection",
+      features: userCoords
+        ? [
+            {
+              type: "Feature",
+              properties: {
+                isUserLocation: true,
+              },
+              geometry: {
+                type: "Point",
+                coordinates: [userCoords.longitude, userCoords.latitude],
+              },
+            },
+          ]
+        : [],
+    }),
+    [userCoords],
+  );
+
+  const { colors } = useTheme();
+
+  const isFocused = useIsFocused();
+
+  const [isFlipped, setIsFlipped] = useState(false);
+  const [isFlipping, setIsFlipping] = useState(false);
+
+  if (errorMsg) {
+    return (
+      <View style={styles.container}>
+        <Text>{errorMsg}</Text>
+      </View>
+    );
+  }
+
+  return (
+    <View style={styles.container}>
+      <TopNavigatingBar setIsFlipped={setIsFlipped} isFlipped={isFlipped} />
+      <FlipView
+        style={{ flex: 1 }}
+        front={
+          <>
+            {(isFlipped || isFlipping) && (
+              <Animated.View
+                exiting={FadeOut.duration(500)}
+                style={{
+                  position: "absolute",
+                  top: 0,
+                  left: 0,
+                  right: 0,
+                  bottom: 0,
+                  backgroundColor: colors.activeBackground,
+                  flex: 1,
+                }}
+              >
+                <ImageBackground
+                  source={mapLoaderImage}
+                  resizeMode="contain"
+                  style={{ flex: 1 }}
+                />
+              </Animated.View>
+            )}
+            <MapView
+              mapRef={mapRef}
+              onRegionIsChanging={onRegionIsChanging}
+              onRegionDidChange={onRegionDidChange}
+              onLongPress={onLongPress}
+            >
+              <Camera bounds={bounds} cameraRef={cameraRef} />
+              <FeatureImages />
+              <ShapePoints shape={shape} onPress={onPress}>
+                <Maplibre.LineLayer
+                  id="lineLayer"
+                  belowLayerID="points-green"
+                  style={layerStyles.route}
+                />
+              </ShapePoints>
+              {isFocused && !isFlipped && <ShapeUserPulse shape={userShape} />}
+            </MapView>
+            <ControlButtons
+              mapRef={mapRef}
+              cameraRef={cameraRef}
+              boundsChangingRef={boundsChangingRef}
+              boundType={boundType}
+              setBoundType={setBoundType}
+              userCoords={userCoords}
+            />
+          </>
+        }
+        back={
+          <>
+            <ImageBackground
+              source={image2}
+              resizeMode="contain"
+              style={{ flex: 1, backgroundColor: colors.activeBackground }}
+            />
+          </>
+        }
+        isFlipped={isFlipped}
+        onFlipping={(val) => {
+          setIsFlipping(true);
+        }}
+        onFlipped={(val) => {
+          setTimeout(() => {
+            setIsFlipping(false);
+          }, 1000);
+        }}
+        flipAxis="y"
+        flipEasing={Easing.linear(Easing.ease)}
+        flipDuration={500}
+        perspective={200}
+      />
+    </View>
+  );
+}
+
+const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+    paddingTop: 55,
+  },
+});
+
+const layerStyles = {
+  origin: {
+    circleRadius: 5,
+    circleColor: "white",
+  },
+  destination: {
+    circleRadius: 5,
+    circleColor: "white",
+  },
+  route: {
+    lineColor: "blue",
+    lineCap: Maplibre.LineJoin.Round,
+    lineWidth: 3,
+    lineOpacity: 0.84,
+  },
+  progress: {
+    lineColor: "#314ccd",
+    lineWidth: 3,
+  },
+};

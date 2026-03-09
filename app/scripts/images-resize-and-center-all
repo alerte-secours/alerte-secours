@@ -1,0 +1,7 @@
+#!/bin/bash
+
+resize=${1:-"48x48"}
+for file in *.png; do
+  convert "$file" -resize "${resize}" -background none -gravity center -extent "${resize}" "$file"
+  echo "Resized and centered $file"
+done
