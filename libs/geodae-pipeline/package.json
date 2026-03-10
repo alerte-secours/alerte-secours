@@ -1,0 +1,13 @@
+{
+  "name": "geodae-pipeline",
+  "version": "0.0.1",
+  "private": true,
+  "main": "src/index.js",
+  "dependencies": {
+    "better-sqlite3": "^11.0.0",
+    "h3-js": "^4.2.1"
+  },
+  "engines": {
+    "node": ">=18"
+  }
+}

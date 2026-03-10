@@ -57,6 +57,12 @@ module.exports = async function createConfig({ env = process.env } = {}) {
       url: `${env.AMQP_URL}?heartbeat=30`, // https://github.com/amqp-node/amqplib/issues/733
     },
     smtp,
+    minio: {
+      endPoint: env.MINIO_ENDPOINT,
+      port: toInteger(env.MINIO_PORT, 10) || 9000,
+      accessKey: env.MINIO_ACCESS_KEY,
+      secretKey: env.MINIO_SECRET_KEY,
+    },
   }
 
   return config

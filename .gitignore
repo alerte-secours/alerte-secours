@@ -31,3 +31,5 @@ services/*/dist
 codebase.md
 
 /bin
+
+.claude/*.local.json

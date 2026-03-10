@@ -126,6 +126,9 @@ modjo({
             })
           },
         },
+        minio: {
+          pluginName: "minio",
+        },
       },
     },
   },

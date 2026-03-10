@@ -36,8 +36,8 @@ export default function HeaderLeft(props) {
             const drawerNavState = rootState.routes[0]?.state;
             if (
               drawerNavState?.key &&
-              drawerNavState.history?.filter((h) => h.type === "route")
-                .length > 1
+              drawerNavState.history?.filter((h) => h.type === "route").length >
+                1
             ) {
               navigation.dispatch({
                 ...CommonActions.goBack(),

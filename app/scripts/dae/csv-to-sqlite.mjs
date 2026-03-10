@@ -3,16 +3,14 @@
 // Usage: node csv-to-sqlite.mjs --input <path> --output <path> [--h3res 8] [--delimiter auto] [--batchSize 5000]
 
 import { createReadStream, readFileSync, existsSync, unlinkSync } from "node:fs";
-import { createHash } from "node:crypto";
 import { parseArgs } from "node:util";
-import { dirname, resolve } from "node:path";
-import { fileURLToPath } from "node:url";
 import { createRequire } from "node:module";
 import { parse } from "csv-parse";
 
 const require = createRequire(import.meta.url);
 const Database = require("better-sqlite3");
 const h3 = require("h3-js");
+const { deterministicId, SCHEMA_PATH } = require("../../../libs/geodae-pipeline/src/build-sqlite");
 
 // ---------------------------------------------------------------------------
 // CLI args
@@ -42,9 +40,6 @@ if (!INPUT || !OUTPUT) {
 // Helpers
 // ---------------------------------------------------------------------------
 
-const __dirname = dirname(fileURLToPath(import.meta.url));
-const SCHEMA_PATH = resolve(__dirname, "lib", "schema.sql");
-
 function detectDelimiter(filePath) {
   // Read first line to detect delimiter
   const chunk = readFileSync(filePath, { encoding: "utf-8", end: 4096 });
@@ -54,15 +49,6 @@ function detectDelimiter(filePath) {
   const detected = semicolonCount > commaCount ? ";" : ",";
   console.log(`Delimiter auto-detected: "${detected}" (commas=${commaCount}, semicolons=${semicolonCount})`);
   return detected;
-}
-
-function computeH3(lat, lon, res) {
-  return h3.latLngToCell(lat, lon, res);
-}
-
-function deterministicId(lat, lon, nom, adresse) {
-  const payload = `${lat}|${lon}|${nom}|${adresse}`;
-  return createHash("sha256").update(payload, "utf-8").digest("hex").slice(0, 16);
 }
 
 function cleanFloat(val) {
@@ -101,7 +87,7 @@ async function main() {
   db.pragma("cache_size = -64000"); // 64 MB
   db.pragma("locking_mode = EXCLUSIVE");
 
-  // Create schema
+  // Create schema (from shared lib)
   const schema = readFileSync(SCHEMA_PATH, "utf-8");
   db.exec(schema);
 
@@ -152,7 +138,7 @@ async function main() {
     const disponible_24h = cleanInt(record.disponible_24h);
     const horaires_std = cleanStr(record.horaires_std) || "{}";
     const id = deterministicId(lat, lon, nom, adresse);
-    const h3Cell = computeH3(lat, lon, H3_RES);
+    const h3Cell = h3.latLngToCell(lat, lon, H3_RES);
 
     batch.push({
       id,

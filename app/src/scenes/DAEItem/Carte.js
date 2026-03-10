@@ -47,7 +47,6 @@ import {
   STATE_CALCULATING_LOADING,
 } from "~/scenes/AlertCurMap/constants";
 
-
 export default React.memo(function DAEItemCarte() {
   const { colors } = useTheme();
   const { selectedDefib: defib } = useDefibsState(["selectedDefib"]);

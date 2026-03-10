@@ -517,8 +517,8 @@ export default withConnectivity(
                         loadingDaeCorridor
                           ? "loading"
                           : defibsEnabled
-                            ? "heart-off"
-                            : "heart-pulse"
+                          ? "heart-off"
+                          : "heart-pulse"
                       }
                       style={[styles.actionIcon, styles.actionShowDefibsIcon]}
                     />

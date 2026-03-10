@@ -18,9 +18,18 @@ for (const dir of packageDirs) {
 }
 
 module.exports = {
-  ignorePatterns: ["**/build/*", "modjo", "**/as-back"],
+  root: true,
+  ignorePatterns: [
+    "**/build",
+    "**/dist",
+    "modjo",
+    "**/as-back",
+    "/app",
+    ".yarn",
+  ],
   settings: {
     "import/resolver": {
+      node: true,
       alias: true,
     },
   },
