@@ -3,6 +3,11 @@
 FROM ./dockerfile-x/node AS build
 ENV NODE_ENV=production
 
+# Install build dependencies for native modules (better-sqlite3)
+USER root
+RUN apt-get update && apt-get install -y python3 make g++ && rm -rf /var/lib/apt/lists/*
+USER 1000
+
 # fetch
 COPY --chown=1000:1000 yarn.lock .yarnrc.yml ./
 COPY --chown=1000:1000 .yarn .yarn
