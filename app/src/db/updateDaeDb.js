@@ -134,7 +134,7 @@ export async function updateDaeDb({ onProgress, onPhase } = {}) {
         validationDb = open({ name: tmpName, location: tmpDir });
 
         // Wrap for assertDbHasTable compatibility
-        const getAllAsync = async (sql, params = []) => {
+        const execQuery = async (sql, params = []) => {
           const exec =
             typeof validationDb.executeAsync === "function"
               ? validationDb.executeAsync.bind(validationDb)
@@ -144,7 +144,15 @@ export async function updateDaeDb({ onProgress, onPhase } = {}) {
           return res?.rows ?? [];
         };
 
-        await assertDbHasTable({ getAllAsync }, "defibs");
+        const dbWrapper = {
+          getAllAsync: execQuery,
+          getFirstAsync: async (sql, params = []) => {
+            const rows = await execQuery(sql, params);
+            return rows[0] ?? null;
+          },
+        };
+
+        await assertDbHasTable(dbWrapper, "defibs");
       }
     } catch (validationError) {
       // Clean up temp file

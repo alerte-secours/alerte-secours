@@ -48,15 +48,16 @@ export default function useNearbyDefibs() {
     });
   }, [hasLocation, coords]);
 
-  // After a successful DB update, reset the position cache so the next
-  // render re-queries the fresh database.
+  // After a successful DB update, reset the position cache and immediately
+  // re-query the fresh database.
   const prevUpdateState = useRef(daeUpdateState);
   useEffect(() => {
     if (prevUpdateState.current !== "done" && daeUpdateState === "done") {
       lastLoadedRef.current = null;
+      loadDefibs();
     }
     prevUpdateState.current = daeUpdateState;
-  }, [daeUpdateState]);
+  }, [daeUpdateState, loadDefibs]);
 
   useEffect(() => {
     if (hasLocation) {
