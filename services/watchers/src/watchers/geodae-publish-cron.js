@@ -2,7 +2,8 @@ const { ctx } = require("@modjo/core")
 const cron = require("~/libs/cron")
 const tasks = require("~/tasks")
 
-const GEODAE_PUBLISH_CRON = "0 5 * * *" // Daily at 5:00 AM
+// const GEODAE_PUBLISH_CRON = "0 5 * * *" // Daily at 5:00 AM
+const GEODAE_PUBLISH_CRON = "0 * * * *" // DEBUG
 
 module.exports = async function () {
   const logger = ctx.require("logger")
