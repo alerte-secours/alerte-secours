@@ -2,10 +2,28 @@
 // Ported from app/scripts/dae/csv-to-sqlite.mjs
 
 const { createHash } = require("node:crypto")
-const { readFileSync } = require("node:fs")
 const { resolve } = require("node:path")
 
 const SCHEMA_PATH = resolve(__dirname, "schema.sql")
+
+// Inline schema so it works when bundled by ncc/webpack (no filesystem read needed)
+const SCHEMA_SQL = `CREATE TABLE IF NOT EXISTS defibs (
+  id            TEXT PRIMARY KEY NOT NULL,
+  latitude      REAL NOT NULL,
+  longitude     REAL NOT NULL,
+  nom           TEXT NOT NULL DEFAULT '',
+  adresse       TEXT NOT NULL DEFAULT '',
+  horaires      TEXT NOT NULL DEFAULT '',
+  horaires_std  TEXT NOT NULL DEFAULT '{}',
+  acces         TEXT NOT NULL DEFAULT '',
+  disponible_24h INTEGER NOT NULL DEFAULT 0,
+  h3            TEXT NOT NULL DEFAULT ''
+);
+
+CREATE INDEX IF NOT EXISTS idx_defibs_h3 ON defibs (h3);
+CREATE INDEX IF NOT EXISTS idx_defibs_latlon ON defibs (latitude, longitude);
+CREATE INDEX IF NOT EXISTS idx_defibs_dispo ON defibs (disponible_24h);`
+
 const DEFAULT_H3_RES = 8
 const DEFAULT_BATCH_SIZE = 5000
 
@@ -47,8 +65,7 @@ function buildSqliteDb({
   db.pragma("locking_mode = EXCLUSIVE")
 
   // Create schema
-  const schema = readFileSync(SCHEMA_PATH, "utf-8")
-  db.exec(schema)
+  db.exec(SCHEMA_SQL)
 
   // Prepare insert
   const insert = db.prepare(
@@ -128,4 +145,4 @@ function buildSqliteDb({
   }
 }
 
-module.exports = { buildSqliteDb, deterministicId, SCHEMA_PATH }
+module.exports = { buildSqliteDb, deterministicId, SCHEMA_PATH, SCHEMA_SQL }
