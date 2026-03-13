@@ -1,6 +1,6 @@
 {
   "name": "alerte-secours",
-  "version": "0.0.1",
+  "version": "1.16.10",
   "description": "Alerte-Secours - Le Réflexe qui Sauve",
   "keywords": [
     "alerte",
@@ -27,6 +27,7 @@
     "compose:down": "docker compose down -v",
     "up:modjo": "git stash && yarn up '@modjo/*' && git stash pop && yarn",
     "release": "commit-and-tag-version",
+    "release:app:prebuild": "cd app && yarn prebuild",
     "lint": "eslint .",
     "test": "jest tests",
     "clear:local": "git clean -xdf",
@@ -64,6 +65,12 @@
     "node-gyp": "^9.4.0",
     "prettier": "^2.3.2",
     "standard-changelog": "^2.0.27"
+  },
+  "commit-and-tag-version": {
+    "scripts": {
+      "prechangelog": "yarn release:app:prebuild",
+      "postcommit": "git add app/android/app/build.gradle app/android/app/src/main/AndroidManifest.xml app/ios/AlerteSecours/Info.plist && git commit --amend --no-edit"
+    }
   },
   "engines": {
     "node": ">=20"

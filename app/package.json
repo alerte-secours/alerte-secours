@@ -32,8 +32,7 @@
     "prebuild:hackfix": "node scripts/removeDuplicates.js",
     "lint": "eslint .",
     "expo-updates:upload": "dotenv --override -e .env.prod -- expo-publish-selfhosted.sh release . $EXPO_UPLOAD_KEY https://expo-updates.alertesecours.fr",
-    "release": "commit-and-tag-version",
-    "delivery": "yarn release && yarn expo-updates:upload",
+    "delivery": "yarn expo-updates:upload",
     "test": "jest",
     "e2e:build": "dotenv --override -e .env.staging -- detox build --configuration android.emu.debug",
     "e2e:deploy": "adb -s emulator-5554 install -r android/app/build/outputs/apk/debug/app-debug.apk",
@@ -60,12 +59,6 @@
   "customExpoVersioning": {
     "versionCode": 241,
     "buildNumber": 241
-  },
-  "commit-and-tag-version": {
-    "scripts": {
-      "prechangelog": "yarn prebuild",
-      "postcommit": "git add android/app/build.gradle android/app/src/main/AndroidManifest.xml ios/AlerteSecours/Info.plist && git commit --amend --no-edit"
-    }
   },
   "_moduleAliases": {
     "~": "src"

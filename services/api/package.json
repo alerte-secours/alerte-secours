@@ -1,6 +1,6 @@
 {
   "name": "@as/api",
-  "version": "0.0.1",
+  "version": "1.16.10",
   "description": "",
   "scripts": {
     "start": "node dist/index.js start",

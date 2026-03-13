@@ -1,6 +1,6 @@
 {
   "name": "@as/watchers",
-  "version": "0.0.1",
+  "version": "1.16.10",
   "description": "",
   "scripts": {
     "build": "node src/index.js build && NODE_OPTIONS=--openssl-legacy-provider ncc build src/index.js --source-map",
