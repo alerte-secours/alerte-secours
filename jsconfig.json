@@ -9,5 +9,5 @@
       "@modjo/*": ["./node_modules/@modjo/*"]
     }
   },
-  "exclude": ["node_modules", "**/node_modules/*"]
+  "exclude": ["node_modules", "**/node_modules/**"]
 }

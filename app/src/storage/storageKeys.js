@@ -82,4 +82,7 @@ export const STORAGE_KEYS = {
   EMULATOR_MODE_ENABLED: registerAsyncStorageKey("emulator_mode_enabled"),
   SENTRY_ENABLED: registerAsyncStorageKey("@sentry_enabled"),
   DAE_DB_UPDATED_AT: registerAsyncStorageKey("@dae_db_updated_at"),
+  USEFUL_PLACES_DB_UPDATED_AT: registerAsyncStorageKey(
+    "@useful_places_db_updated_at",
+  ),
 };

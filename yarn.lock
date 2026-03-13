@@ -395,6 +395,7 @@ __metadata:
     nodemon: "npm:^2.0.12"
     qs: "npm:^6.10.3"
     redis-queue-dedup: "workspace:^"
+    useful-places-pipeline: "workspace:^"
     utils: "workspace:^"
     ya-retry: "npm:^1.2.0"
   languageName: unknown
@@ -22757,6 +22758,16 @@ __metadata:
   checksum: 10/08a130289f5238fcbf8f59a18951286a6e660d17acccc9d58d9b69dfa0ee19aa038e8f95721b00b432c36d1629a9e32a464bf2e7e0ae6a244c42ddb30bdd8b33
   languageName: node
   linkType: hard
+
+"useful-places-pipeline@workspace:^, useful-places-pipeline@workspace:libs/useful-places-pipeline":
+  version: 0.0.0-use.local
+  resolution: "useful-places-pipeline@workspace:libs/useful-places-pipeline"
+  dependencies:
+    better-sqlite3: "npm:^11.0.0"
+    geodae-pipeline: "workspace:^"
+    h3-js: "npm:^4.2.1"
+  languageName: unknown
+  linkType: soft
 
 "util-deprecate@npm:^1.0.1, util-deprecate@npm:^1.0.2, util-deprecate@npm:~1.0.1":
   version: 1.0.2

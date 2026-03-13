@@ -1,4 +1,4 @@
-import React, { useState, useCallback, useEffect, useRef } from "react";
+import React, { useState, useCallback } from "react";
 import { ScrollView, View } from "react-native";
 import { useNavigation, CommonActions } from "@react-navigation/native";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
@@ -13,14 +13,9 @@ import HelpBlock from "./HelpBlock";
 import RegisterRelativesButton from "./RegisterRelativesButton";
 import NotificationsButton from "./NotificationsButton";
 import ContributeButton from "./ContributeButton";
-import RadarButton from "./RadarButton";
-import RadarModal from "./RadarModal";
+import UsefulPlacesButton from "./UsefulPlacesButton";
 import TopButtonsBar from "./TopButtonsBar";
-import useRadarData from "~/hooks/useRadarData";
-import {
-  announceForA11yIfScreenReaderEnabled,
-  setA11yFocusAfterInteractions,
-} from "~/lib/a11y";
+import { announceForA11yIfScreenReaderEnabled } from "~/lib/a11y";
 
 export default function SendAlert() {
   const navigation = useNavigation();
@@ -28,19 +23,6 @@ export default function SendAlert() {
   const styles = useStyles();
 
   const [helpVisible, setHelpVisible] = useState(false);
-  const [radarModalVisible, setRadarModalVisible] = useState(false);
-
-  const radarButtonRef = useRef(null);
-  const radarAnnouncementsRef = useRef({ loading: false, resultKey: null });
-
-  const {
-    data: radarData,
-    isLoading: radarIsLoading,
-    error: radarError,
-    fetchRadarData,
-    reset: resetRadarData,
-    hasLocation,
-  } = useRadarData();
 
   const toggleHelp = useCallback(() => {
     setHelpVisible((prev) => {
@@ -51,59 +33,6 @@ export default function SendAlert() {
       return next;
     });
   }, []);
-
-  const handleRadarPress = useCallback(() => {
-    if (!hasLocation) {
-      // Could show a location permission alert here
-      return;
-    }
-    setRadarModalVisible(true);
-    fetchRadarData();
-  }, [hasLocation, fetchRadarData]);
-
-  const handleRadarModalClose = useCallback(() => {
-    setRadarModalVisible(false);
-    resetRadarData();
-    setA11yFocusAfterInteractions(radarButtonRef);
-  }, [resetRadarData]);
-
-  useEffect(() => {
-    if (!radarModalVisible) {
-      radarAnnouncementsRef.current = { loading: false, resultKey: null };
-      return;
-    }
-
-    const state = radarAnnouncementsRef.current;
-
-    if (radarIsLoading && !state.loading) {
-      state.loading = true;
-      state.resultKey = null;
-      announceForA11yIfScreenReaderEnabled("Recherche en cours.");
-      return;
-    }
-
-    if (radarIsLoading) return;
-
-    state.loading = false;
-
-    if (radarError && state.resultKey !== "error") {
-      state.resultKey = "error";
-      announceForA11yIfScreenReaderEnabled("Erreur lors de la recherche.");
-      return;
-    }
-
-    const count = radarData?.count;
-    if (typeof count === "number") {
-      const key = `success:${count}`;
-      if (state.resultKey !== key) {
-        state.resultKey = key;
-        let message = `${count} utilisateurs disponibles à proximité.`;
-        if (count === 0) message = "Aucun utilisateur disponible à proximité.";
-        if (count === 1) message = "1 utilisateur disponible à proximité.";
-        announceForA11yIfScreenReaderEnabled(message);
-      }
-    }
-  }, [radarModalVisible, radarIsLoading, radarError, radarData?.count]);
 
   const navigateTo = useCallback(
     (navOpts) =>
@@ -138,7 +67,7 @@ export default function SendAlert() {
             },
           });
           break;
-        case "unkown":
+        case "unknown":
           navigateTo({
             name: "SendAlertFinder",
           });
@@ -153,13 +82,7 @@ export default function SendAlert() {
       <View style={styles.container}>
         <TopButtonsBar>
           <NotificationsButton flex={0.78} />
-          <RadarButton
-            ref={radarButtonRef}
-            onPress={handleRadarPress}
-            isLoading={radarIsLoading}
-            isExpanded={radarModalVisible}
-            flex={0.22}
-          />
+          <UsefulPlacesButton flex={0.22} />
         </TopButtonsBar>
 
         <View style={styles.head}>
@@ -292,13 +215,13 @@ export default function SendAlert() {
           <Button
             testID="send-alert-cta-unknown"
             accessibilityRole="button"
-            accessibilityLabel={levelLabel.unkown}
+            accessibilityLabel={levelLabel.unknown}
             accessibilityHint="Ouvre l'assistant pour choisir votre situation."
             mode="contained"
-            style={[styles.button, styles.btnUnkown]}
+            style={[styles.button, styles.btnUnknown]}
             contentStyle={[styles.buttonContent]}
             labelStyle={[styles.buttonLabel]}
-            onPress={() => sendAlert("unkown")}
+            onPress={() => sendAlert("unknown")}
             icon={({ size }) => (
               <View style={styles.iconContainer}>
                 <IconByAlertLevel
@@ -309,7 +232,7 @@ export default function SendAlert() {
               </View>
             )}
           >
-            {capitalize(levelLabel.unkown)}
+            {capitalize(levelLabel.unknown)}
           </Button>
 
           <Button
@@ -337,14 +260,6 @@ export default function SendAlert() {
         </View>
 
         <ContributeButton />
-
-        <RadarModal
-          visible={radarModalVisible}
-          onDismiss={handleRadarModalClose}
-          peopleCount={radarData?.count}
-          isLoading={radarIsLoading}
-          error={radarError}
-        />
       </View>
     </ScrollView>
   );
@@ -425,7 +340,7 @@ const useStyles = createStyles(
     btnGreen: {
       backgroundColor: custom.appColors.green,
     },
-    btnUnkown: {
+    btnUnknown: {
       backgroundColor: custom.appColors.unknown,
     },
     btnCall: {

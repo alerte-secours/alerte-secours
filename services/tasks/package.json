@@ -34,6 +34,7 @@
     "nodemailer": "^6.9.11",
     "qs": "^6.10.3",
     "redis-queue-dedup": "workspace:^",
+    "useful-places-pipeline": "workspace:^",
     "utils": "workspace:^",
     "ya-retry": "^1.2.0"
   },

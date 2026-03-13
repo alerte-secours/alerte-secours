@@ -7,8 +7,6 @@ import {
 } from "@expo/vector-icons";
 import { useNavigation, CommonActions } from "@react-navigation/native";
 
-import FontAwesome6 from "@expo/vector-icons/FontAwesome6";
-
 import DrawerContent from "~/navigation/DrawerNav/DrawerContent";
 import { useDrawerState } from "~/navigation/Context";
 import getDefaultDrawerWidth from "~/navigation/DrawerNav/getDefaultDrawerWidth";
@@ -27,6 +25,8 @@ import Contribute from "~/scenes/Contribute";
 import Location from "~/scenes/Location";
 import DAEList from "~/scenes/DAEList";
 import DAEItem from "~/scenes/DAEItem";
+import UsefulPlacesList from "~/scenes/UsefulPlacesList";
+import UsefulPlaceItem from "~/scenes/UsefulPlaceItem";
 import Developer from "~/scenes/Developer";
 import HelpSignal from "~/scenes/HelpSignal";
 
@@ -377,29 +377,24 @@ export default React.memo(function DrawerNav() {
         options={{
           drawerLabel: "Défibrillateurs",
           drawerIcon: ({ focused }) => (
-            <FontAwesome6
-              name="heart-circle-bolt"
+            <MaterialCommunityIcons
+              name="heart-pulse"
               {...iconProps}
               {...(focused ? iconFocusedProps : {})}
             />
-            // <MaterialCommunityIcons
-            //   name="heart-flash"
-            //   {...iconProps}
-            //   {...(focused ? iconFocusedProps : {})}
-            // />
           ),
           unmountOnBlur: true,
         }}
         listeners={{}}
       />
       <Drawer.Screen
-        name="Links"
-        component={Links}
+        name="UsefulPlacesList"
+        component={UsefulPlacesList}
         options={{
-          drawerLabel: "Liens utiles",
+          drawerLabel: "Lieux utiles",
           drawerIcon: ({ focused }) => (
             <MaterialCommunityIcons
-              name="web"
+              name="map-marker-multiple"
               {...iconProps}
               {...(focused ? iconFocusedProps : {})}
             />
@@ -432,6 +427,22 @@ export default React.memo(function DrawerNav() {
           drawerIcon: ({ focused }) => (
             <MaterialCommunityIcons
               name="hand-back-left"
+              {...iconProps}
+              {...(focused ? iconFocusedProps : {})}
+            />
+          ),
+          unmountOnBlur: true,
+        }}
+        listeners={{}}
+      />
+      <Drawer.Screen
+        name="Links"
+        component={Links}
+        options={{
+          drawerLabel: "Liens utiles",
+          drawerIcon: ({ focused }) => (
+            <MaterialCommunityIcons
+              name="web"
               {...iconProps}
               {...(focused ? iconFocusedProps : {})}
             />
@@ -532,6 +543,14 @@ export default React.memo(function DrawerNav() {
       <Drawer.Screen
         name="DAEItem"
         component={DAEItem}
+        options={{
+          hidden: true,
+          unmountOnBlur: true,
+        }}
+      />
+      <Drawer.Screen
+        name="UsefulPlaceItem"
+        component={UsefulPlaceItem}
         options={{
           hidden: true,
           unmountOnBlur: true,

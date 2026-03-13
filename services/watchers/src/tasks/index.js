@@ -1,3 +1,5 @@
+const commonTasks = require("common/tasks")
+
 module.exports = {
   DEFAULT_SWAG_USERNAME: "defaultSwagUsername",
   EMAIL_VERIFY: "emailVerify",
@@ -10,6 +12,7 @@ module.exports = {
   RELATIVE_INVITATION_NOTIFY: "relativeInvitationNotify",
   ALERT_CALL_EMERGENCY_INFO_NOTIFY: "alertCallEmergencyInfoNotify",
   BACKGROUND_GEOLOCATION_LOST_NOTIFY: "backgroundGeolocationLostNotify",
-  GEODAE_PUBLISH: "geodaePublish",
+  // Re-export shared task constants from common to avoid duplication
+  ...commonTasks,
   // IOS_GEOLOCATION_HEARTBEAT_SYNC: "iosGeolocationHeartbeatSync",
 }

@@ -1,0 +1,13 @@
+{
+  "name": "Claude Code Sandbox",
+  "image": "jetpackio/devbox:latest",
+  "features": {
+    "ghcr.io/devcontainers/features/node:1.6.1": {
+      "version": "lts"
+    }
+  },
+  "runArgs": ["--security-opt=no-new-privileges=false"],
+  "containerEnv": {},
+  "postCreateCommand": "npm install -g @anthropic-ai/claude-code && mkdir -p ~/.claude",
+  "remoteUser": "devbox"
+}

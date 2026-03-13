@@ -256,68 +256,9 @@ function createExpoSqliteBackend() {
   let _expoDbPromise = null;
 
   function createLegacyAsyncFacade(legacyDb) {
-    const execSqlAsync = (sql, params = []) =>
-      new Promise((resolve, reject) => {
-        const runner =
-          typeof legacyDb.readTransaction === "function"
-            ? legacyDb.readTransaction.bind(legacyDb)
-            : legacyDb.transaction.bind(legacyDb);
-
-        runner((tx) => {
-          tx.executeSql(
-            sql,
-            params,
-            () => resolve(),
-            (_tx, err) => {
-              reject(err);
-              return true;
-            },
-          );
-        });
-      });
-
-    const queryAllAsync = (sql, params = []) =>
-      new Promise((resolve, reject) => {
-        const runner =
-          typeof legacyDb.readTransaction === "function"
-            ? legacyDb.readTransaction.bind(legacyDb)
-            : legacyDb.transaction.bind(legacyDb);
-
-        runner((tx) => {
-          tx.executeSql(
-            sql,
-            params,
-            (_tx, result) => {
-              const rows = [];
-              const len = result?.rows?.length ?? 0;
-              for (let i = 0; i < len; i++) {
-                rows.push(result.rows.item(i));
-              }
-              resolve(rows);
-            },
-            (_tx, err) => {
-              reject(err);
-              return true;
-            },
-          );
-        });
-      });
-
-    return {
-      // Methods used by this repo
-      execAsync(sql) {
-        return execSqlAsync(sql);
-      },
-      getAllAsync(sql, params) {
-        return queryAllAsync(sql, params);
-      },
-      async getFirstAsync(sql, params) {
-        const rows = await queryAllAsync(sql, params);
-        return rows[0] ?? null;
-      },
-      // Keep a reference to the underlying legacy DB for debugging.
-      _legacyDb: legacyDb,
-    };
+    // eslint-disable-next-line global-require
+    const { wrapLegacyExpoSqlite } = require("./wrapDbHandle");
+    return wrapLegacyExpoSqlite(legacyDb);
   }
 
   async function initDbExpo() {

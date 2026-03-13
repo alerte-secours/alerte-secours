@@ -1,0 +1,125 @@
+import React from "react";
+import { View, StyleSheet } from "react-native";
+import { createBottomTabNavigator } from "@react-navigation/bottom-tabs";
+import { MaterialCommunityIcons } from "@expo/vector-icons";
+import ErrorBoundary from "react-native-error-boundary";
+import { useTranslation } from "react-i18next";
+
+import { fontFamily, useTheme } from "~/theme";
+import Text from "~/components/Text";
+
+import UsefulPlacesListe from "./Liste";
+import UsefulPlacesCarte from "./Carte";
+
+const Tab = createBottomTabNavigator();
+
+function FallbackScreen({ error, resetError }) {
+  const { colors } = useTheme();
+  const { t } = useTranslation();
+  return (
+    <View style={styles.fallback}>
+      <MaterialCommunityIcons
+        name="alert-circle-outline"
+        size={48}
+        color={colors.error || "#B00020"}
+      />
+      <Text style={styles.fallbackText}>{t("sectionError")}</Text>
+      {__DEV__ && error?.message ? (
+        <Text style={styles.fallbackText}>{error.message}</Text>
+      ) : null}
+      <Text
+        style={[styles.fallbackAction, { color: colors.primary }]}
+        onPress={resetError}
+      >
+        {t("sectionRetry")}
+      </Text>
+    </View>
+  );
+}
+
+export default React.memo(function UsefulPlacesList({ route }) {
+  const { colors } = useTheme();
+  const { t } = useTranslation();
+  const initialTab = route?.params?.initialTab;
+
+  return (
+    <ErrorBoundary FallbackComponent={FallbackScreen}>
+      <View style={styles.container}>
+        <View style={styles.tabContainer}>
+          <Tab.Navigator
+            initialRouteName={
+              initialTab === "carte" ? "UsefulPlacesCarte" : "UsefulPlacesListe"
+            }
+            screenOptions={{
+              headerShown: false,
+              tabBarActiveTintColor: colors.primary,
+              tabBarInactiveTintColor: colors.onSurfaceVariant || colors.grey,
+              tabBarLabelStyle: {
+                fontFamily,
+                fontSize: 12,
+              },
+              tabBarStyle: {
+                backgroundColor: colors.surface,
+                borderTopColor: colors.outlineVariant || colors.grey,
+              },
+            }}
+          >
+            <Tab.Screen
+              name="UsefulPlacesListe"
+              component={UsefulPlacesListe}
+              options={{
+                tabBarLabel: t("listTab"),
+                tabBarIcon: ({ color, size }) => (
+                  <MaterialCommunityIcons
+                    name="format-list-bulleted"
+                    color={color}
+                    size={size}
+                  />
+                ),
+              }}
+            />
+            <Tab.Screen
+              name="UsefulPlacesCarte"
+              component={UsefulPlacesCarte}
+              options={{
+                tabBarLabel: t("mapTab"),
+                tabBarIcon: ({ color, size }) => (
+                  <MaterialCommunityIcons
+                    name="map-marker-outline"
+                    color={color}
+                    size={size}
+                  />
+                ),
+              }}
+            />
+          </Tab.Navigator>
+        </View>
+      </View>
+    </ErrorBoundary>
+  );
+});
+
+const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+  },
+  tabContainer: {
+    flex: 1,
+  },
+  fallback: {
+    flex: 1,
+    alignItems: "center",
+    justifyContent: "center",
+    paddingHorizontal: 32,
+  },
+  fallbackText: {
+    fontSize: 16,
+    textAlign: "center",
+    marginTop: 12,
+    marginBottom: 16,
+  },
+  fallbackAction: {
+    fontSize: 16,
+    fontWeight: "600",
+  },
+});

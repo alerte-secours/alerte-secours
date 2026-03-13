@@ -14,6 +14,7 @@ import notifications from "./notifications";
 import permissionWizard from "./permissionWizard";
 import aggregatedMessages from "./aggregatedMessages";
 import defibs from "./defibs";
+import usefulPlaces from "./usefulPlaces";
 
 const store = createStore({
   tree,
@@ -30,6 +31,7 @@ const store = createStore({
   notifications,
   aggregatedMessages,
   defibs,
+  usefulPlaces,
 });
 
 // console.log("store", JSON.stringify(Object.keys(store), null, 2));
@@ -107,4 +109,9 @@ export const {
   getDefibsState,
   subscribeDefibsState,
   defibsActions,
+
+  useUsefulPlacesState,
+  getUsefulPlacesState,
+  subscribeUsefulPlacesState,
+  usefulPlacesActions,
 } = store;

@@ -11,6 +11,21 @@
 
 const DEFAULT_DB_NAME = "geodae.db";
 
+function resolveEmbeddedDbModule(dbName) {
+  switch (dbName) {
+    case "geodae.db":
+      // eslint-disable-next-line global-require
+      return require("../assets/db/geodae.db");
+    case "useful-places.db":
+      // eslint-disable-next-line global-require
+      return require("../assets/db/useful-places.db");
+    default:
+      throw new Error(
+        `[EMBEDDED_DB] Unsupported embedded DB asset for \"${dbName}\"`,
+      );
+  }
+}
+
 function stripFileScheme(uri) {
   return typeof uri === "string" && uri.startsWith("file://")
     ? uri.slice("file://".length)
@@ -52,12 +67,12 @@ async function ensureEmbeddedDb(options = {}) {
 
   if (!FileSystem?.documentDirectory) {
     throw new Error(
-      "[DAE_DB] expo-file-system unavailable (documentDirectory missing) — cannot stage embedded DB",
+      "[EMBEDDED_DB] expo-file-system unavailable (documentDirectory missing) — cannot stage embedded DB",
     );
   }
   if (!Asset?.fromModule) {
     throw new Error(
-      "[DAE_DB] expo-asset unavailable (Asset.fromModule missing) — cannot stage embedded DB",
+      "[EMBEDDED_DB] expo-asset unavailable (Asset.fromModule missing) — cannot stage embedded DB",
     );
   }
 
@@ -76,41 +91,52 @@ async function ensureEmbeddedDb(options = {}) {
     !fileInfo.exists ||
     (typeof fileInfo.size === "number" && fileInfo.size === 0);
 
+  if (__DEV__) console.warn("[EMBEDDED_DB] ensure", dbName, { shouldCopy });
+
   if (shouldCopy) {
     let moduleId = assetModule;
     if (moduleId == null) {
       try {
-        // Bundled asset (must exist in repo/build output).
-        // Path is relative to src/db/
-        // eslint-disable-next-line global-require
-        moduleId = require("../assets/db/geodae.db");
+        moduleId = resolveEmbeddedDbModule(dbName);
       } catch (e) {
         const err = new Error(
-          "[DAE_DB] Embedded DB asset not found at src/assets/db/geodae.db. " +
-            "Run `yarn dae:build` (or ensure the asset is committed) and rebuild the dev client.",
+          `[EMBEDDED_DB] Embedded DB asset not found for ${dbName}. ` +
+            "Ensure the asset is committed and rebuild the dev client.",
         );
         err.cause = e;
         throw err;
       }
     }
 
+    if (moduleId == null) {
+      // No embedded asset for this DB — skip copy silently.
+      // The DB will be provided later via OTA update.
+      if (__DEV__) {
+        console.warn(
+          "[EMBEDDED_DB] No embedded asset bundled for",
+          dbName,
+          "— skipping copy (will rely on OTA update)",
+        );
+      }
+      return { dbName, sqliteDirUri, dbUri, copied: false };
+    }
+
     const asset = Asset.fromModule(moduleId);
     await asset.downloadAsync();
     if (!asset.localUri) {
       throw new Error(
-        "[DAE_DB] DAE DB asset missing localUri after Asset.downloadAsync()",
+        `[EMBEDDED_DB] ${dbName} asset missing localUri after Asset.downloadAsync()`,
       );
     }
 
     // Defensive: expo-asset returns file:// URIs; copyAsync wants URIs.
     await FileSystem.copyAsync({ from: asset.localUri, to: dbUri });
-    console.warn(
-      "[DAE_DB] Staged embedded geodae.db into SQLite directory:",
-      stripFileScheme(dbUri),
-    );
+    if (__DEV__) console.warn("[EMBEDDED_DB] copied", dbName);
 
     return { dbName, sqliteDirUri, dbUri, copied: true };
   }
+
+  if (__DEV__) console.warn("[EMBEDDED_DB] reusing existing", dbName);
 
   return { dbName, sqliteDirUri, dbUri, copied: false };
 }

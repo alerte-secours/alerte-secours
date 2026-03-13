@@ -34,3 +34,4 @@ codebase.md
 
 .claude/*.local.json
 .falcon/**
+.devcontainers/**

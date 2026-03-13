@@ -1,0 +1,18 @@
+{
+  "name": "useful-places-pipeline",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "packageManager": "yarn@4.5.3",
+  "scripts": {
+    "download": "node download-sources.mjs",
+    "download:force": "node download-sources.mjs --force",
+    "process": "node process-all.mjs",
+    "build": "yarn download && yarn process"
+  },
+  "dependencies": {
+    "better-sqlite3": "^11.7.0",
+    "csv-parse": "^5.6.0",
+    "h3-js": "^4.2.1"
+  }
+}

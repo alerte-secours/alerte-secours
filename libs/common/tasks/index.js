@@ -1,5 +1,5 @@
 /**
- * Common task constants for geocoding operations
+ * Common task constants shared across services
  */
 module.exports = {
   GEOCODE_ALERT_GUESS_ADDRESS: "geocodeAlertGuessAddress",
@@ -7,4 +7,5 @@ module.exports = {
   GEOCODE_ALERT: "geocodeAlert",
   RELATIVE_ALERT: "relativeAlert",
   GEODAE_PUBLISH: "geodaePublish",
+  USEFUL_PLACES_PUBLISH: "usefulPlacesPublish",
 }

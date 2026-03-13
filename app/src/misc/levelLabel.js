@@ -2,7 +2,7 @@ export default {
   red: "urgence",
   yellow: "danger",
   green: "petit coup de main",
-  unkown: "je ne sais pas",
+  unknown: "je ne sais pas",
   call: "appeler les Secours",
 };
 

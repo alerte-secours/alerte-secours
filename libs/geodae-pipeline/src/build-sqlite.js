@@ -32,7 +32,7 @@ function deterministicId(lat, lon, nom, adresse) {
   return createHash("sha256")
     .update(payload, "utf-8")
     .digest("hex")
-    .slice(0, 16)
+    .slice(0, 20)
 }
 
 /**

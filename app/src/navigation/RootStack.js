@@ -62,6 +62,11 @@ function getHeaderTitle(route) {
     case "DAEItem":
       return "Défibrillateur";
 
+    case "UsefulPlacesList":
+      return "Lieux utiles";
+    case "UsefulPlaceItem":
+      return "Lieu utile";
+
     case "ConnectivityError":
       return "Non connecté";
 

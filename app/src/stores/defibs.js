@@ -5,36 +5,13 @@ import {
   computeCorridorQueryRadiusMeters,
   filterDefibsInCorridor,
 } from "~/utils/geo/corridor";
-import { updateDaeDb } from "~/db/updateDaeDb";
-import memoryAsyncStorage from "~/storage/memoryAsyncStorage";
+import { updateUsefulPlacesDb } from "~/db/updateUsefulPlacesDb";
 import { STORAGE_KEYS } from "~/storage/storageKeys";
+import createOtaUpdateActions from "./createOtaUpdateActions";
 
 const DEFAULT_NEAR_USER_RADIUS_M = 10_000;
 const DEFAULT_CORRIDOR_M = 10_000;
 const DEFAULT_LIMIT = 200;
-
-const AUTO_DISMISS_DELAY = 4_000;
-
-/**
- * Convert a technical DAE update error into a user-friendly French message.
- * The raw technical details are already logged via console.warn in updateDaeDb.
- */
-function userFriendlyDaeError(error) {
-  const msg = error?.message || "";
-  if (msg.includes("Network") || msg.includes("network")) {
-    return "Impossible de contacter le serveur. Vérifiez votre connexion internet et réessayez.";
-  }
-  if (msg.includes("HTTP")) {
-    return "Le serveur a rencontré un problème. Veuillez réessayer ultérieurement.";
-  }
-  if (msg.includes("Download failed") || msg.includes("file is empty")) {
-    return "Le téléchargement a échoué. Veuillez réessayer.";
-  }
-  if (msg.includes("failed validation")) {
-    return "Le fichier téléchargé est corrompu. Veuillez réessayer.";
-  }
-  return "La mise à jour a échoué. Veuillez réessayer ultérieurement.";
-}
 
 export default createAtom(({ merge, reset }) => {
   const actions = {
@@ -73,8 +50,8 @@ export default createAtom(({ merge, reset }) => {
         merge({ nearUserDefibs, loadingNearUser: false });
         return { defibs: nearUserDefibs, error: null };
       } catch (error) {
+        // Keep previously loaded data on error (e.g. DB temporarily locked during OTA)
         merge({
-          nearUserDefibs: [],
           loadingNearUser: false,
           errorNearUser: error,
         });
@@ -125,77 +102,25 @@ export default createAtom(({ merge, reset }) => {
       }
     },
 
-    // ── DAE DB Over-the-Air Update ─────────────────────────────────────
-
-    loadLastDaeUpdate: async () => {
-      try {
-        const stored = await memoryAsyncStorage.getItem(
-          STORAGE_KEYS.DAE_DB_UPDATED_AT,
-        );
-        if (stored) {
-          merge({ daeLastUpdatedAt: stored });
-        }
-      } catch {
-        // Non-fatal
-      }
-    },
-
-    triggerDaeUpdate: async () => {
-      merge({
-        daeUpdateState: "checking",
-        daeUpdateProgress: 0,
-        daeUpdateError: null,
-      });
-
-      const result = await updateDaeDb({
-        onPhase: (phase) => {
-          merge({ daeUpdateState: phase });
+    // ── DAE DB Over-the-Air Update (shared factory) ───────────────────
+    ...(({ loadLastUpdate, triggerUpdate, dismissUpdateError }) => ({
+      loadLastDaeUpdate: loadLastUpdate,
+      triggerDaeUpdate: triggerUpdate,
+      dismissDaeUpdateError: dismissUpdateError,
+    }))(
+      createOtaUpdateActions({
+        merge,
+        updateFn: updateUsefulPlacesDb,
+        storageKey: STORAGE_KEYS.USEFUL_PLACES_DB_UPDATED_AT,
+        keys: {
+          state: "daeUpdateState",
+          progress: "daeUpdateProgress",
+          error: "daeUpdateError",
+          lastUpdatedAt: "daeLastUpdatedAt",
         },
-        onProgress: ({ totalBytesWritten, totalBytesExpectedToWrite }) => {
-          const progress =
-            totalBytesExpectedToWrite > 0
-              ? totalBytesWritten / totalBytesExpectedToWrite
-              : 0;
-          merge({
-            daeUpdateState: "downloading",
-            daeUpdateProgress: progress,
-          });
-        },
-      });
-
-      if (result.alreadyUpToDate) {
-        merge({ daeUpdateState: "up-to-date" });
-        setTimeout(() => {
-          merge({ daeUpdateState: "idle" });
-        }, AUTO_DISMISS_DELAY);
-        return;
-      }
-
-      if (!result.success) {
-        merge({
-          daeUpdateState: "error",
-          daeUpdateError: userFriendlyDaeError(result.error),
-        });
-        return;
-      }
-
-      // Success: update stored timestamp and clear loaded defibs
-      // so the next query fetches from the fresh DB.
-      merge({
-        daeUpdateState: "done",
-        daeLastUpdatedAt: result.updatedAt,
-        nearUserDefibs: [],
-        corridorDefibs: [],
-      });
-
-      setTimeout(() => {
-        merge({ daeUpdateState: "idle" });
-      }, AUTO_DISMISS_DELAY);
-    },
-
-    dismissDaeUpdateError: () => {
-      merge({ daeUpdateState: "idle", daeUpdateError: null });
-    },
+        clearOnSuccess: { nearUserDefibs: [], corridorDefibs: [] },
+      }),
+    ),
   };
 
   return {
