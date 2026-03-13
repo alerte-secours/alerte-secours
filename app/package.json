@@ -1,6 +1,6 @@
 {
   "name": "alerte-secours",
-  "version": "1.16.10",
+  "version": "1.16.11",
   "main": "index.js",
   "scripts": {
     "start": "expo start --dev-client --private-key-path ./keys/private-key.pem",
@@ -57,8 +57,8 @@
     "dae:build": "yarn --cwd scripts/dae build"
   },
   "customExpoVersioning": {
-    "versionCode": 241,
-    "buildNumber": 241
+    "versionCode": 242,
+    "buildNumber": 242
   },
   "_moduleAliases": {
     "~": "src"
