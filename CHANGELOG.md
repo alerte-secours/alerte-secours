@@ -2,6 +2,16 @@
 
 All notable changes to this project will be documented in this file. See [commit-and-tag-version](https://github.com/absolute-version/commit-and-tag-version) for commit guidelines.
 
+## [1.16.12](https://codeberg.org/alerte-secours/alerte-secours/compare/v1.16.11...v1.16.12) (2026-03-14)
+
+
+### Bug Fixes
+
+* **alert-agg-map:** add useful places ([ae9008f](https://codeberg.org/alerte-secours/alerte-secours/commit/ae9008ff5c66eb85ef62e2cfd25e7949012b2e9b))
+* **dev:** add git-lfs ([9523291](https://codeberg.org/alerte-secours/alerte-secours/commit/9523291acd69f00cf62f15c6febedd039fcc04b3))
+* **useful-place:** finalize merging + clean old dea opendb ([ade0d5e](https://codeberg.org/alerte-secours/alerte-secours/commit/ade0d5e62237083fe9a7de1e71034993a09539a6))
+* **useful-place:** icons on map ([e1da9fc](https://codeberg.org/alerte-secours/alerte-secours/commit/e1da9fc2747587875196d6fe69eb9102dca7d59c))
+
 ## [1.16.11](https://codeberg.org/alerte-secours/alerte-secours/compare/v1.16.10...v1.16.11) (2026-03-13)
 
 ## [1.16.10](https://github.com/alerte-secours/as-app/compare/v1.16.0...v1.16.10) (2026-02-08)
