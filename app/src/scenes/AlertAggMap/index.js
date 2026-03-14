@@ -15,7 +15,7 @@ import {
 
 import { deepEqual } from "fast-equals";
 
-import { useAlertState } from "~/stores";
+import { useAlertState, usefulPlacesActions } from "~/stores";
 import { storeLocation } from "~/location/storage";
 import useLocation from "~/hooks/useLocation";
 
@@ -30,6 +30,12 @@ import FeatureImages from "~/containers/Map/FeatureImages";
 import SelectedFeatureBubble from "~/containers/Map/SelectedFeatureBubble";
 import LastKnownLocationMarker from "~/containers/Map/LastKnownLocationMarker";
 import useMapInit from "~/containers/Map/useMapInit";
+import { useTheme } from "~/theme";
+import { useNavigation } from "@react-navigation/native";
+
+import useNearbyPlaces from "~/scenes/UsefulPlacesList/useNearbyPlaces";
+import useTypeFilter from "~/scenes/UsefulPlacesList/useTypeFilter";
+import SettingsMenu from "~/scenes/UsefulPlacesList/SettingsMenu";
 
 import ControlButtons from "./ControlButtons";
 import useFeatures from "./useFeatures";
@@ -40,7 +46,28 @@ import { BoundType } from "~/containers/Map/constants";
 const compassViewPosition = 1;
 const compassViewMargin = { x: 10, y: 10 };
 
+function placesToGeoJSON(places) {
+  return {
+    type: "FeatureCollection",
+    features: places.map((p) => ({
+      type: "Feature",
+      id: p.id,
+      geometry: {
+        type: "Point",
+        coordinates: [p.longitude, p.latitude],
+      },
+      properties: {
+        id: p.id,
+        nom: p.nom || "",
+        type: p.type,
+      },
+    })),
+  };
+}
+
 function AlertAggMap() {
+  const { colors } = useTheme();
+  const navigation = useNavigation();
   const userCoordRef = useRef();
 
   const { alertingList } = useAlertState(["alertingList"]);
@@ -152,6 +179,34 @@ function AlertAggMap() {
     setDetached,
   });
 
+  // ── Useful places ──────────────────────────────────────────────────
+  const { visibleTypes, toggle } = useTypeFilter("alertAgg");
+  const { places: allPlaces } = useNearbyPlaces();
+
+  const filteredPlaces = useMemo(
+    () => allPlaces.filter((p) => visibleTypes.includes(p.type)),
+    [allPlaces, visibleTypes],
+  );
+
+  const placesGeoJSON = useMemo(
+    () => placesToGeoJSON(filteredPlaces),
+    [filteredPlaces],
+  );
+
+  const onPlacePress = useCallback(
+    (e) => {
+      const feature = e?.features?.[0];
+      if (!feature) return;
+      const placeId = feature.properties?.id;
+      const place = filteredPlaces.find((p) => p.id === placeId);
+      if (place) {
+        usefulPlacesActions.setSelectedPlace(place);
+        navigation.navigate("UsefulPlaceItem");
+      }
+    },
+    [filteredPlaces, navigation],
+  );
+
   const [selectedFeature, setSelectedFeature] = useState(null);
   const closeSelected = useCallback(() => {
     setSelectedFeature(null);
@@ -211,6 +266,53 @@ function AlertAggMap() {
         />
         <FeatureImages />
         <ShapePoints shape={shape} onPress={onPress} />
+
+        {/* Useful places markers */}
+        {placesGeoJSON.features.length > 0 && (
+          <Maplibre.ShapeSource
+            id="alertAggPlacesSource"
+            shape={placesGeoJSON}
+            onPress={onPlacePress}
+          >
+            <Maplibre.SymbolLayer
+              id="alertAggPlacesDaeLayer"
+              filter={["==", ["get", "type"], "dae"]}
+              style={{
+                iconImage: "dae",
+                iconSize: 0.5,
+                iconAllowOverlap: true,
+                textField: ["get", "nom"],
+                textSize: 11,
+                textOffset: [0, 1.5],
+                textAnchor: "top",
+                textMaxWidth: 12,
+                textColor: colors.onSurface,
+                textHaloColor: colors.surface,
+                textHaloWidth: 1,
+                textOptional: true,
+              }}
+            />
+            <Maplibre.SymbolLayer
+              id="alertAggPlacesIconLayer"
+              filter={["!=", ["get", "type"], "dae"]}
+              style={{
+                iconImage: ["get", "type"],
+                iconSize: 0.5,
+                iconAllowOverlap: true,
+                textField: ["get", "nom"],
+                textSize: 11,
+                textOffset: [0, 1.5],
+                textAnchor: "top",
+                textMaxWidth: 12,
+                textColor: colors.onSurface,
+                textHaloColor: colors.surface,
+                textHaloWidth: 1,
+                textOptional: true,
+              }}
+            />
+          </Maplibre.ShapeSource>
+        )}
+
         {selectedFeature && (
           <SelectedFeatureBubble
             feature={selectedFeature}
@@ -231,6 +333,12 @@ function AlertAggMap() {
           />
         )}
       </MapView>
+      <SettingsMenu
+        visibleTypes={visibleTypes}
+        onToggle={toggle}
+        floating
+        showUpdateSection={false}
+      />
       <ControlButtons
         mapRef={mapRef}
         cameraRef={cameraRef}

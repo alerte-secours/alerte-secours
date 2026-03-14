@@ -143,6 +143,7 @@ export default React.memo(function SettingsMenu({
   visibleTypes,
   onToggle,
   floating,
+  showUpdateSection = true,
 }) {
   const { colors } = useTheme();
   const { t } = useTranslation();
@@ -293,15 +294,19 @@ export default React.memo(function SettingsMenu({
             })}
           </View>
 
-          <View
-            style={[
-              styles.separator,
-              { backgroundColor: colors.outlineVariant || colors.grey },
-            ]}
-          />
+          {showUpdateSection && (
+            <>
+              <View
+                style={[
+                  styles.separator,
+                  { backgroundColor: colors.outlineVariant || colors.grey },
+                ]}
+              />
 
-          <Text style={styles.sectionTitle}>{t("dataUpdateSection")}</Text>
-          <UpdateSection />
+              <Text style={styles.sectionTitle}>{t("dataUpdateSection")}</Text>
+              <UpdateSection />
+            </>
+          )}
 
           <Button mode="text" onPress={close} style={styles.closeButton}>
             {t("closeButton")}

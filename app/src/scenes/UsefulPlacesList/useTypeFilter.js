@@ -11,6 +11,10 @@ export { ALL_TYPES, DEFAULT_TYPES };
 const CONTEXT_CONFIG = {
   map: { stateKey: "mapVisibleTypes", action: "setMapVisibleTypes" },
   list: { stateKey: "listVisibleTypes", action: "setListVisibleTypes" },
+  alertAgg: {
+    stateKey: "alertAggVisibleTypes",
+    action: "setAlertAggVisibleTypes",
+  },
 };
 
 export default function useTypeFilter(context = "list") {

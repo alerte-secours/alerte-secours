@@ -26,6 +26,10 @@ export default createAtom(({ merge, reset }) => {
       merge({ listVisibleTypes });
     },
 
+    setAlertAggVisibleTypes: (alertAggVisibleTypes) => {
+      merge({ alertAggVisibleTypes });
+    },
+
     loadNearUser: async ({
       userLonLat,
       radiusMeters = DEFAULT_RADIUS_M,
@@ -91,6 +95,7 @@ export default createAtom(({ merge, reset }) => {
       selectedPlace: null,
       mapVisibleTypes: ALL_TYPES,
       listVisibleTypes: DEFAULT_TYPES,
+      alertAggVisibleTypes: DEFAULT_TYPES,
 
       loadingNearUser: false,
       errorNearUser: null,
