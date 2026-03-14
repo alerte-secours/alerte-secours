@@ -1,4 +1,4 @@
-// Schema validation for embedded SQLite databases (geodae.db, useful-places.db).
+// Schema validation for embedded SQLite databases.
 
 /**
  * Validate that the embedded DB looks like the pre-populated database.
@@ -9,7 +9,7 @@
  * @param {Object} db
  * @param {string} [tableName]
  */
-async function assertDbHasTable(db, tableName = "defibs") {
+async function assertDbHasTable(db, tableName = "useful_places") {
   if (!db || typeof db.getFirstAsync !== "function") {
     const err = new TypeError(
       `[DB_VALIDATE] Cannot validate schema: db.getFirstAsync() missing`,

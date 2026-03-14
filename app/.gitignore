@@ -103,12 +103,4 @@ screenshot-*.png
 
 /.data
 
-# Geodae preprocessing
-scripts/dae/node_modules/
-scripts/dae/.yarn/*
-!scripts/dae/.yarn/patches
-!scripts/dae/.yarn/plugins
-!scripts/dae/.yarn/releases
-!scripts/dae/.yarn/sdks
-!scripts/dae/.yarn/versions
 src/assets/db/*.db

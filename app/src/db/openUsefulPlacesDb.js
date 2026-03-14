@@ -1,7 +1,4 @@
 // Open the useful_places SQLite database.
-//
-// Follows the same pattern as openDb.js but for the unified useful_places DB.
-// Reuses the same backend selection logic as the geodae DB opener.
 
 export const DB_NAME = "useful-places.db";
 
@@ -29,7 +26,6 @@ function logError(label, error) {
 
 /**
  * Open the useful_places database.
- * Uses the same backend strategy as the main geodae DB.
  * If the DB file is stale/empty (missing useful_places table), forces re-staging
  * from the embedded asset and retries once.
  */

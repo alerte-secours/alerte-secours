@@ -20,7 +20,8 @@ describe("db/ensureEmbeddedDb", () => {
         getInfoAsync: jest.fn(async (uri) => {
           calls.getInfoAsync.push(uri);
           if (uri === "file:///docs/SQLite") return { exists: false };
-          if (uri === "file:///docs/SQLite/geodae.db") return { exists: false };
+          if (uri === "file:///docs/SQLite/useful-places.db")
+            return { exists: false };
           return { exists: false };
         }),
         makeDirectoryAsync: jest.fn(async (uri) => {
@@ -40,7 +41,7 @@ describe("db/ensureEmbeddedDb", () => {
         Asset: {
           fromModule: jest.fn(() => ({
             downloadAsync,
-            localUri: "file:///bundle/geodae.db",
+            localUri: "file:///bundle/useful-places.db",
           })),
         },
       }),
@@ -49,11 +50,14 @@ describe("db/ensureEmbeddedDb", () => {
 
     const res = await ensureEmbeddedDb({ assetModule: 123 });
 
-    expect(res.dbUri).toBe("file:///docs/SQLite/geodae.db");
+    expect(res.dbUri).toBe("file:///docs/SQLite/useful-places.db");
     expect(res.copied).toBe(true);
     expect(calls.makeDirectoryAsync).toEqual(["file:///docs/SQLite"]);
     expect(calls.copyAsync).toEqual([
-      { from: "file:///bundle/geodae.db", to: "file:///docs/SQLite/geodae.db" },
+      {
+        from: "file:///bundle/useful-places.db",
+        to: "file:///docs/SQLite/useful-places.db",
+      },
     ]);
     expect(downloadAsync).toHaveBeenCalled();
   });
@@ -66,7 +70,7 @@ describe("db/ensureEmbeddedDb", () => {
         documentDirectory: "file:///docs/",
         getInfoAsync: jest.fn(async (uri) => {
           if (uri === "file:///docs/SQLite") return { exists: true };
-          if (uri === "file:///docs/SQLite/geodae.db") {
+          if (uri === "file:///docs/SQLite/useful-places.db") {
             return { exists: true, size: 42 };
           }
           return { exists: true };
@@ -84,7 +88,7 @@ describe("db/ensureEmbeddedDb", () => {
         Asset: {
           fromModule: jest.fn(() => ({
             downloadAsync: jest.fn(async () => undefined),
-            localUri: "file:///bundle/geodae.db",
+            localUri: "file:///bundle/useful-places.db",
           })),
         },
       }),

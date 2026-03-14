@@ -39,6 +39,10 @@ const SOURCES = {
     url: "https://datahub.bordeaux-metropole.fr/api/explore/v2.1/catalog/datasets/sv_angela_p/exports/csv?lang=fr&timezone=Europe%2FBerlin&use_labels=true&delimiter=%3B",
     filename: "angela/sv_angela_p.csv",
   },
+  geodae: {
+    url: "https://www.data.gouv.fr/api/1/datasets/r/86ea48a0-dd94-4a23-b71c-80d3041d7db2",
+    filename: "geodae.json",
+  },
 };
 
 const { values: args } = parseArgs({

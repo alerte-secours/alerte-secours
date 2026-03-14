@@ -384,7 +384,6 @@ __metadata:
     eta: "npm:^3.2.0"
     firebase-admin: "npm:^13.1.0"
     generate-swag-username: "npm:^1.0.3"
-    geodae-pipeline: "workspace:^"
     geolib: "npm:^3.3.3"
     link-module-alias: "npm:^1.2.0"
     lodash: "npm:^4.17.21"

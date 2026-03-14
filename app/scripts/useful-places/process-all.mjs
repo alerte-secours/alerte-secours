@@ -102,7 +102,7 @@ async function main() {
   }
 
   // ── 5. DAE ─────────────────────────────────────────────────────────────
-  const daeFile = join(__dirname, "../dae/geodae.json");
+  const daeFile = join(DATA_DIR, "geodae.json");
   if (parseDae && existsSync(daeFile)) {
     console.log("Parsing DAE...");
     try {

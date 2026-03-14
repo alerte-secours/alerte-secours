@@ -1,4 +1,4 @@
-// Ensure the embedded pre-populated geodae.db is available on-device.
+// Ensure the embedded pre-populated useful-places.db is available on-device.
 //
 // This copies the bundled asset into Expo's SQLite directory:
 //   FileSystem.documentDirectory + 'SQLite/' + DB_NAME
@@ -9,13 +9,10 @@
 // - All native requires must stay inside functions so this file can be loaded
 //   in Jest/node without crashing.
 
-const DEFAULT_DB_NAME = "geodae.db";
+const DEFAULT_DB_NAME = "useful-places.db";
 
 function resolveEmbeddedDbModule(dbName) {
   switch (dbName) {
-    case "geodae.db":
-      // eslint-disable-next-line global-require
-      return require("../assets/db/geodae.db");
     case "useful-places.db":
       // eslint-disable-next-line global-require
       return require("../assets/db/useful-places.db");

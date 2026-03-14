@@ -51,10 +51,9 @@
     "open:deeplink": "npx uri-scheme open --android",
     "screenshot:ios": "scripts/screenshot-ios.sh",
     "screenshot:android": "scripts/screenshot-android.sh",
-    "dae:download": "yarn --cwd scripts/dae download",
-    "dae:json-to-csv": "yarn --cwd scripts/dae json-to-csv",
-    "dae:csv-to-db": "yarn --cwd scripts/dae csv-to-db",
-    "dae:build": "yarn --cwd scripts/dae build"
+    "useful-places:download": "yarn --cwd scripts/useful-places download",
+    "useful-places:process": "yarn --cwd scripts/useful-places process",
+    "useful-places:build": "yarn --cwd scripts/useful-places build"
   },
   "customExpoVersioning": {
     "versionCode": 242,

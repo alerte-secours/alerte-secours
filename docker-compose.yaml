@@ -49,9 +49,9 @@ services:
         echo "MinIO is up and running, configuring..."
         mc mb -p myminio/avatar || true
         mc mb -p myminio/audio || true
-        mc mb -p myminio/geodae || true
+        mc mb -p myminio/useful-places || true
         mc anonymous set download myminio/avatar || true
-        mc anonymous set download myminio/geodae || true
+        mc anonymous set download myminio/useful-places || true
         echo "MinIO bucket setup complete."
 
   rabbitmq:

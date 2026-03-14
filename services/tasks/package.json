@@ -25,7 +25,6 @@
     "eta": "^3.2.0",
     "firebase-admin": "^13.1.0",
     "generate-swag-username": "^1.0.3",
-    "geodae-pipeline": "workspace:^",
     "geolib": "^3.3.3",
     "lodash": "^4.17.21",
     "lodash.tointeger": "^4.0.4",

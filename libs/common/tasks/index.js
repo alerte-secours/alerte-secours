@@ -6,6 +6,5 @@ module.exports = {
   GEOCODE_ALERT_WHAT3WORDS: "geocodeAlertWhat3Words",
   GEOCODE_ALERT: "geocodeAlert",
   RELATIVE_ALERT: "relativeAlert",
-  GEODAE_PUBLISH: "geodaePublish",
   USEFUL_PLACES_PUBLISH: "usefulPlacesPublish",
 }

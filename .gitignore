@@ -28,6 +28,8 @@ services/*/dist
 !.yarn/versions
 # !.yarn/cache
 
+**/.yarn/install-state.gz
+
 codebase.md
 
 /bin
