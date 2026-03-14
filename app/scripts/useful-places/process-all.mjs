@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 // Orchestrator: parse all sources and build unified useful-places.db
 
-import { existsSync, unlinkSync, renameSync } from "node:fs";
+import { existsSync, mkdirSync, unlinkSync, renameSync } from "node:fs";
 import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
 
@@ -125,6 +125,9 @@ async function main() {
     console.error("No rows to process. Ensure data sources are downloaded.");
     process.exit(1);
   }
+
+  // Ensure output directory exists (may be absent on fresh clone)
+  mkdirSync(dirname(OUTPUT_DB), { recursive: true });
 
   // Build into a temp file, then atomically rename on success
   const OUTPUT_DB_TMP = OUTPUT_DB + ".tmp";
