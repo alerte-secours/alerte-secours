@@ -40,6 +40,11 @@ import {
 } from "~/lib/a11y";
 
 import markerDae from "~/assets/img/marker-dae.png";
+import markerPolice from "~/assets/img/marker-police.png";
+import markerGendarmerie from "~/assets/img/marker-gendarmerie.png";
+import markerUrgences from "~/assets/img/marker-urgence.png";
+import markerHopital from "~/assets/img/marker-hopital.png";
+import markerAngela from "~/assets/img/marker-angela.png";
 import RoutingSteps from "~/scenes/AlertCurMap/RoutingSteps";
 import MapHeadRouting from "~/scenes/AlertCurMap/MapHeadRouting";
 
@@ -48,8 +53,6 @@ import {
   STATE_CALCULATING_LOADED,
   STATE_CALCULATING_LOADING,
 } from "~/utils/routing/constants";
-import { TYPE_COLORS } from "~/utils/places/constants";
-
 export default React.memo(function UsefulPlaceItemCarte() {
   const { colors } = useTheme();
   const { t } = useTranslation();
@@ -323,9 +326,6 @@ export default React.memo(function UsefulPlaceItemCarte() {
 
   const profileDefaultMode = profileDefaultModes[profile];
 
-  const isDae = place?.type === "dae";
-  const markerColor = TYPE_COLORS[place?.type] || "#757575";
-
   if (!place) return null;
 
   return (
@@ -438,54 +438,36 @@ export default React.memo(function UsefulPlaceItemCarte() {
               </Maplibre.ShapeSource>
             )}
 
-            {isDae && <Maplibre.Images images={{ dae: markerDae }} />}
+            <Maplibre.Images
+              images={{
+                dae: markerDae,
+                police: markerPolice,
+                gendarmerie: markerGendarmerie,
+                urgences: markerUrgences,
+                hopital: markerHopital,
+                angela: markerAngela,
+              }}
+            />
 
             {/* Place marker */}
             {placeGeoJSON && (
               <Maplibre.ShapeSource id="placeItemSource" shape={placeGeoJSON}>
-                {isDae ? (
-                  <Maplibre.SymbolLayer
-                    id="placeItemSymbol"
-                    style={{
-                      iconImage: "dae",
-                      iconSize: 0.5,
-                      iconAllowOverlap: true,
-                      textField: ["get", "nom"],
-                      textSize: 12,
-                      textOffset: [0, 1.8],
-                      textAnchor: "top",
-                      textMaxWidth: 14,
-                      textColor: colors.onSurface,
-                      textHaloColor: colors.surface,
-                      textHaloWidth: 1,
-                    }}
-                  />
-                ) : (
-                  <>
-                    <Maplibre.CircleLayer
-                      id="placeItemCircle"
-                      style={{
-                        circleRadius: 12,
-                        circleColor: markerColor,
-                        circleStrokeWidth: 3,
-                        circleStrokeColor: "#FFFFFF",
-                      }}
-                    />
-                    <Maplibre.SymbolLayer
-                      id="placeItemLabel"
-                      style={{
-                        textField: ["get", "nom"],
-                        textSize: 12,
-                        textOffset: [0, 2],
-                        textAnchor: "top",
-                        textMaxWidth: 14,
-                        textColor: colors.onSurface,
-                        textHaloColor: colors.surface,
-                        textHaloWidth: 1,
-                      }}
-                    />
-                  </>
-                )}
+                <Maplibre.SymbolLayer
+                  id="placeItemSymbol"
+                  style={{
+                    iconImage: ["get", "type"],
+                    iconSize: 0.65,
+                    iconAllowOverlap: true,
+                    textField: ["get", "nom"],
+                    textSize: 12,
+                    textOffset: [0, 1.8],
+                    textAnchor: "top",
+                    textMaxWidth: 14,
+                    textColor: colors.onSurface,
+                    textHaloColor: colors.surface,
+                    textHaloWidth: 1,
+                  }}
+                />
               </Maplibre.ShapeSource>
             )}
 

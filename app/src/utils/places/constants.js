@@ -27,10 +27,10 @@ export const TYPE_COLORS = {
 export const TYPE_ICONS = {
   dae: "heart-pulse",
   police: "shield-account",
-  gendarmerie: "shield-star",
+  gendarmerie: "shield-account",
   urgences: "hospital-box",
   hopital: "hospital-building",
-  angela: "hand-heart",
+  angela: "shield-home",
 };
 
 export const STATUS_COLORS = {

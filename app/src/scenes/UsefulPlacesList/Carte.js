@@ -24,8 +24,11 @@ import { usefulPlacesActions } from "~/stores";
 import useRadarData from "~/hooks/useRadarData";
 
 import markerDae from "~/assets/img/marker-dae.png";
-
-import { TYPE_COLORS } from "~/utils/places/constants";
+import markerPolice from "~/assets/img/marker-police.png";
+import markerGendarmerie from "~/assets/img/marker-gendarmerie.png";
+import markerUrgences from "~/assets/img/marker-urgence.png";
+import markerHopital from "~/assets/img/marker-hopital.png";
+import markerAngela from "~/assets/img/marker-angela.png";
 
 import useNearbyPlaces from "./useNearbyPlaces";
 import useTypeFilter from "./useTypeFilter";
@@ -188,7 +191,16 @@ export default React.memo(function UsefulPlacesCarte() {
             detached={false}
           />
 
-          <Maplibre.Images images={{ dae: markerDae }} />
+          <Maplibre.Images
+            images={{
+              dae: markerDae,
+              police: markerPolice,
+              gendarmerie: markerGendarmerie,
+              urgences: markerUrgences,
+              hopital: markerHopital,
+              angela: markerAngela,
+            }}
+          />
 
           {geoJSON.features.length > 0 && (
             <Maplibre.ShapeSource
@@ -215,35 +227,14 @@ export default React.memo(function UsefulPlacesCarte() {
                   textOptional: true,
                 }}
               />
-              {/* Other place types: colored circles */}
-              <Maplibre.CircleLayer
-                id="placesCircleLayer"
-                filter={["!=", ["get", "type"], "dae"]}
-                style={{
-                  circleRadius: 8,
-                  circleColor: [
-                    "match",
-                    ["get", "type"],
-                    "police",
-                    TYPE_COLORS.police,
-                    "gendarmerie",
-                    TYPE_COLORS.gendarmerie,
-                    "urgences",
-                    TYPE_COLORS.urgences,
-                    "hopital",
-                    TYPE_COLORS.hopital,
-                    "angela",
-                    TYPE_COLORS.angela,
-                    "#757575",
-                  ],
-                  circleStrokeWidth: 2,
-                  circleStrokeColor: "#FFFFFF",
-                }}
-              />
+              {/* Other place types: marker icons */}
               <Maplibre.SymbolLayer
-                id="placesLabelLayer"
+                id="placesIconLayer"
                 filter={["!=", ["get", "type"], "dae"]}
                 style={{
+                  iconImage: ["get", "type"],
+                  iconSize: 0.5,
+                  iconAllowOverlap: true,
                   textField: ["get", "nom"],
                   textSize: 11,
                   textOffset: [0, 1.5],
