@@ -11,4 +11,5 @@ module.exports = {
   ALERT_CLOSE: "alertClose",
   ALERT_KEEP_OPEN: "alertKeepOpen",
   ALERT_REOPEN: "alertReopen",
+  FALLBACK_LOCATION_SYNC: "fallbackLocationSync",
 }

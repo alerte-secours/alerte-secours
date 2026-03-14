@@ -1,0 +1,30 @@
+x-security:
+  - auth: ["user"]
+requestBody:
+  required: true
+  content:
+    application/json:
+      schema:
+        type: object
+        properties:
+          coordinates:
+            type: array
+            nullable: true
+            items:
+              type: number
+            minItems: 2
+            maxItems: 2
+            description: "[longitude, latitude] or null to clear"
+          label:
+            type: string
+            nullable: true
+            maxLength: 500
+responses:
+  200:
+    content:
+      application/json:
+        schema:
+          type: object
+          properties:
+            ok:
+              type: boolean

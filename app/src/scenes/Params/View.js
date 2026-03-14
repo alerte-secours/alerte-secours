@@ -5,6 +5,7 @@ import ParamsNotifications from "./Notifications";
 import ParamsRadius from "./Radius";
 import ParamsEmergencyCall from "./EmergencyCall";
 import ThemeSwitcher from "./ThemeSwitcher";
+import ParamsFallbackLocation from "./FallbackLocation";
 import Permissions from "./Permissions";
 import SentryOptOut from "./SentryOptOut";
 import { useRoute, useFocusEffect } from "@react-navigation/native";
@@ -38,6 +39,9 @@ export default function ParamsView({ data }) {
       <View style={styles.container}>
         <View style={styles.section}>
           <ThemeSwitcher />
+        </View>
+        <View style={styles.section}>
+          <ParamsFallbackLocation data={data} />
         </View>
         <View style={styles.section}>
           <ParamsEmergencyCall data={data} />

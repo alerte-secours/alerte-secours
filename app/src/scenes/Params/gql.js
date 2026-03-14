@@ -8,6 +8,8 @@ export const DEVICE_PARAMS_SUBSCRIPTION = gql`
       radiusAll
       notificationAlertLevel
       preferredEmergencyCall
+      fallbackLocation
+      fallbackLocationLabel
     }
   }
 `;

@@ -5,6 +5,7 @@ import { useTheme } from "~/theme";
 
 import Welcome from "./Welcome";
 import HeroMode from "./HeroMode";
+import FallbackLocation from "./FallbackLocation";
 import Success from "./Success";
 import SkipInfo from "./SkipInfo";
 
@@ -20,6 +21,9 @@ export default function PermissionWizard({ visible }) {
     case "hero":
     case "tracking":
       StepComponent = HeroMode;
+      break;
+    case "fallbackLocation":
+      StepComponent = FallbackLocation;
       break;
     case "success":
       StepComponent = Success;

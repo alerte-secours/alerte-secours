@@ -66,7 +66,7 @@ const HeroMode = () => {
   });
 
   const handleNext = useCallback(() => {
-    permissionWizardActions.setCurrentStep("success");
+    permissionWizardActions.setCurrentStep("fallbackLocation");
   }, []);
 
   const handleSkip = useCallback(() => {

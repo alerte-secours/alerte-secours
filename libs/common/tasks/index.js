@@ -7,4 +7,5 @@ module.exports = {
   GEOCODE_ALERT: "geocodeAlert",
   RELATIVE_ALERT: "relativeAlert",
   USEFUL_PLACES_PUBLISH: "usefulPlacesPublish",
+  FALLBACK_LOCATION_SYNC: "fallbackLocationSync",
 }

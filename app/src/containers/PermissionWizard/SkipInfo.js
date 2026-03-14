@@ -17,8 +17,8 @@ const SkipInfo = () => {
     setA11yFocusAfterInteractions(titleRef);
   }, []);
 
-  const handleFinish = () => {
-    permissionWizardActions.setCompleted(true);
+  const handleNext = () => {
+    permissionWizardActions.setCurrentStep("fallbackLocation");
   };
 
   return (
@@ -111,8 +111,8 @@ const SkipInfo = () => {
           </Text>
 
           <View style={styles.buttonContainer}>
-            <CustomButton mode="contained" onPress={handleFinish}>
-              C'est noté, à bientôt !
+            <CustomButton mode="contained" onPress={handleNext}>
+              Continuer
             </CustomButton>
           </View>
         </View>

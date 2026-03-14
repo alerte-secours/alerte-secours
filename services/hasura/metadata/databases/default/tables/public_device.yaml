@@ -7,6 +7,10 @@ configuration:
       custom_name: altitudeAccuracy
     created_at:
       custom_name: createdAt
+    fallback_location:
+      custom_name: fallbackLocation
+    fallback_location_label:
+      custom_name: fallbackLocationLabel
     fcm_token:
       custom_name: fcmToken
     follow_location:
@@ -30,6 +34,8 @@ configuration:
   custom_column_names:
     altitude_accuracy: altitudeAccuracy
     created_at: createdAt
+    fallback_location: fallbackLocation
+    fallback_location_label: fallbackLocationLabel
     fcm_token: fcmToken
     follow_location: followLocation
     notification_alert_level: notificationAlertLevel
@@ -72,6 +78,8 @@ select_permissions:
         - altitude
         - altitude_accuracy
         - created_at
+        - fallback_location
+        - fallback_location_label
         - heading
         - id
         - location
@@ -96,6 +104,8 @@ update_permissions:
         - accuracy
         - altitude
         - altitude_accuracy
+        - fallback_location
+        - fallback_location_label
         - fcm_token
         - heading
         - location

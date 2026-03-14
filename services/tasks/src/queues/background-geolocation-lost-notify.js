@@ -3,16 +3,20 @@ const { taskCtx } = require("@modjo/microservice-worker/ctx")
 
 const addNotification = require("~/services/add-notification")
 
-function createBackgroundGeolocationLostNotification() {
+function createBackgroundGeolocationLostNotification(hasFallback) {
   return {
     data: {
       action: "background-geolocation-lost",
     },
     notification: {
-      title: `Alerte-Secours ne reçoit plus de mises à jour de votre position`,
-      body: `Vous ne pourrez plus recevoir d'alertes de proximité. Vérifiez les paramètres.`,
+      title: hasFallback
+        ? `Votre position en temps réel n'est plus à jour`
+        : `Alerte-Secours ne reçoit plus de mises à jour de votre position`,
+      body: hasFallback
+        ? `Votre position habituelle sera utilisée comme point de repère. Ouvrez l'application pour reprendre le suivi.`
+        : `Vous ne pourrez plus recevoir d'alertes de proximité. Vérifiez les paramètres.`,
       channel: "system",
-      priority: "high",
+      priority: hasFallback ? "default" : "high",
       actionId: "open-background-geolocation-settings",
     },
   }
@@ -24,7 +28,7 @@ module.exports = async function () {
       const logger = taskCtx.require("logger")
       const sql = ctx.require("postgres")
 
-      const { deviceId } = params
+      const { deviceId, hasFallback } = params
 
       try {
         // Get the user ID associated with this device
@@ -68,7 +72,8 @@ module.exports = async function () {
         const { fcmToken } = deviceResult[0]
 
         // Create notification config
-        const notificationConfig = createBackgroundGeolocationLostNotification()
+        const notificationConfig =
+          createBackgroundGeolocationLostNotification(hasFallback)
 
         // Send notification
         logger.info(
