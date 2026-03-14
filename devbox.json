@@ -4,6 +4,7 @@
     "nodejs_20",
     "yarn",
     "git",
+    "git-lfs",
     "curl",
     "jq",
     "tilt"
