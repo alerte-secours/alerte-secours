@@ -31,7 +31,7 @@
     "lint": "eslint .",
     "test": "jest tests",
     "clear:local": "git clean -xdf",
-    "postinstall": "[ -d '.husky' ] && husky install || true && bin/direnv allow"
+    "postinstall": "[ -d '.husky' ] && husky install || true && direnv allow"
   },
   "lint-staged": {
     "*.{js,jsx}": "eslint --cache --fix"
