@@ -26,6 +26,7 @@ export default function FallbackLocationPicker({
   initialLabel,
   onSave,
   onClear,
+  useCurrentLocationByDefault = false,
 }) {
   const theme = useTheme();
   const styles = useStyles();
@@ -165,6 +166,21 @@ export default function FallbackLocationPicker({
       onClear();
     }
   }, [onClear]);
+
+  // Auto-select current location when requested and no initial coordinates
+  const autoSelectedRef = useRef(false);
+  useEffect(() => {
+    if (
+      useCurrentLocationByDefault &&
+      !initialCoordinates &&
+      !autoSelectedRef.current &&
+      coords.latitude &&
+      coords.longitude
+    ) {
+      autoSelectedRef.current = true;
+      selectLocation(coords.longitude, coords.latitude, null);
+    }
+  }, [useCurrentLocationByDefault, initialCoordinates, coords, selectLocation]);
 
   const initialCameraCenter =
     selectedCoords ||

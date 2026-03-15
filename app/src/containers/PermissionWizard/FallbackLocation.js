@@ -96,6 +96,7 @@ const FallbackLocation = () => {
             initialCoordinates={null}
             initialLabel={null}
             onSave={handleSave}
+            useCurrentLocationByDefault
           />
 
           <View style={styles.buttonContainer}>
