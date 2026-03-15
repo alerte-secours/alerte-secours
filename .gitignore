@@ -35,5 +35,5 @@ codebase.md
 /bin
 
 .claude/*.local.json
-.falcon/**
 .devcontainers/**
+.falcon/

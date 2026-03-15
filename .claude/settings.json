@@ -1,0 +1,16 @@
+{
+  "hooks": {
+    "Stop": [
+      {
+        "hooks": [
+          {
+            "async": true,
+            "command": "falcon sync --agents none",
+            "timeout": 300,
+            "type": "command"
+          }
+        ]
+      }
+    ]
+  }
+}
