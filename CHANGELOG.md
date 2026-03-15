@@ -2,6 +2,23 @@
 
 All notable changes to this project will be documented in this file. See [commit-and-tag-version](https://github.com/absolute-version/commit-and-tag-version) for commit guidelines.
 
+## [1.17.0](https://codeberg.org/alerte-secours/alerte-secours/compare/v1.16.12...v1.17.0) (2026-03-15)
+
+
+### Features
+
+* **fallback-geopoint:** first draft ([b99aef1](https://codeberg.org/alerte-secours/alerte-secours/commit/b99aef1e36522379cf33ec8293eb0dec84c4fb8a))
+
+
+### Bug Fixes
+
+* **fallback-location:** address picker ([3700822](https://codeberg.org/alerte-secours/alerte-secours/commit/37008229f33d37f810276f6852e311b50657f72e))
+* **fallback-location:** address picker direct geopf call from app ([877bdb0](https://codeberg.org/alerte-secours/alerte-secours/commit/877bdb0466d607a0130fd5b86c84de10a4de3ae0))
+* **fallback-location:** address picker ui ([5433963](https://codeberg.org/alerte-secours/alerte-secours/commit/54339633dad5373500b9193c00343e3c47649d33))
+* **fallback-location:** replace address picker by data.geopf.fr ([e83c44a](https://codeberg.org/alerte-secours/alerte-secours/commit/e83c44ae8f830c2618d8dd0a843824c29cdbb18b))
+* **fallback-location:** wizard default to current location ([9ff18d0](https://codeberg.org/alerte-secours/alerte-secours/commit/9ff18d0c80a4a1f62791eeb79c318a6d69fba91d))
+* restore nominatim for georeverse with optional wrapper ([8e6bf97](https://codeberg.org/alerte-secours/alerte-secours/commit/8e6bf97f7f4f2c103a19dcc77289aaf6be6115e2))
+
 ## [1.16.12](https://codeberg.org/alerte-secours/alerte-secours/compare/v1.16.11...v1.16.12) (2026-03-14)
 
 
