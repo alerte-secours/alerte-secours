@@ -35,7 +35,11 @@ export default function ParamsView({ data }) {
   );
 
   return (
-    <ScrollView ref={scrollRef} style={styles.scrollView}>
+    <ScrollView
+      ref={scrollRef}
+      style={styles.scrollView}
+      keyboardShouldPersistTaps="handled"
+    >
       <View style={styles.container}>
         <View style={styles.section}>
           <ThemeSwitcher />

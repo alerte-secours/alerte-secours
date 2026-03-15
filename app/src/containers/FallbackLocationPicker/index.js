@@ -6,7 +6,6 @@ import {
   ActivityIndicator,
 } from "react-native";
 import Maplibre from "@maplibre/maplibre-react-native";
-import { useLazyQuery } from "@apollo/client";
 import { Ionicons } from "@expo/vector-icons";
 
 import { createStyles, useTheme } from "~/theme";
@@ -15,10 +14,42 @@ import CustomButton from "~/components/CustomButton";
 import MapView from "~/containers/Map/MapView";
 import useLocation from "~/hooks/useLocation";
 
-import { QUERY_NOMINATIM_SEARCH, QUERY_NOMINATIM_REVERSE } from "./gql";
-
 const DEBOUNCE_MS = 500;
 const DEFAULT_ZOOM = 14;
+const GEOPLATEFORME_URL = "https://data.geopf.fr/geocodage";
+
+async function geoplatformeSearch(query) {
+  const params = `q=${encodeURIComponent(
+    query,
+  )}&autocomplete=1&index=address&limit=5`;
+  const res = await fetch(`${GEOPLATEFORME_URL}/search?${params}`, {
+    headers: { "accept-language": "fr" },
+  });
+  if (!res.ok) return [];
+  const data = await res.json();
+  const features = data?.features || [];
+  return features.map((feature) => ({
+    latitude: feature.geometry.coordinates[1],
+    longitude: feature.geometry.coordinates[0],
+    displayName: feature.properties.label || "",
+  }));
+}
+
+async function geoplatformeReverse(lat, lon) {
+  const params = `lon=${encodeURIComponent(lon)}&lat=${encodeURIComponent(
+    lat,
+  )}&index=address&limit=1`;
+  const res = await fetch(`${GEOPLATEFORME_URL}/reverse?${params}`, {
+    headers: { "accept-language": "fr" },
+  });
+  if (!res.ok) return null;
+  const data = await res.json();
+  const features = data?.features || [];
+  if (features.length > 0) {
+    return features[0].properties.label || null;
+  }
+  return null;
+}
 
 export default function FallbackLocationPicker({
   initialCoordinates,
@@ -48,62 +79,48 @@ export default function FallbackLocationPicker({
   const [searchText, setSearchText] = useState("");
   const [searchResults, setSearchResults] = useState([]);
   const [showResults, setShowResults] = useState(false);
+  const [searchLoading, setSearchLoading] = useState(false);
 
-  const [searchNominatim, { loading: searchLoading }] = useLazyQuery(
-    QUERY_NOMINATIM_SEARCH,
-    {
-      fetchPolicy: "network-only",
-      onCompleted: (data) => {
-        const results = data?.getOneInfoNominatimSearch?.results || [];
+  const reverseGeocode = useCallback(async (lat, lon) => {
+    const requestId = ++reverseGeocodeIdRef.current;
+    try {
+      const address = await geoplatformeReverse(lat, lon);
+      if (requestId !== reverseGeocodeIdRef.current) return; // stale response
+      if (address) {
+        setAddressLabel(address);
+        if (onSaveRef.current && selectedCoordsRef.current) {
+          onSaveRef.current(selectedCoordsRef.current, address);
+        }
+      }
+    } catch {
+      // reverse geocode failed silently — user can still save by coordinates
+    }
+  }, []);
+
+  const handleSearchTextChange = useCallback((text) => {
+    setSearchText(text);
+    if (debounceRef.current) {
+      clearTimeout(debounceRef.current);
+    }
+    if (text.trim().length < 3) {
+      setSearchResults([]);
+      setShowResults(false);
+      return;
+    }
+    debounceRef.current = setTimeout(async () => {
+      setSearchLoading(true);
+      try {
+        const results = await geoplatformeSearch(text.trim());
         setSearchResults(results);
         setShowResults(results.length > 0);
-      },
-    },
-  );
-
-  const [reverseGeocodeQuery] = useLazyQuery(QUERY_NOMINATIM_REVERSE, {
-    fetchPolicy: "network-only",
-  });
-
-  const reverseGeocode = useCallback(
-    async (lat, lon) => {
-      const requestId = ++reverseGeocodeIdRef.current;
-      try {
-        const { data } = await reverseGeocodeQuery({
-          variables: { latitude: lat, longitude: lon },
-        });
-        if (requestId !== reverseGeocodeIdRef.current) return; // stale response
-        const address = data?.getOneInfoNominatim?.address;
-        if (address) {
-          setAddressLabel(address);
-          if (onSaveRef.current && selectedCoordsRef.current) {
-            onSaveRef.current(selectedCoordsRef.current, address);
-          }
-        }
       } catch {
-        // reverse geocode failed silently — user can still save by coordinates
-      }
-    },
-    [reverseGeocodeQuery],
-  );
-
-  const handleSearchTextChange = useCallback(
-    (text) => {
-      setSearchText(text);
-      if (debounceRef.current) {
-        clearTimeout(debounceRef.current);
-      }
-      if (text.trim().length < 3) {
         setSearchResults([]);
         setShowResults(false);
-        return;
+      } finally {
+        setSearchLoading(false);
       }
-      debounceRef.current = setTimeout(() => {
-        searchNominatim({ variables: { q: text.trim() } });
-      }, DEBOUNCE_MS);
-    },
-    [searchNominatim],
-  );
+    }, DEBOUNCE_MS);
+  }, []);
 
   useEffect(() => {
     return () => {
@@ -131,11 +148,13 @@ export default function FallbackLocationPicker({
       selectedCoordsRef.current = newCoords;
       if (label) {
         setAddressLabel(label);
-        if (onSaveRef.current) {
-          onSaveRef.current(newCoords, label);
-        }
-      } else {
-        // Reverse geocode will call onSave when it completes (stale responses are discarded)
+      }
+      // Always notify parent immediately so save button is enabled
+      if (onSaveRef.current) {
+        onSaveRef.current(newCoords, label || "");
+      }
+      if (!label) {
+        // Reverse geocode will call onSave again with the resolved address
         reverseGeocode(lat, lon);
       }
       moveCameraTo(lon, lat);
