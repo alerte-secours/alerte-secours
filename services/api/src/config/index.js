@@ -73,6 +73,8 @@ module.exports = async function createConfig({ env = process.env } = {}) {
         ringoverCallEventWebhookKey,
       },
       nominatimUrl: env.NOMINATIM_URL,
+      geoplatformeUrl:
+        env.GEOPLATEFORME_URL || "https://data.geopf.fr/geocodage",
       what3wordsApiKey: env.WHAT3WORDS_API_KEY,
     },
   }

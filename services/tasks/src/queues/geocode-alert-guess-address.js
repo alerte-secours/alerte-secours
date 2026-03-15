@@ -1,7 +1,7 @@
 const { ctx } = require("@modjo/core")
 const { taskCtx } = require("@modjo/microservice-worker/ctx")
 
-const nominatimReverse = require("common/external-api/nominatim-reverse")
+const geoplatformeReverse = require("common/external-api/geoplateforme-reverse")
 
 module.exports = async function () {
   return Object.assign(
@@ -26,12 +26,12 @@ module.exports = async function () {
         return
       }
 
-      const nominatimResult = await nominatimReverse(coordinates)
-      if (!nominatimResult) {
-        logger.error({ params }, "Failed to get nominatim result")
+      const geoplatformeResult = await geoplatformeReverse(coordinates)
+      if (!geoplatformeResult) {
+        logger.error({ params }, "Failed to get geoplateforme result")
         return
       }
-      const { display_name: address } = nominatimResult
+      const { display_name: address } = geoplatformeResult
 
       if (!address) {
         return
