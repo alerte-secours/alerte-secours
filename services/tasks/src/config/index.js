@@ -26,6 +26,7 @@ module.exports = async function createConfig({ env = process.env } = {}) {
       nominatimUrl: env.NOMINATIM_URL,
       geoplatformeUrl:
         env.GEOPLATEFORME_URL || "https://data.geopf.fr/geocodage",
+      geocodeReverseProvider: env.GEOCODE_REVERSE_PROVIDER || "nominatim", // "nominatim" or "geoplateforme"
       what3wordsApiKey: env.WHAT3WORDS_API_KEY,
       googleServiceAccountKey,
       apiUrl,

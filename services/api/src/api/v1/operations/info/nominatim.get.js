@@ -1,17 +1,17 @@
 // const { reqCtx } = require("@modjo/express/ctx")
 
-const geoplatformeReverse = require("common/external-api/geoplateforme-reverse")
+const geocodeReverse = require("common/external-api/geocode-reverse")
 
 module.exports = function ({ services: { middlewareRateLimiterIpUser } }) {
   async function getOneInfoNominatim(req) {
     const { lat, lon } = req.query
     const coordinates = [lon, lat]
 
-    const geoplatformeResult = await geoplatformeReverse(coordinates)
-    if (!geoplatformeResult) {
+    const result = await geocodeReverse(coordinates)
+    if (!result) {
       return
     }
-    const { display_name: displayName } = geoplatformeResult
+    const { display_name: displayName } = result
     const address = displayName || ""
     return { address }
   }

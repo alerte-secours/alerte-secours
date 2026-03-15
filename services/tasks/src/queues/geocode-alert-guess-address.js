@@ -1,7 +1,7 @@
 const { ctx } = require("@modjo/core")
 const { taskCtx } = require("@modjo/microservice-worker/ctx")
 
-const geoplatformeReverse = require("common/external-api/geoplateforme-reverse")
+const geocodeReverse = require("common/external-api/geocode-reverse")
 
 module.exports = async function () {
   return Object.assign(
@@ -26,12 +26,12 @@ module.exports = async function () {
         return
       }
 
-      const geoplatformeResult = await geoplatformeReverse(coordinates)
-      if (!geoplatformeResult) {
-        logger.error({ params }, "Failed to get geoplateforme result")
+      const result = await geocodeReverse(coordinates)
+      if (!result) {
+        logger.error({ params }, "Failed to get geocode reverse result")
         return
       }
-      const { display_name: address } = geoplatformeResult
+      const { display_name: address } = result
 
       if (!address) {
         return
