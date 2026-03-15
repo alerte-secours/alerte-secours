@@ -2,10 +2,12 @@ import React, { useCallback, useState } from "react";
 import { View } from "react-native";
 import { Title } from "react-native-paper";
 import { Ionicons } from "@expo/vector-icons";
+import Maplibre from "@maplibre/maplibre-react-native";
 
 import { createStyles, useTheme } from "~/theme";
 import Text from "~/components/Text";
 import CustomButton from "~/components/CustomButton";
+import MapView from "~/containers/Map/MapView";
 import FallbackLocationPicker from "~/containers/FallbackLocationPicker";
 import {
   saveFallbackLocation,
@@ -72,7 +74,7 @@ export default function ParamsFallbackLocation({ data }) {
   }, [toast]);
 
   return (
-    <>
+    <View style={styles.wrapper}>
       <Title style={styles.title}>Ma position habituelle</Title>
       <Text style={styles.description}>
         Définissez l'endroit où vous vous trouvez habituellement. Cette position
@@ -82,6 +84,38 @@ export default function ParamsFallbackLocation({ data }) {
 
       {!editing && currentCoords ? (
         <View style={styles.currentLocationContainer}>
+          <View style={styles.mapPreviewContainer}>
+            <MapView compassViewPosition={1}>
+              <Maplibre.Camera
+                defaultSettings={{
+                  centerCoordinate: currentCoords,
+                  zoomLevel: 14,
+                }}
+              />
+              <Maplibre.ShapeSource
+                id="fallback_preview_source"
+                shape={{
+                  type: "Feature",
+                  geometry: {
+                    type: "Point",
+                    coordinates: currentCoords,
+                  },
+                  properties: {},
+                }}
+              >
+                <Maplibre.CircleLayer
+                  id="fallback_preview_circle"
+                  style={{
+                    circleRadius: 12,
+                    circleColor: theme.colors.primary,
+                    circleOpacity: 0.9,
+                    circleStrokeWidth: 3,
+                    circleStrokeColor: "#fff",
+                  }}
+                />
+              </Maplibre.ShapeSource>
+            </MapView>
+          </View>
           <View style={styles.currentLocationInfo}>
             <Ionicons
               name="location"
@@ -154,11 +188,14 @@ export default function ParamsFallbackLocation({ data }) {
           </CustomButton>
         </View>
       )}
-    </>
+    </View>
   );
 }
 
 const useStyles = createStyles(({ theme: { colors } }) => ({
+  wrapper: {
+    width: "100%",
+  },
   title: {
     fontSize: 20,
     fontWeight: "bold",
@@ -174,6 +211,12 @@ const useStyles = createStyles(({ theme: { colors } }) => ({
     backgroundColor: colors.surfaceVariant,
     borderRadius: 8,
     padding: 15,
+  },
+  mapPreviewContainer: {
+    height: 200,
+    borderRadius: 8,
+    overflow: "hidden",
+    marginBottom: 10,
   },
   currentLocationInfo: {
     flexDirection: "row",

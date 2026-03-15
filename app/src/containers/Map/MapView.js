@@ -39,7 +39,7 @@ export default function MapView({
       compassViewMargins={compassViewMargin}
       // surfaceView
       contentInset={contentInset}
-      ref={(ref) => (mapRef.current = ref)}
+      ref={mapRef ? (ref) => (mapRef.current = ref) : undefined}
       regionDidChangeDebounceTime={300}
       regionWillChangeDebounceTime={300}
       followHeading={compassViewPosition}
