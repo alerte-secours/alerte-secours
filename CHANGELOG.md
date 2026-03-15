@@ -2,6 +2,8 @@
 
 All notable changes to this project will be documented in this file. See [commit-and-tag-version](https://github.com/absolute-version/commit-and-tag-version) for commit guidelines.
 
+## [1.17.1](https://codeberg.org/alerte-secours/alerte-secours/compare/v1.17.0...v1.17.1) (2026-03-15)
+
 ## [1.17.0](https://codeberg.org/alerte-secours/alerte-secours/compare/v1.16.12...v1.17.0) (2026-03-15)
 
 
