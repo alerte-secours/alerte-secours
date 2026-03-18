@@ -85,4 +85,7 @@ export const STORAGE_KEYS = {
   USEFUL_PLACES_DB_UPDATED_AT: registerAsyncStorageKey(
     "@useful_places_db_updated_at",
   ),
+  LAST_STORE_VERSION_CHECK_TIME: registerAsyncStorageKey(
+    "@last_store_version_check_time",
+  ),
 };

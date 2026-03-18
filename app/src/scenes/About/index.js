@@ -18,7 +18,11 @@ import { useTheme, createStyles } from "~/theme";
 
 import { paramsActions, useParamsState } from "~/stores";
 
-import { useUpdatesCheck } from "~/updates";
+import {
+  useUpdatesCheck,
+  checkStoreVersionManual,
+  openStorePage,
+} from "~/updates";
 
 const logo = require("~/assets/img/logo192.png");
 
@@ -71,18 +75,36 @@ export default function About() {
 
   const { currentlyRunning } = Updates.useUpdates();
 
-  const { updateAvailable } = useUpdatesCheck();
+  const { updateAvailable, storeUpdateAvailable, storeVersion } =
+    useUpdatesCheck();
 
   const runTypeMessage = currentlyRunning.isEmbeddedLaunch
     ? "fonctionne à partir d'un code intégré"
     : "fonctionne à partir d'une mise à jour";
 
   const [checking, setChecking] = useState(false);
+  const [manualStoreUpdate, setManualStoreUpdate] = useState(null);
+
   const checkForUpdates = async () => {
     setChecking(true);
+    setManualStoreUpdate(null);
+
+    // Check store version first (higher priority)
+    const storeResult = await checkStoreVersionManual();
+    if (storeResult.storeUpdateAvailable) {
+      setManualStoreUpdate(storeResult);
+      setChecking(false);
+      return;
+    }
+
+    // Then check OTA
     await Updates.checkForUpdateAsync();
     setChecking(false);
   };
+
+  const hasStoreUpdate =
+    manualStoreUpdate?.storeUpdateAvailable || storeUpdateAvailable;
+  const displayStoreVersion = manualStoreUpdate?.storeVersion || storeVersion;
 
   return (
     <ScrollView
@@ -263,25 +285,30 @@ export default function About() {
             )}
             onPress={handlePressVersion}
           >
-            version {version} {updateAvailable || checking ? "" : "(à jour)"}
+            version {version}{" "}
+            {hasStoreUpdate
+              ? `(v${displayStoreVersion} disponible)`
+              : updateAvailable || checking
+              ? ""
+              : "(à jour)"}
           </Button>
-          {!updateAvailable && (
+          {hasStoreUpdate && (
             <Button
               mode="contained"
               icon={() => (
                 <MaterialIcons
-                  name="update"
+                  name="store"
                   size={22}
                   color={colors.onPrimary}
                 />
               )}
               style={{ backgroundColor: colors.primary }}
-              onPress={checkForUpdates}
+              onPress={() => openStorePage()}
             >
-              Vérifier les mises à jour
+              Mettre à jour (v{displayStoreVersion})
             </Button>
           )}
-          {updateAvailable && (
+          {!hasStoreUpdate && updateAvailable && (
             <Button
               mode="contained"
               icon={() => (
@@ -295,6 +322,22 @@ export default function About() {
               onPress={() => Updates.fetchUpdateAsync()}
             >
               Installer la mise à jour
+            </Button>
+          )}
+          {!hasStoreUpdate && !updateAvailable && (
+            <Button
+              mode="contained"
+              icon={() => (
+                <MaterialIcons
+                  name="update"
+                  size={22}
+                  color={colors.onPrimary}
+                />
+              )}
+              style={{ backgroundColor: colors.primary }}
+              onPress={checkForUpdates}
+            >
+              Vérifier les mises à jour
             </Button>
           )}
           <StatusBar style="auto" />

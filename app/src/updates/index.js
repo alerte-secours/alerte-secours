@@ -8,6 +8,10 @@ import * as Sentry from "@sentry/react-native";
 
 import env from "~/env";
 import { treeActions } from "~/stores";
+import { checkStoreVersion, openStorePage } from "./storeVersionCheck";
+
+const version = require("../../package.json").version;
+
 const UPDATE_CHECK_INTERVAL = 24 * 60 * 60 * 1000;
 
 const applyUpdate = async () => {
@@ -47,12 +51,6 @@ const checkForUpdate = async () => {
       const remoteCreatedAt = new Date(remoteUpdate.createdAt).getTime();
       // const currentCreatedAt = Updates.manifest.commitTime; // buggy commitTime
       const currentCreatedAt = env.BUILD_TIME;
-      // console.log(
-      //   "DEBUG_AS remoteUpdate",
-      //   `${remoteCreatedAt} > ${currentCreatedAt}`,
-      //   remoteCreatedAt > currentCreatedAt,
-      // );
-      // console.log("DEBUG_AS Updates.manifest", Updates.manifest);
 
       if (remoteCreatedAt > currentCreatedAt) {
         return true;
@@ -65,19 +63,68 @@ const checkForUpdate = async () => {
   }
 };
 
+const checkForStoreUpdate = async () => {
+  if (env.LOCAL_DEV) {
+    return { storeUpdateAvailable: false, storeVersion: null };
+  }
+  try {
+    const lastCheckString = await AsyncStorage.getItem(
+      STORAGE_KEYS.LAST_STORE_VERSION_CHECK_TIME,
+    );
+    const lastCheck = lastCheckString ? new Date(lastCheckString) : null;
+    const nowDate = new Date();
+
+    if (!lastCheck || nowDate - lastCheck > UPDATE_CHECK_INTERVAL) {
+      await AsyncStorage.setItem(
+        STORAGE_KEYS.LAST_STORE_VERSION_CHECK_TIME,
+        nowDate.toISOString(),
+      );
+      return await checkStoreVersion(version);
+    }
+    return { storeUpdateAvailable: false, storeVersion: null };
+  } catch (_error) {
+    return { storeUpdateAvailable: false, storeVersion: null };
+  }
+};
+
+export async function checkStoreVersionManual() {
+  return await checkStoreVersion(version);
+}
+
+export { openStorePage } from "./storeVersionCheck";
+
 export function useUpdatesCheck() {
   const [updateAvailable, setUpdateAvailable] = useState(false);
+  const [storeUpdateAvailable, setStoreUpdateAvailable] = useState(false);
+  const [storeVersion, setStoreVersion] = useState(null);
   const now = useNow();
 
   useEffect(() => {
     const updateAvailability = async () => {
+      // Check store version first (higher priority)
+      const storeResult = await checkForStoreUpdate();
+      if (storeResult.storeUpdateAvailable) {
+        setStoreUpdateAvailable(true);
+        setStoreVersion(storeResult.storeVersion);
+        return;
+      }
+      setStoreUpdateAvailable(false);
+      setStoreVersion(null);
+
+      // Then check OTA
       const isAvailable = await checkForUpdate();
       setUpdateAvailable(isAvailable);
     };
     updateAvailability();
   }, [now]); // trigger every minute
 
-  return { updateAvailable, setUpdateAvailable };
+  return {
+    updateAvailable,
+    setUpdateAvailable,
+    storeUpdateAvailable,
+    setStoreUpdateAvailable,
+    storeVersion,
+  };
 }
 
 export function useUpdates() {
@@ -93,9 +140,28 @@ export function useUpdates() {
     }
   }, [isUpdatePending]);
 
-  const { updateAvailable, setUpdateAvailable } = useUpdatesCheck();
+  const {
+    updateAvailable,
+    setUpdateAvailable,
+    storeUpdateAvailable,
+    setStoreUpdateAvailable,
+  } = useUpdatesCheck();
 
-  const showAlert = useCallback(() => {
+  const showStoreAlert = useCallback(() => {
+    Alert.alert(
+      "Nouvelle version disponible",
+      "Une nouvelle version de Alerte Secours est disponible sur le store. Veuillez mettre à jour l'application.",
+      [
+        {
+          text: "Plus tard",
+          onPress: () => setStoreUpdateAvailable(false),
+        },
+        { text: "Mettre à jour", onPress: () => openStorePage() },
+      ],
+    );
+  }, [setStoreUpdateAvailable]);
+
+  const showOtaAlert = useCallback(() => {
     Alert.alert(
       "Mise à jour disponible",
       "Une nouvelle mise à jour est disponible. Souhaitez vous l'appliquer ?",
@@ -110,14 +176,11 @@ export function useUpdates() {
   }, [setUpdateAvailable]);
 
   useEffect(() => {
-    if (updateAvailable) {
-      showAlert();
+    // Store update takes priority over OTA
+    if (storeUpdateAvailable) {
+      showStoreAlert();
+    } else if (updateAvailable) {
+      showOtaAlert();
     }
-  }, [showAlert, updateAvailable]);
+  }, [showStoreAlert, showOtaAlert, storeUpdateAvailable, updateAvailable]);
 }
-
-// export async function installUpdateIfAvailable() {
-//   if (await checkForUpdate()) {
-//     await applyUpdate();
-//   }
-// }
