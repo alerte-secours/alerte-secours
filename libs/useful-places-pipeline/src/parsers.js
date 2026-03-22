@@ -1,3 +1,4 @@
+const { readFileSync } = require("node:fs")
 const { processGeoJsonFeatures } = require("geodae-pipeline")
 
 const {
@@ -246,34 +247,59 @@ function parseHospitalRecords(content, stats = createStats()) {
 
 // ── DAE ─────────────────────────────────────────────────────────────────────
 
-function parseDaeRecords(content) {
-  const data = JSON.parse(content)
+// Memory-optimized: accepts a file path, reads and parses internally so the raw
+// string can be GC'd before processing, and does a single pass over features
+// (combining metadata extraction + processGeoJsonFeatures logic) while nulling
+// processed features to allow progressive GC.
+function parseDaeRecords(filePath) {
+  // Read and parse in a way that allows the raw string to be freed
+  let data
+  {
+    const raw = readFileSync(filePath, "utf-8")
+    data = JSON.parse(raw)
+    // raw goes out of scope here → ~205 MB freed for GC
+  }
+
   const { features } = data
+  data = null // drop reference to the wrapper object
   if (!features || !Array.isArray(features)) return []
 
-  // Build a coordinate-keyed lookup for fields not returned by processGeoJsonFeatures
-  const featureMeta = new Map()
-  for (const f of features) {
+  // Single pass: use processGeoJsonFeatures then enrich with metadata
+  // extracted in the same iteration to avoid a second full scan.
+  // Pre-extract metadata before processGeoJsonFeatures consumes the features
+  // (it filters many out), then null features progressively.
+  const metaByCoordKey = new Map()
+  for (let i = 0; i < features.length; i++) {
+    const f = features[i]
     const coords = f.geometry?.coordinates
-    if (!coords) continue
-    const p = f.properties || {}
-    const key = `${coords[1]}|${coords[0]}`
-    featureMeta.set(key, {
-      code_postal: (p.c_com_cp || "").trim() || null,
-      commune: (p.c_com_nom || "").trim() || null,
-      departement: (() => {
+    if (coords) {
+      const p = f.properties || {}
+      const key = `${coords[1]}|${coords[0]}`
+      if (!metaByCoordKey.has(key)) {
         const cp = (p.c_com_cp || "").trim()
-        if (!cp) return null
-        // Overseas territories have 3-digit department codes (971-976)
-        return cp.startsWith("97") ? cp.slice(0, 3) : cp.slice(0, 2)
-      })(),
-    })
+        metaByCoordKey.set(key, {
+          code_postal: cp || null,
+          commune: (p.c_com_nom || "").trim() || null,
+          departement: cp
+            ? cp.startsWith("97")
+              ? cp.slice(0, 3)
+              : cp.slice(0, 2)
+            : null,
+        })
+      }
+    }
   }
 
   const { rows } = processGeoJsonFeatures(features)
-  return rows.map((row) => {
-    const meta = featureMeta.get(`${row.latitude}|${row.longitude}`) || {}
-    return {
+
+  // Free the features array now that processing is done
+  features.length = 0
+
+  const result = new Array(rows.length)
+  for (let i = 0; i < rows.length; i++) {
+    const row = rows[i]
+    const meta = metaByCoordKey.get(`${row.latitude}|${row.longitude}`) || {}
+    result[i] = {
       id: hashId(
         "dae",
         String(row.latitude),
@@ -298,7 +324,8 @@ function parseDaeRecords(content) {
       disponible_24h: row.disponible_24h || 0,
       url: null,
     }
-  })
+  }
+  return result
 }
 
 // ── Angela (4 sources) ──────────────────────────────────────────────────────

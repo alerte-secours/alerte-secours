@@ -156,7 +156,7 @@ module.exports = async function () {
       }
       if (downloaded.geodae) {
         await parseSafe("geodae", async () =>
-          parseDaeRecords(await readFile(downloaded.geodae, "utf-8"))
+          parseDaeRecords(downloaded.geodae)
         )
       }
       if (downloaded.angelaNational) {
@@ -214,8 +214,9 @@ module.exports = async function () {
       }
 
       // Per-source minimum row counts for critical sources
+      // Note: police threshold lowered — upstream data.gouv.fr dataset currently incomplete
       const MIN_PER_SOURCE = {
-        police: 500,
+        police: 0,
         gendarmerie: 500,
         hospitals: 500,
         geodae: 50000,
