@@ -52,6 +52,7 @@ import {
   STATE_CALCULATING_INIT,
   STATE_CALCULATING_LOADED,
   STATE_CALCULATING_LOADING,
+  STATE_CALCULATING_RELOADING,
 } from "~/utils/routing/constants";
 export default React.memo(function UsefulPlaceItemCarte() {
   const { colors } = useTheme();
@@ -98,6 +99,7 @@ export default React.memo(function UsefulPlaceItemCarte() {
   const abortControllerRef = useRef(null);
   const routeTimerRef = useRef(null);
   const lastRouteCoordsRef = useRef(null);
+  const lastRouteProfileRef = useRef(null);
 
   // Minimum distance (meters) the user must move before re-fetching the route
   const ROUTE_REFETCH_THRESHOLD_M = 50;
@@ -140,18 +142,24 @@ export default React.memo(function UsefulPlaceItemCarte() {
       return;
     }
 
-    // On explicit retry, bypass the distance threshold
+    // On explicit retry or profile change, bypass the distance threshold
     const isRetry = routeRetry !== prevRouteRetryRef.current;
     prevRouteRetryRef.current = routeRetry;
+    const isProfileChange = profile !== lastRouteProfileRef.current;
 
-    // Skip re-fetch if user hasn't moved significantly (unless explicit retry)
-    if (!isRetry && lastRouteCoordsRef.current) {
+    // Skip re-fetch if user hasn't moved significantly (unless explicit retry or profile change)
+    if (!isRetry && !isProfileChange && lastRouteCoordsRef.current) {
       const [prevLat, prevLon] = lastRouteCoordsRef.current;
       const dlat = (userLat - prevLat) * 111_320;
       const dlon =
         (userLon - prevLon) * 111_320 * Math.cos((userLat * Math.PI) / 180);
       const moved = Math.sqrt(dlat * dlat + dlon * dlon);
       if (moved < ROUTE_REFETCH_THRESHOLD_M) return;
+    }
+
+    // Show loader immediately on profile change (before debounce)
+    if (isProfileChange) {
+      setCalculating(STATE_CALCULATING_RELOADING);
     }
 
     // Debounce: wait 2s after last coordinate change
@@ -189,8 +197,9 @@ export default React.memo(function UsefulPlaceItemCarte() {
             setRouteCoords(decoded);
             setRoute(fetchedRoute);
             setCalculating(STATE_CALCULATING_LOADED);
-            // Only update last coords after a successful fetch
+            // Only update last coords/profile after a successful fetch
             lastRouteCoordsRef.current = [userLat, userLon];
+            lastRouteProfileRef.current = profile;
           }
         } catch (err) {
           if (!cancelled && err.name !== "AbortError") {

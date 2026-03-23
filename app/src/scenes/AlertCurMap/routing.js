@@ -199,7 +199,7 @@ export const modeIcons = {
 export const profileDefaultModes = {
   car: "driving",
   foot: "walking",
-  bike: "cycling",
+  bicycle: "cycling",
 };
 
 export const osmProfileUrl = {

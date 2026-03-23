@@ -53,7 +53,7 @@ import useOnRegionDidChange from "./useOnRegionDidChange";
 import useOnPress from "./useOnPress";
 import getDestinationName from "./getDestinationName.js";
 
-import { osmProfileUrl } from "./routing";
+import { osmProfileUrl, profileDefaultModes } from "./routing";
 
 import RoutingSteps from "./RoutingSteps";
 
@@ -166,6 +166,7 @@ function AlertCurMap() {
 
   const defaultProfile = "car";
   const [profile, setProfile] = useState(defaultProfile);
+  const profileDefaultMode = profileDefaultModes[profile];
 
   const fetchRoute = useCallback(
     async ({ origin, target, signal }) => {
@@ -241,11 +242,20 @@ function AlertCurMap() {
     ) {
       return; // Skip if values haven't changed
     }
+    const isProfileChange =
+      prevValuesRef.current?.profile != null &&
+      prevValuesRef.current?.profile !== profile;
+
     prevValuesRef.current = {
       userCoordArr,
       profile,
       alertCoords,
     };
+
+    // Show loader immediately on profile change (before debounce)
+    if (isProfileChange) {
+      setCalculating(STATE_CALCULATING_RELOADING);
+    }
 
     // Debounce the route calculation
     debounceCalculation(() => {
@@ -640,6 +650,7 @@ function AlertCurMap() {
           <MapHeadRouting
             instructions={instructions}
             distance={distance}
+            profileDefaultMode={profileDefaultMode}
             openStepper={openStepper}
             openStepperTriggerRef={mapHeadOpenRef}
             seeAllStepsTriggerRef={mapHeadSeeAllRef}

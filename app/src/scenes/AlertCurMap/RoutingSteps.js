@@ -74,7 +74,10 @@ export default function RoutingSteps({
             flexDirection: "row",
           }}
         >
-          <ToggleButton.Group onValueChange={setProfile} value={profile}>
+          <ToggleButton.Group
+            onValueChange={(value) => value && setProfile(value)}
+            value={profile}
+          >
             <ToggleButton
               value="car"
               accessibilityRole="radio"

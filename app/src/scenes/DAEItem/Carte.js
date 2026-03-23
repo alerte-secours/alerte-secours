@@ -45,6 +45,7 @@ import {
   STATE_CALCULATING_INIT,
   STATE_CALCULATING_LOADED,
   STATE_CALCULATING_LOADING,
+  STATE_CALCULATING_RELOADING,
 } from "~/scenes/AlertCurMap/constants";
 
 export default React.memo(function DAEItemCarte() {
@@ -57,12 +58,14 @@ export default React.memo(function DAEItemCarte() {
     coords && coords.latitude !== null && coords.longitude !== null;
   const hasDefibCoords = defib && defib.latitude && defib.longitude;
 
+  const userLat = coords?.latitude ?? null;
+  const userLon = coords?.longitude ?? null;
+  const defibLat = defib?.latitude ?? null;
+  const defibLon = defib?.longitude ?? null;
+
   const userCoords = useMemo(
-    () =>
-      hasUserCoords
-        ? { latitude: coords.latitude, longitude: coords.longitude }
-        : null,
-    [hasUserCoords, coords],
+    () => (hasUserCoords ? { latitude: userLat, longitude: userLon } : null),
+    [hasUserCoords, userLat, userLon],
   );
 
   const {
@@ -86,6 +89,12 @@ export default React.memo(function DAEItemCarte() {
   });
 
   const abortControllerRef = useRef(null);
+  const routeTimerRef = useRef(null);
+  const lastRouteCoordsRef = useRef(null);
+  const lastRouteProfileRef = useRef(null);
+
+  // Minimum distance (meters) the user must move before re-fetching the route
+  const ROUTE_REFETCH_THRESHOLD_M = 50;
 
   const onRegionDidChange = useCallback(
     (event) => {
@@ -108,63 +117,106 @@ export default React.memo(function DAEItemCarte() {
   const defaultProfile = "foot";
   const [profile, setProfile] = useState(defaultProfile);
 
-  // Compute route
+  // Reset route state when defib changes to avoid showing stale route
+  useEffect(() => {
+    setRouteCoords(null);
+    setRoute(null);
+    setRouteError(null);
+    setCalculating(STATE_CALCULATING_INIT);
+    lastRouteCoordsRef.current = null;
+  }, [defibLat, defibLon]);
+
+  // Compute route (debounced, with distance threshold)
   useEffect(() => {
     if (!hasUserCoords || !hasDefibCoords || !hasInternetConnection) {
       return;
     }
 
-    // Abort any previous request
-    if (abortControllerRef.current) {
-      abortControllerRef.current.abort();
+    const isProfileChange = profile !== lastRouteProfileRef.current;
+
+    // Skip re-fetch if user hasn't moved significantly (unless profile change)
+    if (!isProfileChange && lastRouteCoordsRef.current) {
+      const [prevLat, prevLon] = lastRouteCoordsRef.current;
+      const dlat = (userLat - prevLat) * 111_320;
+      const dlon =
+        (userLon - prevLon) * 111_320 * Math.cos((userLat * Math.PI) / 180);
+      const moved = Math.sqrt(dlat * dlat + dlon * dlon);
+      if (moved < ROUTE_REFETCH_THRESHOLD_M) return;
     }
 
-    const controller = new AbortController();
-    abortControllerRef.current = controller;
+    // Show loader immediately on profile change (before debounce)
+    if (isProfileChange) {
+      setCalculating(STATE_CALCULATING_RELOADING);
+    }
 
-    const fetchRoute = async () => {
-      setLoadingRoute(true);
-      setCalculating(STATE_CALCULATING_LOADING);
-      setRouteError(null);
-      try {
-        const origin = `${coords.longitude},${coords.latitude}`;
-        const target = `${defib.longitude},${defib.latitude}`;
-        const osrmUrl = osmProfileUrl[profile] || osmProfileUrl.foot;
-        const url = `${osrmUrl}/route/v1/${profile}/${origin};${target}?overview=full&steps=true`;
+    // Debounce: wait 2s after last coordinate change
+    if (routeTimerRef.current) clearTimeout(routeTimerRef.current);
 
-        const res = await fetch(url, { signal: controller.signal });
-        const result = await res.json();
+    let cancelled = false;
 
-        if (result.routes && result.routes.length > 0) {
-          const fetchedRoute = result.routes[0];
-          const decoded = polyline
-            .decode(fetchedRoute.geometry)
-            .map((p) => p.reverse());
-          setRouteCoords(decoded);
-          setRoute(fetchedRoute);
-          setCalculating(STATE_CALCULATING_LOADED);
-        }
-      } catch (err) {
-        if (err.name !== "AbortError") {
-          console.warn("Route calculation failed:", err.message);
-          setRouteError(err);
-        }
-      } finally {
-        setLoadingRoute(false);
+    routeTimerRef.current = setTimeout(() => {
+      // Abort any previous request
+      if (abortControllerRef.current) {
+        abortControllerRef.current.abort();
       }
-    };
 
-    fetchRoute();
+      const controller = new AbortController();
+      abortControllerRef.current = controller;
+
+      const fetchRoute = async () => {
+        setLoadingRoute(true);
+        setCalculating(STATE_CALCULATING_LOADING);
+        setRouteError(null);
+        try {
+          const origin = `${userLon},${userLat}`;
+          const target = `${defibLon},${defibLat}`;
+          const osrmUrl = osmProfileUrl[profile] || osmProfileUrl.foot;
+          const url = `${osrmUrl}/route/v1/${profile}/${origin};${target}?overview=full&steps=true`;
+
+          const res = await fetch(url, { signal: controller.signal });
+          const result = await res.json();
+
+          if (!cancelled && result.routes && result.routes.length > 0) {
+            const fetchedRoute = result.routes[0];
+            const decoded = polyline
+              .decode(fetchedRoute.geometry)
+              .map((p) => p.reverse());
+            setRouteCoords(decoded);
+            setRoute(fetchedRoute);
+            setCalculating(STATE_CALCULATING_LOADED);
+            // Only update last coords/profile after a successful fetch
+            lastRouteCoordsRef.current = [userLat, userLon];
+            lastRouteProfileRef.current = profile;
+          }
+        } catch (err) {
+          if (!cancelled && err.name !== "AbortError") {
+            console.warn("Route calculation failed:", err.message);
+            setRouteError(err);
+          }
+        } finally {
+          if (!cancelled) setLoadingRoute(false);
+        }
+      };
+
+      fetchRoute();
+    }, 2000);
 
     return () => {
-      controller.abort();
+      cancelled = true;
+      if (routeTimerRef.current) clearTimeout(routeTimerRef.current);
+      if (abortControllerRef.current) {
+        abortControllerRef.current.abort();
+        abortControllerRef.current = null;
+      }
     };
   }, [
     hasUserCoords,
     hasDefibCoords,
     hasInternetConnection,
-    coords,
-    defib,
+    userLat,
+    userLon,
+    defibLat,
+    defibLon,
     profile,
   ]);
 
