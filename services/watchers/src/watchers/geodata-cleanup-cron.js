@@ -12,10 +12,10 @@ const {
   // DEVICE_GEODATA_IOS_SILENT_PUSH_AGE,
   DEVICE_GEODATA_NOTIFICATION_AGE,
   DEVICE_GEODATA_CLEANUP_AGE,
+  GEODATA_CLEANUP_CRON,
 } = require("~/constants/time")
 const tasks = require("~/tasks")
 
-const CLEANUP_CRON = "0 */4 * * *" // Run every 4 hours
 const MAX_PARALLEL_PROCESS = 10
 // const iosHeartbeatAge = Math.floor(ms(DEVICE_GEODATA_IOS_SILENT_PUSH_AGE) / 1000)
 const notificationAge = Math.floor(ms(DEVICE_GEODATA_NOTIFICATION_AGE) / 1000) // Convert to seconds
@@ -275,7 +275,7 @@ module.exports = async function () {
     // }
 
     // Schedule cleanup function to run periodically
-    cron.schedule(CLEANUP_CRON, async () => {
+    cron.schedule(GEODATA_CLEANUP_CRON, async () => {
       await processGeodataCleanup()
       // await cleanupOrphanedHotGeodata()
     })

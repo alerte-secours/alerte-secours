@@ -24,6 +24,7 @@ const {
 const USEFUL_PLACES_BUCKET = "useful-places"
 const DB_OBJECT_KEY = "useful-places.db"
 const METADATA_OBJECT_KEY = "metadata.json"
+const SOURCES_CACHE_PREFIX = "sources-cache/"
 
 const SOURCES = {
   police: {
@@ -60,6 +61,49 @@ const SOURCES = {
   },
 }
 
+// Per-source minimum row counts for critical sources
+// Note: police threshold lowered — upstream data.gouv.fr dataset currently incomplete
+const MIN_PER_SOURCE = {
+  police: 0,
+  gendarmerie: 500,
+  hospitals: 500,
+  geodae: 50000,
+}
+
+const MIN_EXPECTED_ROWS = 10000
+
+// Map source keys to their parse functions
+// Each returns (filePath, coordsStats) => rows[]
+const SOURCE_PARSERS = {
+  police: async (filePath, coordsStats) =>
+    parsePoliceRecords(await readFile(filePath, "utf-8"), coordsStats),
+  gendarmerie: async (filePath, coordsStats) =>
+    parseGendarmerieRecords(await readFile(filePath, "utf-8"), coordsStats),
+  hospitals: async (filePath, coordsStats) =>
+    parseHospitalRecords(await readFile(filePath, "utf-8"), coordsStats),
+  geodae: async (filePath) => parseDaeRecords(filePath),
+  angelaNational: async (filePath, coordsStats) =>
+    parseAngelaNationalRecords(await readFile(filePath, "utf-8"), coordsStats),
+  angelaBayonne: async (filePath, coordsStats) =>
+    parseAngelaBayonneRecords(await readFile(filePath, "utf-8"), coordsStats),
+  angelaPoitiers: async (filePath, coordsStats) =>
+    parseAngelaPoitiersRecords(await readFile(filePath, "utf-8"), coordsStats),
+  angelaBordeaux: async (filePath, coordsStats) =>
+    parseAngelaBordeauxRecords(await readFile(filePath, "utf-8"), coordsStats),
+}
+
+// sourceRowCounts keys use kebab-case for angela sources (matching existing behavior)
+const SOURCE_KEY_TO_ROW_KEY = {
+  police: "police",
+  gendarmerie: "gendarmerie",
+  hospitals: "hospitals",
+  geodae: "geodae",
+  angelaNational: "angela-national",
+  angelaBayonne: "angela-bayonne",
+  angelaPoitiers: "angela-poitiers",
+  angelaBordeaux: "angela-bordeaux",
+}
+
 // ── Main task ───────────────────────────────────────────────────────────────
 
 module.exports = async function () {
@@ -74,12 +118,20 @@ module.exports = async function () {
 
       const coordsStats = createStats()
 
-      // ── Step 1: Download all sources ────────────────────────────────────
+      // ── Step 1: Download all sources (with S3 cache) ────────────────────
       logger.info("usefulPlacesPublish: downloading sources")
       const downloaded = {}
+      const usedCache = new Set()
+
+      await minio.ensureBucketExists(USEFUL_PLACES_BUCKET)
+
       for (const [name, source] of Object.entries(SOURCES)) {
+        const filePath = join(tmpDir, source.filename)
+        const cacheKey = `${SOURCES_CACHE_PREFIX}${name}/${source.filename}`
+        let downloadOk = false
+
+        // Try upstream download
         try {
-          const filePath = join(tmpDir, source.filename)
           const response = await axios({
             method: "get",
             url: source.url,
@@ -89,107 +141,86 @@ module.exports = async function () {
           await pipeline(response.data, createWriteStream(filePath))
           const { size } = statSync(filePath)
           if (size === 0) throw new Error("empty file")
-          downloaded[name] = filePath
+          downloadOk = true
           logger.info(
             { source: name, sizeKB: (size / 1024).toFixed(1) },
             "usefulPlacesPublish: source downloaded"
           )
+
+          // Cache to S3
+          try {
+            await minio.fPutObject(USEFUL_PLACES_BUCKET, cacheKey, filePath)
+            logger.debug(
+              { source: name },
+              "usefulPlacesPublish: source cached to S3"
+            )
+          } catch (cacheErr) {
+            logger.warn(
+              { source: name, error: cacheErr.message },
+              "usefulPlacesPublish: failed to cache source to S3"
+            )
+          }
         } catch (err) {
           logger.warn(
             { source: name, error: err.message },
-            "usefulPlacesPublish: source download failed, skipping"
+            "usefulPlacesPublish: source download failed, trying S3 cache"
           )
+
+          // Try S3 cache fallback
+          try {
+            await minio.fGetObject(USEFUL_PLACES_BUCKET, cacheKey, filePath)
+            const { size } = statSync(filePath)
+            if (size === 0) throw new Error("cached file empty")
+            downloadOk = true
+            usedCache.add(name)
+            logger.info(
+              { source: name, sizeKB: (size / 1024).toFixed(1) },
+              "usefulPlacesPublish: using cached source from S3"
+            )
+          } catch (cacheErr) {
+            logger.warn(
+              { source: name, error: cacheErr.message },
+              "usefulPlacesPublish: no cached source available, skipping"
+            )
+          }
+        }
+
+        if (downloadOk) {
+          downloaded[name] = filePath
         }
       }
 
       // ── Step 2: Parse all sources ───────────────────────────────────────
       logger.info("usefulPlacesPublish: parsing sources")
-      const allRows = []
-
-      // Use safe array concatenation to avoid stack overflow with large arrays (DAE ~155k rows)
-      const addRows = (target, source) => {
-        for (let i = 0; i < source.length; i++) target.push(source[i])
-      }
-
+      const sourceRowsMap = {}
       const sourceRowCounts = {}
-      const parseSafe = async (sourceName, parseFn) => {
+
+      const parseSafe = async (sourceKey) => {
+        const rowKey = SOURCE_KEY_TO_ROW_KEY[sourceKey]
+        if (!downloaded[sourceKey]) return
         try {
-          const rows = await parseFn()
-          addRows(allRows, rows)
-          sourceRowCounts[sourceName] = rows.length
+          const rows = await SOURCE_PARSERS[sourceKey](
+            downloaded[sourceKey],
+            coordsStats
+          )
+          sourceRowsMap[rowKey] = rows
+          sourceRowCounts[rowKey] = rows.length
           logger.info(
-            { source: sourceName, count: rows.length },
+            { source: rowKey, count: rows.length },
             "usefulPlacesPublish: source parsed"
           )
         } catch (err) {
-          sourceRowCounts[sourceName] = 0
+          sourceRowsMap[rowKey] = []
+          sourceRowCounts[rowKey] = 0
           logger.warn(
-            { source: sourceName, error: err.message },
+            { source: rowKey, error: err.message },
             "usefulPlacesPublish: source parse failed, skipping"
           )
         }
       }
 
-      if (downloaded.police) {
-        await parseSafe("police", async () =>
-          parsePoliceRecords(
-            await readFile(downloaded.police, "utf-8"),
-            coordsStats
-          )
-        )
-      }
-      if (downloaded.gendarmerie) {
-        await parseSafe("gendarmerie", async () =>
-          parseGendarmerieRecords(
-            await readFile(downloaded.gendarmerie, "utf-8"),
-            coordsStats
-          )
-        )
-      }
-      if (downloaded.hospitals) {
-        await parseSafe("hospitals", async () =>
-          parseHospitalRecords(
-            await readFile(downloaded.hospitals, "utf-8"),
-            coordsStats
-          )
-        )
-      }
-      if (downloaded.geodae) {
-        await parseSafe("geodae", async () =>
-          parseDaeRecords(downloaded.geodae)
-        )
-      }
-      if (downloaded.angelaNational) {
-        await parseSafe("angela-national", async () =>
-          parseAngelaNationalRecords(
-            await readFile(downloaded.angelaNational, "utf-8"),
-            coordsStats
-          )
-        )
-      }
-      if (downloaded.angelaBayonne) {
-        await parseSafe("angela-bayonne", async () =>
-          parseAngelaBayonneRecords(
-            await readFile(downloaded.angelaBayonne, "utf-8"),
-            coordsStats
-          )
-        )
-      }
-      if (downloaded.angelaPoitiers) {
-        await parseSafe("angela-poitiers", async () =>
-          parseAngelaPoitiersRecords(
-            await readFile(downloaded.angelaPoitiers, "utf-8"),
-            coordsStats
-          )
-        )
-      }
-      if (downloaded.angelaBordeaux) {
-        await parseSafe("angela-bordeaux", async () =>
-          parseAngelaBordeauxRecords(
-            await readFile(downloaded.angelaBordeaux, "utf-8"),
-            coordsStats
-          )
-        )
+      for (const sourceKey of Object.keys(SOURCES)) {
+        await parseSafe(sourceKey)
       }
 
       const { correctedCount } = coordsStats
@@ -200,39 +231,105 @@ module.exports = async function () {
         )
       }
 
+      // ── Step 2b: Per-source threshold check with S3 cache fallback ─────
+      const checkPerSourceThresholds = () => {
+        const missing = []
+        for (const [source, minCount] of Object.entries(MIN_PER_SOURCE)) {
+          const count = sourceRowCounts[source] || 0
+          if (count < minCount) {
+            missing.push({ source, count, minCount })
+          }
+        }
+        return missing
+      }
+
+      let missingCritical = checkPerSourceThresholds()
+
+      // Try cache fallback for sources that were freshly downloaded but failed threshold
+      if (missingCritical.length > 0) {
+        const fallbackAttempts = missingCritical.filter(
+          ({ source }) => !usedCache.has(source)
+        )
+
+        if (fallbackAttempts.length > 0) {
+          logger.warn(
+            {
+              sources: fallbackAttempts.map(
+                (s) => `${s.source}: ${s.count}/${s.minCount}`
+              ),
+            },
+            "usefulPlacesPublish: sources below threshold, trying S3 cache fallback"
+          )
+
+          for (const { source } of fallbackAttempts) {
+            // Find the SOURCES key for this rowKey
+            const sourceKey = Object.entries(SOURCE_KEY_TO_ROW_KEY).find(
+              ([, v]) => v === source
+            )?.[0]
+            if (!sourceKey) continue
+
+            const srcDef = SOURCES[sourceKey]
+            const cachedFilePath = join(tmpDir, `cached-${srcDef.filename}`)
+            const cacheKey = `${SOURCES_CACHE_PREFIX}${sourceKey}/${srcDef.filename}`
+
+            try {
+              await minio.fGetObject(
+                USEFUL_PLACES_BUCKET,
+                cacheKey,
+                cachedFilePath
+              )
+              const { size } = statSync(cachedFilePath)
+              if (size === 0) throw new Error("cached file empty")
+
+              // Re-parse from cached file
+              const rows = await SOURCE_PARSERS[sourceKey](
+                cachedFilePath,
+                coordsStats
+              )
+              sourceRowsMap[source] = rows
+              sourceRowCounts[source] = rows.length
+              usedCache.add(sourceKey)
+              logger.info(
+                { source, count: rows.length },
+                "usefulPlacesPublish: source re-parsed from S3 cache fallback"
+              )
+            } catch (err) {
+              logger.warn(
+                { source, error: err.message },
+                "usefulPlacesPublish: S3 cache fallback failed for source"
+              )
+            }
+          }
+
+          // Re-check thresholds after fallback
+          missingCritical = checkPerSourceThresholds()
+        }
+      }
+
+      if (missingCritical.length > 0) {
+        throw new Error(
+          `usefulPlacesPublish: critical sources below minimum: ${missingCritical
+            .map((s) => `${s.source}: ${s.count}/${s.minCount}`)
+            .join(", ")}`
+        )
+      }
+
+      // Flatten all rows
+      const allRows = []
+      for (const rows of Object.values(sourceRowsMap)) {
+        // Use safe array concatenation to avoid stack overflow with large arrays (DAE ~155k rows)
+        for (let i = 0; i < rows.length; i++) allRows.push(rows[i])
+      }
+
       if (allRows.length === 0) {
         throw new Error("usefulPlacesPublish: no valid rows after processing")
       }
 
       // Guard against partial source failures silently producing a near-empty DB
-      const MIN_EXPECTED_ROWS = 10000
       if (allRows.length < MIN_EXPECTED_ROWS) {
         throw new Error(
           `usefulPlacesPublish: only ${allRows.length} rows parsed (minimum ${MIN_EXPECTED_ROWS}). ` +
             "Multiple sources may have failed to download."
-        )
-      }
-
-      // Per-source minimum row counts for critical sources
-      // Note: police threshold lowered — upstream data.gouv.fr dataset currently incomplete
-      const MIN_PER_SOURCE = {
-        police: 0,
-        gendarmerie: 500,
-        hospitals: 500,
-        geodae: 50000,
-      }
-      const missingCritical = []
-      for (const [source, minCount] of Object.entries(MIN_PER_SOURCE)) {
-        const count = sourceRowCounts[source] || 0
-        if (count < minCount) {
-          missingCritical.push(`${source}: ${count}/${minCount}`)
-        }
-      }
-      if (missingCritical.length > 0) {
-        throw new Error(
-          `usefulPlacesPublish: critical sources below minimum: ${missingCritical.join(
-            ", "
-          )}`
         )
       }
 
@@ -263,7 +360,6 @@ module.exports = async function () {
 
       // ── Step 4: Upload to Minio ─────────────────────────────────────────
       logger.info("usefulPlacesPublish: uploading to Minio")
-      await minio.ensureBucketExists(USEFUL_PLACES_BUCKET)
 
       const publicDownloadPolicy = JSON.stringify({
         Version: "2012-10-17",

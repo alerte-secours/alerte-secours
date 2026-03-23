@@ -1,8 +1,9 @@
 const { ctx } = require("@modjo/core")
 const cron = require("~/libs/cron")
-
-const CLEANUP_CRON = "0 0 * * *" // Run at midnight every day
-const CLEANUP_INTERVAL = "14 days"
+const {
+  NOTIFICATION_CLEANUP_CRON,
+  NOTIFICATION_CLEANUP_INTERVAL,
+} = require("~/constants/time")
 
 module.exports = async function () {
   const logger = ctx.require("logger")
@@ -16,7 +17,7 @@ module.exports = async function () {
         // Delete notifications older than 14 days
         const result = await sql`
           DELETE FROM notification
-          WHERE created_at < NOW() - ${CLEANUP_INTERVAL}::interval
+          WHERE created_at < NOW() - ${NOTIFICATION_CLEANUP_INTERVAL}::interval
           `
         logger.info(
           { count: result.count },
@@ -28,6 +29,6 @@ module.exports = async function () {
     }
 
     // Schedule the cleanup to run daily
-    cron.schedule(CLEANUP_CRON, cleanupOldNotifications)
+    cron.schedule(NOTIFICATION_CLEANUP_CRON, cleanupOldNotifications)
   }
 }

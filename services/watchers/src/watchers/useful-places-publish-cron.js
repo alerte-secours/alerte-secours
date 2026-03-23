@@ -1,8 +1,7 @@
 const { ctx } = require("@modjo/core")
 const cron = require("~/libs/cron")
 const tasks = require("~/tasks")
-
-const USEFUL_PLACES_PUBLISH_CRON = "0 5 * * *" // Daily at 5:00 AM
+const { USEFUL_PLACES_PUBLISH_CRON } = require("~/constants/time")
 
 module.exports = async function () {
   const logger = ctx.require("logger")
