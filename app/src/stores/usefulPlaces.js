@@ -7,7 +7,7 @@ import { STORAGE_KEYS } from "~/storage/storageKeys";
 import { ALL_TYPES, DEFAULT_TYPES } from "~/utils/places/constants";
 import createOtaUpdateActions from "./createOtaUpdateActions";
 
-const DEFAULT_RADIUS_M = 10_000;
+const DEFAULT_RADIUS_M = 30_000;
 const DEFAULT_LIMIT = 200;
 
 export default createAtom(({ merge, reset }) => {

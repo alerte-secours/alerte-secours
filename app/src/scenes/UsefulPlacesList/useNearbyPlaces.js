@@ -2,7 +2,7 @@ import { useEffect, useRef, useCallback, useState } from "react";
 import useLocation from "~/hooks/useLocation";
 import { usefulPlacesActions, useUsefulPlacesState } from "~/stores";
 
-const RADIUS_METERS = 10_000;
+const RADIUS_METERS = 30_000;
 
 /**
  * Shared hook: loads useful places near user and exposes location + loading state.
