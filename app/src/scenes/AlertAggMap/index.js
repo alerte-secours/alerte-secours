@@ -33,8 +33,11 @@ import useMapInit from "~/containers/Map/useMapInit";
 import { useTheme } from "~/theme";
 import { useNavigation } from "@react-navigation/native";
 
+import { filterUnavailableDae } from "~/utils/places/filterUnavailableDae";
+
 import useNearbyPlaces from "~/scenes/UsefulPlacesList/useNearbyPlaces";
 import useTypeFilter from "~/scenes/UsefulPlacesList/useTypeFilter";
+import useAvailabilityFilter from "~/scenes/UsefulPlacesList/useAvailabilityFilter";
 import SettingsMenu from "~/scenes/UsefulPlacesList/SettingsMenu";
 
 import ControlButtons from "./ControlButtons";
@@ -181,12 +184,16 @@ function AlertAggMap() {
 
   // ── Useful places ──────────────────────────────────────────────────
   const { visibleTypes, toggle } = useTypeFilter("alertAgg");
+  const { hideUnavailableDae } = useAvailabilityFilter();
   const { places: allPlaces } = useNearbyPlaces();
 
-  const filteredPlaces = useMemo(
-    () => allPlaces.filter((p) => visibleTypes.includes(p.type)),
-    [allPlaces, visibleTypes],
-  );
+  const filteredPlaces = useMemo(() => {
+    let filtered = allPlaces.filter((p) => visibleTypes.includes(p.type));
+    if (hideUnavailableDae) {
+      filtered = filterUnavailableDae(filtered);
+    }
+    return filtered;
+  }, [allPlaces, visibleTypes, hideUnavailableDae]);
 
   const placesGeoJSON = useMemo(
     () => placesToGeoJSON(filteredPlaces),

@@ -1,5 +1,5 @@
 import React, { useCallback, useEffect, useMemo, useState } from "react";
-import { View, TouchableOpacity, StyleSheet } from "react-native";
+import { View, TouchableOpacity, Switch, StyleSheet } from "react-native";
 import { Button, Modal, Portal, ProgressBar } from "react-native-paper";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
 import { useTranslation } from "react-i18next";
@@ -144,6 +144,8 @@ export default React.memo(function SettingsMenu({
   onToggle,
   floating,
   showUpdateSection = true,
+  hideUnavailableDae = false,
+  onToggleHideUnavailableDae,
 }) {
   const { colors } = useTheme();
   const { t } = useTranslation();
@@ -294,6 +296,41 @@ export default React.memo(function SettingsMenu({
             })}
           </View>
 
+          {visibleTypes.includes("dae") && onToggleHideUnavailableDae && (
+            <>
+              <View
+                style={[
+                  styles.separator,
+                  { backgroundColor: colors.outlineVariant || colors.grey },
+                ]}
+              />
+              <View style={styles.availabilityToggleRow}>
+                <View style={styles.availabilityToggleText}>
+                  <Text style={styles.sectionTitle}>
+                    {t("hideUnavailableDaeLabel")}
+                  </Text>
+                  <Text
+                    style={[
+                      styles.availabilityToggleHint,
+                      { color: colors.onSurfaceVariant || colors.grey },
+                    ]}
+                  >
+                    {t("hideUnavailableDaeHint")}
+                  </Text>
+                </View>
+                <Switch
+                  value={hideUnavailableDae}
+                  onValueChange={onToggleHideUnavailableDae}
+                  trackColor={{
+                    false: colors.surfaceVariant || "#E0E0E0",
+                    true: colors.primary + "80",
+                  }}
+                  thumbColor={hideUnavailableDae ? colors.primary : "#f4f3f4"}
+                />
+              </View>
+            </>
+          )}
+
           {showUpdateSection && (
             <>
               <View
@@ -397,6 +434,19 @@ const styles = StyleSheet.create({
   chipLabel: {
     fontSize: 13,
     fontWeight: "600",
+  },
+  availabilityToggleRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
+    gap: 12,
+  },
+  availabilityToggleText: {
+    flex: 1,
+  },
+  availabilityToggleHint: {
+    fontSize: 12,
+    marginTop: 2,
   },
   separator: {
     height: StyleSheet.hairlineWidth,

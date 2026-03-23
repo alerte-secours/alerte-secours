@@ -117,6 +117,9 @@ export default {
   // Accessibility hints
   placeDetailsHint: "Affiche les détails du lieu",
   filterToggleHint: "Active ou désactive ce filtre",
+  hideUnavailableDaeLabel: "Masquer les DAE indisponibles",
+  hideUnavailableDaeHint:
+    "N'affiche que les défibrillateurs actuellement accessibles",
   usefulPlacesButtonHint: "Affiche les lieux utiles à proximité sur la carte",
   openFiltersHint: "Ouvre les filtres et paramètres",
   routeStepsListOpened: "Liste des étapes ouverte",

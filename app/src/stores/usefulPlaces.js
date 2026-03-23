@@ -30,6 +30,10 @@ export default createAtom(({ merge, reset }) => {
       merge({ alertAggVisibleTypes });
     },
 
+    setHideUnavailableDae: (hideUnavailableDae) => {
+      merge({ hideUnavailableDae });
+    },
+
     loadNearUser: async ({
       userLonLat,
       radiusMeters = DEFAULT_RADIUS_M,
@@ -96,6 +100,7 @@ export default createAtom(({ merge, reset }) => {
       mapVisibleTypes: ALL_TYPES,
       listVisibleTypes: DEFAULT_TYPES,
       alertAggVisibleTypes: DEFAULT_TYPES,
+      hideUnavailableDae: true,
 
       loadingNearUser: false,
       errorNearUser: null,

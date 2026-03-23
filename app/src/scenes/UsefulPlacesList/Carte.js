@@ -30,8 +30,11 @@ import markerUrgences from "~/assets/img/marker-urgence.png";
 import markerHopital from "~/assets/img/marker-hopital.png";
 import markerAngela from "~/assets/img/marker-angela.png";
 
+import { filterUnavailableDae } from "~/utils/places/filterUnavailableDae";
+
 import useNearbyPlaces from "./useNearbyPlaces";
 import useTypeFilter from "./useTypeFilter";
+import useAvailabilityFilter from "./useAvailabilityFilter";
 import SettingsMenu from "./SettingsMenu";
 import { LoadingView, EmptyNoLocation } from "./EmptyStates";
 
@@ -109,6 +112,8 @@ export default React.memo(function UsefulPlacesCarte() {
   const { t } = useTranslation();
   const navigation = useNavigation();
   const { visibleTypes, toggle } = useTypeFilter("map");
+  const { hideUnavailableDae, toggleHideUnavailableDae } =
+    useAvailabilityFilter();
   const {
     places: allPlaces,
     loading,
@@ -119,10 +124,13 @@ export default React.memo(function UsefulPlacesCarte() {
     coords,
   } = useNearbyPlaces();
 
-  const places = useMemo(
-    () => allPlaces.filter((p) => visibleTypes.includes(p.type)),
-    [allPlaces, visibleTypes],
-  );
+  const places = useMemo(() => {
+    let filtered = allPlaces.filter((p) => visibleTypes.includes(p.type));
+    if (hideUnavailableDae) {
+      filtered = filterUnavailableDae(filtered);
+    }
+    return filtered;
+  }, [allPlaces, visibleTypes, hideUnavailableDae]);
 
   const mapRef = useRef();
   const cameraRef = useRef();
@@ -172,7 +180,13 @@ export default React.memo(function UsefulPlacesCarte() {
     <View style={styles.container}>
       <RadarBanner />
       <View style={styles.mapContainer}>
-        <SettingsMenu visibleTypes={visibleTypes} onToggle={toggle} floating />
+        <SettingsMenu
+          visibleTypes={visibleTypes}
+          onToggle={toggle}
+          floating
+          hideUnavailableDae={hideUnavailableDae}
+          onToggleHideUnavailableDae={toggleHideUnavailableDae}
+        />
         <MapView
           mapRef={mapRef}
           compassViewPosition={1}

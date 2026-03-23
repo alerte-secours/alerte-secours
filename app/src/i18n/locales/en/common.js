@@ -112,6 +112,9 @@ export default {
   // Accessibility hints
   placeDetailsHint: "Show place details",
   filterToggleHint: "Toggle this filter",
+  hideUnavailableDaeLabel: "Hide unavailable defibrillators",
+  hideUnavailableDaeHint:
+    "Only show defibrillators that are currently accessible",
   usefulPlacesButtonHint: "Show nearby useful places on the map",
   openFiltersHint: "Open filters and settings",
   routeStepsListOpened: "Route steps list opened",

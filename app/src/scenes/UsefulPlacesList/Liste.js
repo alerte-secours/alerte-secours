@@ -7,8 +7,11 @@ import { useTranslation } from "react-i18next";
 import Text from "~/components/Text";
 import { useTheme } from "~/theme";
 
+import { filterUnavailableDae } from "~/utils/places/filterUnavailableDae";
+
 import useNearbyPlaces from "./useNearbyPlaces";
 import useTypeFilter from "./useTypeFilter";
+import useAvailabilityFilter from "./useAvailabilityFilter";
 import SettingsMenu from "./SettingsMenu";
 import PlaceRow from "./PlaceRow";
 import { LoadingView, EmptyNoLocation } from "./EmptyStates";
@@ -72,6 +75,8 @@ export default React.memo(function UsefulPlacesListe() {
   const { colors } = useTheme();
   const { t } = useTranslation();
   const { visibleTypes, toggle } = useTypeFilter();
+  const { hideUnavailableDae, toggleHideUnavailableDae } =
+    useAvailabilityFilter();
   const {
     places: allPlaces,
     loading,
@@ -81,10 +86,13 @@ export default React.memo(function UsefulPlacesListe() {
     reload,
   } = useNearbyPlaces();
 
-  const places = useMemo(
-    () => allPlaces.filter((p) => visibleTypes.includes(p.type)),
-    [allPlaces, visibleTypes],
-  );
+  const places = useMemo(() => {
+    let filtered = allPlaces.filter((p) => visibleTypes.includes(p.type));
+    if (hideUnavailableDae) {
+      filtered = filterUnavailableDae(filtered);
+    }
+    return filtered;
+  }, [allPlaces, visibleTypes, hideUnavailableDae]);
 
   const renderItem = useCallback(({ item }) => <PlaceRow place={item} />, []);
 
@@ -110,7 +118,12 @@ export default React.memo(function UsefulPlacesListe() {
 
   return (
     <View style={[styles.container, { backgroundColor: colors.background }]}>
-      <SettingsMenu visibleTypes={visibleTypes} onToggle={toggle} />
+      <SettingsMenu
+        visibleTypes={visibleTypes}
+        onToggle={toggle}
+        hideUnavailableDae={hideUnavailableDae}
+        onToggleHideUnavailableDae={toggleHideUnavailableDae}
+      />
       {error && allPlaces.length > 0 && (
         <View
           style={[
