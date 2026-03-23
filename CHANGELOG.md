@@ -2,6 +2,16 @@
 
 All notable changes to this project will be documented in this file. See [commit-and-tag-version](https://github.com/absolute-version/commit-and-tag-version) for commit guidelines.
 
+## [1.17.5](https://codeberg.org/alerte-secours/alerte-secours/compare/v1.17.4...v1.17.5) (2026-03-23)
+
+
+### Bug Fixes
+
+* **dae:** filter unavailable on maps ([e0afdb5](https://codeberg.org/alerte-secours/alerte-secours/commit/e0afdb550a2b64db68b5bafae3e1c55fe5eadf7a))
+* **map:** itinerary bug ([5fbde3a](https://codeberg.org/alerte-secours/alerte-secours/commit/5fbde3a5762cf3e072dd931bfcef53a236a2ca41))
+* nearby place 30km ([b4264bf](https://codeberg.org/alerte-secours/alerte-secours/commit/b4264bf3c99f38aa8b82f8839d99218a4c72989b))
+* nearby place 50km ([9a2ae1d](https://codeberg.org/alerte-secours/alerte-secours/commit/9a2ae1da8ab164bdd49dee6aaefde7a983c99739))
+
 ## [1.17.4](https://codeberg.org/alerte-secours/alerte-secours/compare/v1.17.3...v1.17.4) (2026-03-23)
 
 

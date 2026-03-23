@@ -1,6 +1,6 @@
 {
   "name": "@as/web",
-  "version": "1.17.4",
+  "version": "1.17.5",
   "private": true,
   "scripts": {
     "dev": "PORT=${WEB_PORT:-4203} NODE_OPTIONS=--openssl-legacy-provider yarn run start",
