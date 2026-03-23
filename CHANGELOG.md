@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [commit-and-tag-version](https://github.com/absolute-version/commit-and-tag-version) for commit guidelines.
 
+## [1.17.4](https://codeberg.org/alerte-secours/alerte-secours/compare/v1.17.3...v1.17.4) (2026-03-23)
+
+
+### Bug Fixes
+
+* useful places treshold cache fallback + cron variabilisation ([01ad4d8](https://codeberg.org/alerte-secours/alerte-secours/commit/01ad4d809c2445041e10ee1f9cfa75c5eee9ae9e))
+
 ## [1.17.3](https://codeberg.org/alerte-secours/alerte-secours/compare/v1.17.2...v1.17.3) (2026-03-23)
 
 

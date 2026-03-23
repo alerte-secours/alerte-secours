@@ -1,6 +1,6 @@
 {
   "name": "alerte-secours",
-  "version": "1.17.3",
+  "version": "1.17.4",
   "main": "index.js",
   "scripts": {
     "start": "expo start --dev-client --private-key-path ./keys/private-key.pem",
@@ -56,8 +56,8 @@
     "useful-places:build": "yarn --cwd scripts/useful-places build"
   },
   "customExpoVersioning": {
-    "versionCode": 247,
-    "buildNumber": 247
+    "versionCode": 248,
+    "buildNumber": 248
   },
   "_moduleAliases": {
     "~": "src"
