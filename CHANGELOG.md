@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [commit-and-tag-version](https://github.com/absolute-version/commit-and-tag-version) for commit guidelines.
 
+## [1.17.6](https://codeberg.org/alerte-secours/alerte-secours/compare/v1.17.5...v1.17.6) (2026-03-25)
+
+
+### Bug Fixes
+
+* **android:** background location disclaimer ([f4c73eb](https://codeberg.org/alerte-secours/alerte-secours/commit/f4c73eb2a587a0a290c44dea18c38620a6303b65))
+
 ## [1.17.5](https://codeberg.org/alerte-secours/alerte-secours/compare/v1.17.4...v1.17.5) (2026-03-23)
 
 
