@@ -4,7 +4,7 @@ import usePermissionLocationForeground from "~/permissions/usePermissionLocation
 
 import { usePermissionsState, permissionsActions } from "~/stores";
 
-import requestPermissionLocationBackground from "./requestPermissionLocationBackground";
+import requestPermissionLocationBackgroundWithDisclosure from "./requestPermissionLocationBackgroundWithDisclosure";
 
 export default function usePermissionLocationBackground() {
   usePermissionLocationForeground();
@@ -22,7 +22,7 @@ export default function usePermissionLocationBackground() {
       return;
     }
     (async () => {
-      const granted = await requestPermissionLocationBackground();
+      const granted = await requestPermissionLocationBackgroundWithDisclosure();
       setLocationBackground(granted);
     })();
   }, [locationForeground, locationBackground, setLocationBackground]);

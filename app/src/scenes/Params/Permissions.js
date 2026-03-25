@@ -21,7 +21,7 @@ import {
 } from "~/lib/a11y";
 
 import requestPermissionFcm from "~/permissions/requestPermissionFcm";
-import requestPermissionLocationBackground from "~/permissions/requestPermissionLocationBackground";
+import requestPermissionLocationBackgroundWithDisclosure from "~/permissions/requestPermissionLocationBackgroundWithDisclosure";
 import requestPermissionLocationForeground from "~/permissions/requestPermissionLocationForeground";
 import requestPermissionReadContacts from "~/permissions/requestPermissionReadContacts";
 import requestPermissionPhoneCall from "~/permissions/requestPermissionPhoneCall";
@@ -52,7 +52,7 @@ const requestBatteryOptimizationDisable = async () => {
 
 const requestPermissions = {
   fcm: requestPermissionFcm,
-  locationBackground: requestPermissionLocationBackground,
+  locationBackground: requestPermissionLocationBackgroundWithDisclosure,
   locationForeground: requestPermissionLocationForeground,
   readContacts: requestPermissionReadContacts,
   phoneCall: requestPermissionPhoneCall,
@@ -406,10 +406,10 @@ export default function Permissions() {
           if (!fgReq) {
             granted = false;
           } else {
-            granted = await requestPermissionLocationBackground();
+            granted = await requestPermissionLocationBackgroundWithDisclosure();
           }
         } else {
-          granted = await requestPermissionLocationBackground();
+          granted = await requestPermissionLocationBackgroundWithDisclosure();
         }
         setPermissions.locationBackground(granted);
       } else {

@@ -15,7 +15,6 @@ import {
 import { secureStore } from "~/storage/memorySecureStore";
 import memoryAsyncStorage from "~/storage/memoryAsyncStorage";
 
-import requestPermissionLocationBackground from "~/permissions/requestPermissionLocationBackground";
 import requestPermissionLocationForeground from "~/permissions/requestPermissionLocationForeground";
 import requestPermissionMotion from "~/permissions/requestPermissionMotion";
 import requestPermissionFcm from "~/permissions/requestPermissionFcm";
@@ -133,6 +132,9 @@ const checkPermissions = async (completed) => {
   permissionsActions.setLocationBackground(locationBackgroundGranted);
 
   // Handle background location permission
+  // Note: we do NOT auto-re-request background location because Google Play
+  // requires a prominent disclosure before each request. The user must
+  // re-grant via Params > Permissions where the disclosure is shown.
   if (locationBackgroundGranted) {
     previouslyGranted.locationBackground = true;
     deniedReRequests.locationBackground = false;
@@ -142,14 +144,10 @@ const checkPermissions = async (completed) => {
     !deniedReRequests.locationBackground
   ) {
     permissionLogger.warn(
-      "Background location permission lost, requesting again",
+      "Background location permission lost, user must re-grant via settings",
     );
-    const granted = await requestPermissionLocationBackground();
-    if (!granted) {
-      deniedReRequests.locationBackground = true;
-      permissionLogger.warn("Background location permission request denied");
-    }
-    permissionsActions.setLocationBackground(granted);
+    deniedReRequests.locationBackground = true;
+    permissionsActions.setLocationBackground(false);
   }
 
   // Check motion permission

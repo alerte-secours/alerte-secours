@@ -9,7 +9,7 @@ import { UPDATE_ALERT_FOLLOW_LOCATION_MUTATION } from "./gql";
 import Text from "~/components/Text";
 import { createStyles, useTheme } from "~/theme";
 import { usePermissionsState, permissionsActions } from "~/stores";
-import requestPermissionLocationBackground from "~/permissions/requestPermissionLocationBackground";
+import requestPermissionLocationBackgroundWithDisclosure from "~/permissions/requestPermissionLocationBackgroundWithDisclosure";
 import requestPermissionLocationForeground from "~/permissions/requestPermissionLocationForeground";
 import openSettings from "~/lib/native/openSettings";
 
@@ -88,7 +88,8 @@ export default function FieldFollowLocation({ alert }) {
 
       if (foregroundGranted) {
         // Request background permission if foreground is granted
-        const backgroundGranted = await requestPermissionLocationBackground();
+        const backgroundGranted =
+          await requestPermissionLocationBackgroundWithDisclosure();
         permissionsActions.setLocationBackground(backgroundGranted);
         return backgroundGranted;
       }

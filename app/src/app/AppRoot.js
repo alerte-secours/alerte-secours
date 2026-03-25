@@ -4,6 +4,7 @@ import Layout from "~/layout/Layout";
 import NetworkProviders from "~/network/NetworkProviders";
 import { useEULA } from "~/hooks/useEULA";
 import EULA from "~/components/EULA";
+import BackgroundLocationDisclosure from "~/components/BackgroundLocationDisclosure";
 import PermissionWizard from "~/containers/PermissionWizard";
 import HasRelativeContainer from "~/containers/HasRelativeContainer";
 import { usePermissionWizardState } from "~/stores";
@@ -43,6 +44,7 @@ export default React.memo(function AppRoot() {
           </AudioProvider>
         </TreeWrapper>
         <EULA visible={!eulaAccepted} onAccept={acceptEULA} />
+        <BackgroundLocationDisclosure />
         <PermissionWizard visible={eulaAccepted && !wizardCompleted} />
         <UnreadMessageAlert />
       </NetworkProviders>

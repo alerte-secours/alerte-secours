@@ -26,7 +26,7 @@ import {
   BatteryOptEnabled,
 } from "react-native-battery-optimization-check";
 
-import requestPermissionLocationBackground from "~/permissions/requestPermissionLocationBackground";
+import requestPermissionLocationBackgroundWithDisclosure from "~/permissions/requestPermissionLocationBackgroundWithDisclosure";
 import requestPermissionMotion from "~/permissions/requestPermissionMotion";
 import CustomButton from "~/components/CustomButton";
 import Text from "~/components/Text";
@@ -118,7 +118,8 @@ const HeroMode = () => {
       console.log("Starting permission requests...");
 
       // Request background location last (after user returns from Settings if needed)
-      const locationGranted = await requestPermissionLocationBackground();
+      const locationGranted =
+        await requestPermissionLocationBackgroundWithDisclosure();
       permissionsActions.setLocationBackground(locationGranted);
       console.log("Location background permission:", locationGranted);
 
