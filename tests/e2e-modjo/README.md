@@ -16,15 +16,19 @@ upgrading `@modjo/core` — to catch regressions on:
 ## Run
 
 ```sh
-# bring the stack up first
+# Local docker-compose (default):
 docker compose up -d
-# (optional: also start with the modjo override if testing a dev modjo core)
-# docker compose -f docker-compose.yaml -f docker-compose.modjo-smoke.yaml up -d
+cd tests/e2e-modjo && ./run.sh
 
-# run tests against the running stack
-cd tests/e2e-modjo
-node --test --test-reporter=spec .
+# Staging / prod — pass URLs via env:
+API_URL=https://api.example.com \
+  FILES_URL=https://files.example.com \
+  HASURA_URL=https://hasura.example.com \
+  ./run.sh staging
 ```
+
+`run.sh` does a quick reachability check on `API_URL` before starting and
+exits with a clear error if the target is down.
 
 ## Envs
 
