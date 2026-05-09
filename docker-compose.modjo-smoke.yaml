@@ -1,0 +1,17 @@
+# Override mount: makes the DEV @modjo/core (symlinked from
+# node_modules/@modjo/core) resolvable inside each backend container.
+# Used together with scripts/smoke-dev-services.sh which swaps the
+# vendored @modjo/core for a symlink to the dev tree.
+services:
+  api:
+    volumes:
+      - /home/jo/lab/devthefuture/modjo:/home/jo/lab/devthefuture/modjo:ro
+  files:
+    volumes:
+      - /home/jo/lab/devthefuture/modjo:/home/jo/lab/devthefuture/modjo:ro
+  tasks:
+    volumes:
+      - /home/jo/lab/devthefuture/modjo:/home/jo/lab/devthefuture/modjo:ro
+  watchers:
+    volumes:
+      - /home/jo/lab/devthefuture/modjo:/home/jo/lab/devthefuture/modjo:ro

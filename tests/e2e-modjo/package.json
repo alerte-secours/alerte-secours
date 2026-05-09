@@ -1,0 +1,12 @@
+{
+  "name": "@as/tests-e2e-modjo",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Black-box e2e contract tests for the modjo-driven backend services. Runs against a docker-compose stack started via tilt or compose up.",
+  "scripts": {
+    "test": "node --test --test-reporter=spec ."
+  },
+  "engines": {
+    "node": ">=20"
+  }
+}
