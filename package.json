@@ -77,17 +77,17 @@
   },
   "resolutions": {
     "express": "5.0.0-beta.3",
-    "@modjo/express": "1.11.0",
-    "@modjo/amqp": "1.11.0",
-    "@modjo/core": "1.11.0",
-    "@modjo/hasura": "1.11.0",
-    "@modjo/ioredis": "1.11.0",
-    "@modjo/microservice-oapi": "1.11.0",
-    "@modjo/microservice-worker": "1.11.0",
-    "@modjo/microservice-watcher": "1.11.0",
-    "@modjo/oa-graphql": "1.11.0",
-    "@modjo/postgres": "1.11.0",
-    "@modjo/sentry": "1.11.0"
+    "@modjo/express": "1.11.1",
+    "@modjo/amqp": "1.11.1",
+    "@modjo/core": "1.11.1",
+    "@modjo/hasura": "1.11.1",
+    "@modjo/ioredis": "1.11.1",
+    "@modjo/microservice-oapi": "1.11.1",
+    "@modjo/microservice-worker": "1.11.1",
+    "@modjo/microservice-watcher": "1.11.1",
+    "@modjo/oa-graphql": "1.11.1",
+    "@modjo/postgres": "1.11.1",
+    "@modjo/sentry": "1.11.1"
   },
   "packageManager": "yarn@4.10.3"
 }

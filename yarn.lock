@@ -3136,9 +3136,9 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@modjo/amqp@npm:1.11.0":
-  version: 1.11.0
-  resolution: "@modjo/amqp@npm:1.11.0"
+"@modjo/amqp@npm:1.11.1":
+  version: 1.11.1
+  resolution: "@modjo/amqp@npm:1.11.1"
   dependencies:
     "@modjo/config": "npm:*"
     "@modjo/logger": "npm:*"
@@ -3146,7 +3146,7 @@ __metadata:
     nctx: "npm:^2.2.0"
     wait-on: "npm:^6.0.1"
     ya-retry: "npm:^1.2.0"
-  checksum: 10/81f8d84b8510dc26b907d729da15238113d6f1418271cc37a89e42bb17a9492a68c65a640612d16c470764ff6ce8294ecc7e6b3b2fecc344a16205d0fb5fedc9
+  checksum: 10/ab849f3734ef576a42958474c006b4ab1bc77f1ece57b7fa104a0b38a43357a391e4a35d4a98488511e17266a3daf55d6c83baffd49483d95a14505a53def199
   languageName: node
   linkType: hard
 
@@ -3176,9 +3176,9 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@modjo/core@npm:1.11.0":
-  version: 1.11.0
-  resolution: "@modjo/core@npm:1.11.0"
+"@modjo/core@npm:1.11.1":
+  version: 1.11.1
+  resolution: "@modjo/core@npm:1.11.1"
   dependencies:
     "@foundernetes/dbug": "npm:^1.0.0"
     commander: "npm:^9.1.0"
@@ -3188,13 +3188,13 @@ __metadata:
     nctx: "npm:^2.2.0"
     pretty-ms: "npm:^7.0.1"
     yup: "npm:^0.32.11"
-  checksum: 10/23bb86e64d0a577d1ec8b6e77af877d0aa06c418fbe19e95c7bb2c0278e0ab9366fbcbc3eaaa5e5ea5e061242253ec23bbcc60e085d99496e88c4cdfacd7fb18
+  checksum: 10/5ddf634e65255db32df12aee5d207f7b8db7a5204410e4545691dc5e527e2b68e521c9178818ae7d612114347edea8c1946b294f39338b7d8bc48670e9dbfb9b
   languageName: node
   linkType: hard
 
-"@modjo/express@npm:1.11.0":
-  version: 1.11.0
-  resolution: "@modjo/express@npm:1.11.0"
+"@modjo/express@npm:1.11.1":
+  version: 1.11.1
+  resolution: "@modjo/express@npm:1.11.1"
   dependencies:
     "@modjo/config": "npm:*"
     "@modjo/http-logger": "npm:*"
@@ -3208,7 +3208,7 @@ __metadata:
     nctx: "npm:^2.2.0"
     websocket-express: "npm:^3.1.2"
     ws: "npm:^8.18.0"
-  checksum: 10/66ff29a4b6febc67a1577c6a45f19f799c12409217e92e226246de71d92633af90aa5dac272f41c0ec8f844ec1ae833bcaa33e2ccf92cee43e86e80551a4ed40
+  checksum: 10/3a94393881e099ba7a16bc14850b6f6a5e3348afff7f4885eb025eef72cf5414f83a042c52e85ecf2d8499afc44fceb78ee69903754b85ae90967d8b8b0f2b72
   languageName: node
   linkType: hard
 
@@ -3224,9 +3224,9 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@modjo/hasura@npm:1.11.0":
-  version: 1.11.0
-  resolution: "@modjo/hasura@npm:1.11.0"
+"@modjo/hasura@npm:1.11.1":
+  version: 1.11.1
+  resolution: "@modjo/hasura@npm:1.11.1"
   dependencies:
     "@modjo/config": "npm:*"
     axios: "npm:^1.4.0"
@@ -3238,7 +3238,7 @@ __metadata:
     nctx: "npm:^2.2.0"
     postgres: "npm:^3.4.4"
     wait-on: "npm:^6.0.1"
-  checksum: 10/a00a1bb176219969b19dd1189a546a5f7a5951b0bde706ad43231cfe849f4516f7d1b25d00ab5ac4f5ba4a8fe71885b90fedfadcc70585a188f7a97523baecd0
+  checksum: 10/3b0d2e319c4649f24b4d89b3755f1788755fffd1c10b400bdde185e02b3c79a85eb40ab32a6eb8852797c7dc42e32c5b612c339249bf72eff7820a3a0dfd2033
   languageName: node
   linkType: hard
 
@@ -3265,15 +3265,15 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@modjo/ioredis@npm:1.11.0":
-  version: 1.11.0
-  resolution: "@modjo/ioredis@npm:1.11.0"
+"@modjo/ioredis@npm:1.11.1":
+  version: 1.11.1
+  resolution: "@modjo/ioredis@npm:1.11.1"
   dependencies:
     "@modjo/config": "npm:*"
     ioredis: "npm:^5.3.2"
     nctx: "npm:^2.2.0"
     wait-on: "npm:^6.0.1"
-  checksum: 10/cf0f0215846d7b9aebc7f7b7922d9a605ba2b095db6a2dfcc2fbc7060e9a448756d380c7c0ddbe9d77ef3e9930c148c5ae8691d5c07d640f7518e26b50563788
+  checksum: 10/430db723c52782f84ead7052c7892c3b7d6160ee2790fc2d51d0e3d89042ba1dedcb6bf0b1597dbed3305d60df80b671bfccb1f486af93c4a650f44b133af40d
   languageName: node
   linkType: hard
 
@@ -3301,9 +3301,9 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@modjo/microservice-oapi@npm:1.11.0":
-  version: 1.11.0
-  resolution: "@modjo/microservice-oapi@npm:1.11.0"
+"@modjo/microservice-oapi@npm:1.11.1":
+  version: 1.11.1
+  resolution: "@modjo/microservice-oapi@npm:1.11.1"
   dependencies:
     "@modjo/core": "npm:*"
     "@modjo/express": "npm:*"
@@ -3315,25 +3315,25 @@ __metadata:
     "@modjo/oa": "npm:*"
     "@modjo/shutdown-handlers": "npm:*"
     nctx: "npm:^2.2.0"
-  checksum: 10/025c2f8a4001fd963dcf07a652580041df1dfdc7f102a2acf2b1fe27b35d37233b6cb6b7500b2834d0cf0d8e2e0a6b324709af08a3db326bce75445c42829b1d
+  checksum: 10/909362d7db4717173221270bd92f28b6522c0cb30146805a21ead1528070904d5d3091b7e10088026d3fc0e718187db966da1f8d0fcd7372260d31265aa401cc
   languageName: node
   linkType: hard
 
-"@modjo/microservice-watcher@npm:1.11.0":
-  version: 1.11.0
-  resolution: "@modjo/microservice-watcher@npm:1.11.0"
+"@modjo/microservice-watcher@npm:1.11.1":
+  version: 1.11.1
+  resolution: "@modjo/microservice-watcher@npm:1.11.1"
   dependencies:
     "@modjo/amqp": "npm:*"
     "@modjo/apollo-client": "npm:*"
     "@modjo/core": "npm:*"
     nctx: "npm:^2.2.0"
-  checksum: 10/92554eb0af5b56101e1f14ba2d38bebd75194c0ec9f9baf80d5402ebd6e6289b01bbdfe67a511587d8692c17a422817648775ee2a6d7bede4a1643785a68a971
+  checksum: 10/17e58f02a533013becf0f2060dc7feefb9dba8ae93c022cc40c93c3b4f3bade770c858d58cfc544f5e9014c7f63a5640047dcf428485c668fa674d2c05599bc2
   languageName: node
   linkType: hard
 
-"@modjo/microservice-worker@npm:1.11.0":
-  version: 1.11.0
-  resolution: "@modjo/microservice-worker@npm:1.11.0"
+"@modjo/microservice-worker@npm:1.11.1":
+  version: 1.11.1
+  resolution: "@modjo/microservice-worker@npm:1.11.1"
   dependencies:
     "@modjo/amqp": "npm:*"
     "@modjo/config": "npm:*"
@@ -3343,7 +3343,7 @@ __metadata:
     lodash.kebabcase: "npm:^4.1.1"
     nctx: "npm:^2.2.0"
     pretty-ms: "npm:^7.0.1"
-  checksum: 10/bf527af364e949e06ec1a0fc3e880bc197d00b67ca6d3912184faee70721823fbae3f23cf29832aedd5483807538a3e969f5f623d434ef77d5d77f59411b0d9c
+  checksum: 10/7ddca8a3e4840c413c9d0a0c07b1fba77607ff9dd952e520f8bd9b0e3a2f665adfb478552e03ca0d0fe7de19b17219bc195c052794300d0ad36f5abb9f8a83ff
   languageName: node
   linkType: hard
 
@@ -3359,9 +3359,9 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@modjo/oa-graphql@npm:1.11.0":
-  version: 1.11.0
-  resolution: "@modjo/oa-graphql@npm:1.11.0"
+"@modjo/oa-graphql@npm:1.11.1":
+  version: 1.11.1
+  resolution: "@modjo/oa-graphql@npm:1.11.1"
   dependencies:
     "@apollo/server": "npm:^4.7.5"
     "@apollo/server-plugin-landing-page-graphql-playground": "npm:^4.0.1"
@@ -3385,7 +3385,7 @@ __metadata:
     nctx: "npm:^2.2.0"
     openapi-to-graphql: "npm:^3.0.5"
     subscriptions-transport-ws: "npm:^0.11.0"
-  checksum: 10/28d221ebc89f3a7aadb1f2f8294ac28c2dce6ecfa075a77ed5fd3c5aaac92ab1329dd42dd7c124d6c34c897cdf0d7b884ff9838cd8e46d188bd16776ff3a867b
+  checksum: 10/c3637061bd8d992df5f7dd026b97c4c5fae971f686692c49911d505ca1d7193688c8e0e84568b466019ddaf57d495cba21f8e39c5f61243fcbc7bf31ca9f9420
   languageName: node
   linkType: hard
 
@@ -3417,9 +3417,9 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@modjo/postgres@npm:1.11.0":
-  version: 1.11.0
-  resolution: "@modjo/postgres@npm:1.11.0"
+"@modjo/postgres@npm:1.11.1":
+  version: 1.11.1
+  resolution: "@modjo/postgres@npm:1.11.1"
   dependencies:
     "@opentelemetry/api": "npm:^1.9.0"
     "@opentelemetry/core": "npm:^1.25.1"
@@ -3427,18 +3427,18 @@ __metadata:
     lodash.defaultsdeep: "npm:^4.6.1"
     nctx: "npm:^2.2.0"
     postgres: "npm:^3.4.4"
-  checksum: 10/56a3ca6076640a544be0394538f2153e8da5f61ebd1c1e57eabdb473c3585ac76391676ac994321e1194c6d74cdf2413b6f1d857ae2ff4f2ee68bc2acebf9669
+  checksum: 10/ffd51ffc2fcbc2ad09b6499a89a58cb9e900d86d2a417fd9ea7cade18021eb3ae84b63a70800be73451989ac2886d312d330bc85978676cec4cabe97fe3570bf
   languageName: node
   linkType: hard
 
-"@modjo/sentry@npm:1.11.0":
-  version: 1.11.0
-  resolution: "@modjo/sentry@npm:1.11.0"
+"@modjo/sentry@npm:1.11.1":
+  version: 1.11.1
+  resolution: "@modjo/sentry@npm:1.11.1"
   dependencies:
     "@sentry/node": "npm:^8.15.0"
     "@sentry/profiling-node": "npm:^8.15.0"
     nctx: "npm:^2.2.0"
-  checksum: 10/8ac1e4ea0ecfb81aaa5d6e2d043c7ba06ab3e5aa4307dbf10f261b7b28cf38dd38ccaa3033ce31fc3f423f4a6d4c580af317cd301e3a7811f1449185483f69c4
+  checksum: 10/41f8641e6c32ee32496eaa88e0b080a3479850560f903ca7709b45b2e3270413e8eb7eb8850c3fa50a0f9a5db72318056cf63f6c0605a419fc8c21195e0da38e
   languageName: node
   linkType: hard
 
