@@ -7,7 +7,8 @@
     "git-lfs",
     "curl",
     "jq",
-    "tilt"
+    "tilt",
+    "fastlane@latest"
   ],
   "shell": {
     "init_hook": [
@@ -25,7 +26,7 @@
       "",
       "# Local PostgreSQL configuration",
       "export PGHOST=localhost",
-      "export PGUSER=dev", 
+      "export PGUSER=dev",
       "export PGPASSWORD=dev",
       "export PGPORT=${EXPOSE_PG_PORT:-4204}",
       "",
@@ -41,14 +42,14 @@
       ""
     ],
     "scripts": {
-      "dev": "yarn dev",
-      "dev:up": "yarn dev:up",
+      "dev":      "yarn dev",
+      "dev:up":   "yarn dev:up",
       "dev:logs": "yarn dev:logs",
-      "console": "scripts/console"
+      "console":  "scripts/console"
     }
   },
   "env": {
-    "NODE_ENV": "development",
+    "NODE_ENV":  "development",
     "LOCAL_DEV": "true"
   }
 }

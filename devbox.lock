@@ -21,6 +21,54 @@
         }
       }
     },
+    "fastlane@latest": {
+      "last_modified": "2026-05-20T06:38:13Z",
+      "resolved": "github:NixOS/nixpkgs/d99b013d5d1931ad77fe3912ed218170dec5d9a4#fastlane",
+      "source": "devbox-search",
+      "version": "2.232.2",
+      "systems": {
+        "aarch64-darwin": {
+          "outputs": [
+            {
+              "name": "out",
+              "path": "/nix/store/nl9l6qs46q2rd2y79aml307k9fyfj5ck-fastlane-2.232.2",
+              "default": true
+            }
+          ],
+          "store_path": "/nix/store/nl9l6qs46q2rd2y79aml307k9fyfj5ck-fastlane-2.232.2"
+        },
+        "aarch64-linux": {
+          "outputs": [
+            {
+              "name": "out",
+              "path": "/nix/store/3skjmb826na0cz2rr8s80d16a4jc1bz2-fastlane-2.232.2",
+              "default": true
+            }
+          ],
+          "store_path": "/nix/store/3skjmb826na0cz2rr8s80d16a4jc1bz2-fastlane-2.232.2"
+        },
+        "x86_64-darwin": {
+          "outputs": [
+            {
+              "name": "out",
+              "path": "/nix/store/hfk079ssc25j7kmaz8qw3n4mk8qhhsgs-fastlane-2.232.2",
+              "default": true
+            }
+          ],
+          "store_path": "/nix/store/hfk079ssc25j7kmaz8qw3n4mk8qhhsgs-fastlane-2.232.2"
+        },
+        "x86_64-linux": {
+          "outputs": [
+            {
+              "name": "out",
+              "path": "/nix/store/i0fdkc7g2i0gc1jbcjl3vapf09pk3gi1-fastlane-2.232.2",
+              "default": true
+            }
+          ],
+          "store_path": "/nix/store/i0fdkc7g2i0gc1jbcjl3vapf09pk3gi1-fastlane-2.232.2"
+        }
+      }
+    },
     "git": {
       "resolved": "github:NixOS/nixpkgs/ca77296380960cd497a765102eeb1356eb80fed0?narHash=sha256-PgLSZDBEWUHpfTRfFyklmiiLBE1i1aGCtz4eRA3POao%3D#git",
       "source": "nixpkg",
