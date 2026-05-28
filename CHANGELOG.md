@@ -2,6 +2,14 @@
 
 All notable changes to this project will be documented in this file. See [commit-and-tag-version](https://github.com/absolute-version/commit-and-tag-version) for commit guidelines.
 
+## [1.17.8](https://codeberg.org/alerte-secours/alerte-secours/compare/v1.17.7...v1.17.8) (2026-05-28)
+
+
+### Bug Fixes
+
+* **android:** keep avatar cropper toolbar on-screen on Android 15+ ([9b446aa](https://codeberg.org/alerte-secours/alerte-secours/commit/9b446aa2e53123e05caf05e67d5c9b81ea18bd36))
+* **env:** inherit devbox toolchain in app/.envrc ([3f58876](https://codeberg.org/alerte-secours/alerte-secours/commit/3f5887661a961915a6cd99354a0b7841ce0ee124))
+
 ## [1.17.7](https://codeberg.org/alerte-secours/alerte-secours/compare/v1.17.6...v1.17.7) (2026-05-09)
 
 ## [1.17.6](https://codeberg.org/alerte-secours/alerte-secours/compare/v1.17.5...v1.17.6) (2026-03-25)
