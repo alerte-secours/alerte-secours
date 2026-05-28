@@ -194,6 +194,7 @@ let config = {
       "expo-audio",
       "./plugins/withXcode15Fix",
       "./plugins/withCustomScheme", // Preserve URL schemes during prebuild
+      "./plugins/withUCropEdgeToEdge", // Fix uCrop toolbar under status bar on Android 15+
     ],
     // Disable Flipper
     extra: {

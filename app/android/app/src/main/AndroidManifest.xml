@@ -79,6 +79,7 @@
       </intent-filter>
     </activity>
     <activity android:name="com.facebook.react.devsupport.DevSettingsActivity" android:exported="false"/>
+    <activity android:name="com.yalantis.ucrop.UCropActivity" android:theme="@style/Theme.App.UCrop" tools:replace="android:theme"/>
     <provider android:name="com.facebook.drawee.backends.pipeline.FrescoInitProvider" tools:node="remove"/>
     <provider android:name=".FrescoInitProvider" android:authorities="${applicationId}.frescoinit" android:exported="false" android:initOrder="100"/>
   </application>
