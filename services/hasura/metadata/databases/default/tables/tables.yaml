@@ -37,5 +37,6 @@
 - "!include public_user_login_request.yaml"
 - "!include public_user_phone_number_relative.yaml"
 - "!include public_user_role.yaml"
+- "!include public_view_email_registered_result.yaml"
 - "!include public_view_relative_invitation_phone_number.yaml"
 - "!include public_view_relative_phone_number.yaml"

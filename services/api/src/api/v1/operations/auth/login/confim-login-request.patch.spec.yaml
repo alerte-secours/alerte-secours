@@ -35,7 +35,17 @@ responses:
         schema:
           type: object
           properties: {}
-  
+
+  403:
+    description: Caller did not initiate this login request
+    content:
+      application/json:
+        schema:
+          type: object
+          properties:
+            message:
+              type: string
+
   404:
     description: Request Login not found
     content:

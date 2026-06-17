@@ -72,12 +72,6 @@ select_permissions:
       filter:
         user_id:
           _eq: X-Hasura-User-Id
-  - role: public_anon
-    permission:
-      columns:
-        - email
-      filter: {}
-    comment: ""
 delete_permissions:
   - role: owner
     permission:

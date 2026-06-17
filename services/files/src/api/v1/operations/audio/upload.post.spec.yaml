@@ -37,3 +37,12 @@ responses:
           required:
             - messageId
             - audioFileUuid
+  403:
+    description: Caller is not a participant of this alert
+    content:
+      application/json:
+        schema:
+          type: object
+          properties:
+            message:
+              type: string

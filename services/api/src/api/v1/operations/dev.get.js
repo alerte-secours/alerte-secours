@@ -1,3 +1,4 @@
+const httpError = require("http-errors")
 const { ctx } = require("@modjo/core")
 
 function getRandomInRange(from, to, fixed) {
@@ -27,6 +28,13 @@ function forHumans(seconds) {
 
 module.exports = function () {
   return async function dev() {
+    // Foot-gun guard: this endpoint inserts 10M rows. Even though it is
+    // admin-only, keep it disabled unless explicitly enabled, so it can never be
+    // triggered in production by a misconfigured role.
+    if (process.env.ENABLE_DEV_ENDPOINTS !== "true") {
+      throw httpError(404)
+    }
+
     const sql = ctx.require("postgres")
 
     const startTime = new Date()

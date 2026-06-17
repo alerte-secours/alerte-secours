@@ -1,6 +1,7 @@
 const httpError = require("http-errors")
 const { nanoid } = require("nanoid")
 const { ctx } = require("@modjo/core")
+const { reqCtx } = require("@modjo/express/ctx")
 
 module.exports = async function ({ services: { signJwt } }) {
   const sql = ctx.require("postgres")
@@ -64,6 +65,24 @@ module.exports = async function ({ services: { signJwt } }) {
     }
 
     logger.info({ loginRequestId }, "Login request is valid and not expired")
+
+    // Security: a login request may only be confirmed by the very session that
+    // initiated it. `user_login_request.user_id` is the initiating (anonymous)
+    // account; the app always confirms with that same session. Without this
+    // check, loginRequestId being a serial integer, any authenticated user could
+    // enumerate pending requests and claim another user's account (account takeover).
+    const session = reqCtx.get("session")
+    if (!session || userLoginRequest.userId !== session.userId) {
+      logger.warn(
+        {
+          loginRequestId,
+          requesterUserId: userLoginRequest.userId,
+          sessionUserId: session?.userId,
+        },
+        "Login request confirmation rejected: caller did not initiate the request"
+      )
+      throw httpError(403, "forbidden")
+    }
 
     let userId
     logger.info({ loginRequestId, type }, "Resolving user ID by login type")

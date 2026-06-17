@@ -73,6 +73,66 @@ const checkSentryEnabled = async () => {
   return true;
 };
 
+// --- PII / secret scrubbing -------------------------------------------------
+// This is an emergency app: Sentry events must never carry auth tokens, phone
+// numbers, emails, alert access codes, etc. We redact by key name and by value
+// shape (JWT / email / phone), recursively, on every event and breadcrumb.
+const REDACTED = "[redacted]";
+const SENSITIVE_KEY_RE =
+  /token|jwt|bearer|authorization|cookie|password|secret|sign[_-]?key|auth[_-]?token|connection[_-]?code|verification[_-]?code|access[_-]?code|otp|api[_-]?key/i;
+const JWT_RE = /\beyJ[A-Za-z0-9_-]+\.[A-Za-z0-9_-]+\.[A-Za-z0-9_-]+\b/g;
+const EMAIL_RE = /\b[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}\b/g;
+const PHONE_RE = /\+?\d[\d\s().-]{6,}\d/g;
+
+const redactString = (str) => {
+  if (typeof str !== "string") return str;
+  return str
+    .replace(JWT_RE, REDACTED)
+    .replace(EMAIL_RE, REDACTED)
+    .replace(PHONE_RE, (m) =>
+      m.replace(/\D/g, "").length >= 7 ? REDACTED : m,
+    );
+};
+
+const scrub = (value, depth = 0) => {
+  if (value == null || depth > 8) return value;
+  if (typeof value === "string") return redactString(value);
+  if (Array.isArray(value)) return value.map((v) => scrub(v, depth + 1));
+  if (typeof value === "object") {
+    const out = {};
+    for (const [k, v] of Object.entries(value)) {
+      out[k] = SENSITIVE_KEY_RE.test(k) ? REDACTED : scrub(v, depth + 1);
+    }
+    return out;
+  }
+  return value;
+};
+
+const scrubEvent = (event) => {
+  try {
+    if (event.message) event.message = redactString(event.message);
+    if (event.extra) event.extra = scrub(event.extra);
+    if (event.contexts) event.contexts = scrub(event.contexts);
+    if (event.request) event.request = scrub(event.request);
+    if (event.exception?.values) {
+      event.exception.values = event.exception.values.map((v) => ({
+        ...v,
+        value: redactString(v.value),
+      }));
+    }
+    if (event.breadcrumbs) {
+      event.breadcrumbs = event.breadcrumbs.map((b) => ({
+        ...b,
+        message: redactString(b.message),
+        data: scrub(b.data),
+      }));
+    }
+  } catch {
+    // Never let a scrubbing bug drop error reporting entirely.
+  }
+  return event;
+};
+
 // Initialize Sentry with user preference check
 const initializeSentry = async () => {
   const isEnabled = await checkSentryEnabled();
@@ -117,11 +177,15 @@ const initializeSentry = async () => {
         }));
       }
 
-      return event;
+      return scrubEvent(event);
     },
     beforeBreadcrumb(breadcrumb) {
-      if (breadcrumb.category === "console") {
-        return breadcrumb;
+      try {
+        if (breadcrumb.message)
+          breadcrumb.message = redactString(breadcrumb.message);
+        if (breadcrumb.data) breadcrumb.data = scrub(breadcrumb.data);
+      } catch {
+        // Never let a scrubbing bug suppress breadcrumbs.
       }
       return breadcrumb;
     },

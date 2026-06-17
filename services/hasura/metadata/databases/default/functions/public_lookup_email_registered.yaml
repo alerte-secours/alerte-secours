@@ -1,0 +1,9 @@
+function:
+  name: lookup_email_registered
+  schema: public
+configuration:
+  custom_name: lookupEmailRegistered
+  custom_root_fields: {}
+  exposed_as: query
+permissions:
+  - role: user

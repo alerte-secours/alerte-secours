@@ -37,10 +37,26 @@ module.exports = ({ services }) => {
         "auth_token"
       WHERE
         "auth_token" = ${authToken}
+        AND ("expires_at" IS NULL
+          OR "expires_at" > now())
       `
     if (!row) {
       throw httpError(410, "Auth token not found")
     }
+
+    // Sliding expiry: the auth_token is the long-lived credential exchanged for a
+    // short-lived bearer. Refresh its 1-year window on every exchange so active
+    // devices never expire, while a leaked/forgotten token dies after a year of
+    // inactivity. No backfill / forced expiry of existing tokens — an inactive
+    // user is never locked out mid-emergency; they simply get a window on next use.
+    await sql`
+      UPDATE
+        "auth_token"
+      SET
+        "expires_at" = now() + interval '1 year'
+      WHERE
+        "auth_token" = ${authToken}
+      `
 
     userId = row.userId
     deviceId = row.deviceId

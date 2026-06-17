@@ -1,5 +1,6 @@
 const { ctx } = require("@modjo/core")
 const { reqCtx } = require("@modjo/express/ctx")
+const httpError = require("http-errors")
 
 const { v4: uuidv4 } = require("uuid")
 
@@ -21,6 +22,30 @@ module.exports = function () {
     const session = reqCtx.require("session")
 
     const { userId, deviceId } = session
+
+    // Security: mirror the Hasura `message` insert rule
+    // (oneAlert.manyAlerting.user_id == X-Hasura-User-Id). This service writes
+    // via admin SQL and bypasses RLS, so without this check any authenticated
+    // user could post audio onto an arbitrary alertId they have no relation to.
+    // Every legitimate participant (alert creator and connected responders) has
+    // an `alerting` row, so this does not restrict normal usage.
+    const [membership] = await sql`
+      SELECT
+        1
+      FROM
+        "alerting"
+      WHERE
+        "alert_id" = ${alertId}
+        AND "user_id" = ${userId}
+      LIMIT 1
+      `
+    if (!membership) {
+      logger.warn(
+        { alertId, userId },
+        "Audio upload rejected: user is not a participant of this alert"
+      )
+      throw httpError(403, "not a participant of this alert")
+    }
 
     const audioFileUuid = uuidv4()
 

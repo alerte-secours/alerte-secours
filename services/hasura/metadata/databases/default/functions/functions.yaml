@@ -1,4 +1,5 @@
 - "!include public_aknowledge_alerting.yaml"
+- "!include public_lookup_email_registered.yaml"
 - "!include public_upsert_one_relative_by_invitation_id.yaml"
 - "!include public_upsert_one_relative_by_phone_number_id.yaml"
 - "!include public_upsert_one_relative_invitation_by_phone_number_id.yaml"

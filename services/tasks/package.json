@@ -19,7 +19,7 @@
     "@vercel/ncc": "^0.30.0",
     "@what3words/api": "^4.0.4",
     "async": "^3.2.5",
-    "axios": "^0.24.0",
+    "axios": "^1.7.7",
     "common": "workspace:^",
     "cross-fetch": "^3.1.4",
     "eta": "^3.2.0",

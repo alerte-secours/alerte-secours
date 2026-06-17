@@ -10,7 +10,7 @@ export default function useCheckEmailRegistered() {
       const { data } = await isEmailRegistered({
         variables: { email },
       });
-      return data?.selectManyEmail.length > 0;
+      return data?.lookupEmailRegistered?.[0]?.registered ?? false;
     },
     [isEmailRegistered],
   );

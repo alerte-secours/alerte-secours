@@ -98,9 +98,9 @@
           <key>NSExceptionAllowsInsecureHTTPLoads</key>
           <false/>
           <key>NSExceptionMinimumTLSVersion</key>
-          <string>TLSv1.0</string>
+          <string>TLSv1.2</string>
           <key>NSExceptionRequiresForwardSecrecy</key>
-          <false/>
+          <true/>
           <key>NSIncludesSubdomains</key>
           <true/>
         </dict>
@@ -114,9 +114,9 @@
         <key>sentry.io</key>
         <dict>
           <key>NSExceptionMinimumTLSVersion</key>
-          <string>TLSv1.0</string>
+          <string>TLSv1.2</string>
           <key>NSExceptionRequiresForwardSecrecy</key>
-          <false/>
+          <true/>
           <key>NSIncludesSubdomains</key>
           <true/>
         </dict>

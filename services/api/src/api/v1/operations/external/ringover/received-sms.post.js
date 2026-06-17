@@ -38,7 +38,15 @@ function isTimestampExpired(timestampStr) {
   const timestampDate = new Date(Number(timestampStr) * 1000)
   const currentDate = new Date()
   const differenceInMilliseconds = currentDate - timestampDate
-  return differenceInMilliseconds <= 2 * 3600000 // 2 hours
+  // Valid only within [now-2h, now+5min]. The upper bound enforces the 2h
+  // expiry; the lower bound rejects future-dated timestamps. Previously a
+  // future timestamp yielded a negative diff that still satisfied `<= 2h`, so a
+  // code could be minted valid indefinitely (replay). 5min tolerates clock skew.
+  const FIVE_MINUTES = 5 * 60 * 1000
+  return (
+    differenceInMilliseconds >= -FIVE_MINUTES &&
+    differenceInMilliseconds <= 2 * 3600000
+  )
 }
 
 function generateSignature(signKey, userId, timestamp) {

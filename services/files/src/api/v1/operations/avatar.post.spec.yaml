@@ -21,3 +21,12 @@ responses:
               format: uuid
           required:
             - imageFileUuid
+  415:
+    description: Uploaded file is not a supported image type
+    content:
+      application/json:
+        schema:
+          type: object
+          properties:
+            message:
+              type: string

@@ -9,12 +9,15 @@ configuration:
       custom_name: createdAt
     device_id:
       custom_name: deviceId
+    expires_at:
+      custom_name: expiresAt
     user_id:
       custom_name: userId
   custom_column_names:
     auth_token: authToken
     created_at: createdAt
     device_id: deviceId
+    expires_at: expiresAt
     user_id: userId
   custom_root_fields:
     delete: deleteManyAuthToken

@@ -1,0 +1,25 @@
+table:
+  name: view_email_registered_result
+  schema: public
+configuration:
+  column_config: {}
+  custom_column_names: {}
+  custom_root_fields:
+    delete: deleteManyViewEmailRegisteredResult
+    delete_by_pk: deleteOneViewEmailRegisteredResult
+    insert: insertManyViewEmailRegisteredResult
+    insert_one: insertOneViewEmailRegisteredResult
+    select: selectManyViewEmailRegisteredResult
+    select_aggregate: selectAggViewEmailRegisteredResult
+    select_by_pk: selectOneViewEmailRegisteredResult
+    select_stream: selectStreamViewEmailRegisteredResult
+    update: updateManyViewEmailRegisteredResult
+    update_by_pk: updateOneViewEmailRegisteredResult
+    update_many: updateBatchViewEmailRegisteredResult
+select_permissions:
+  - role: user
+    permission:
+      columns:
+        - registered
+      filter: {}
+    comment: Boolean-only result type for lookup_email_registered; exposes no email.

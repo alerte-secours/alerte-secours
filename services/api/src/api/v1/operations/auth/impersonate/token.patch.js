@@ -3,6 +3,7 @@ const { nanoid } = require("nanoid")
 const { validate: validateUUID } = require("uuid")
 
 const { ctx } = require("@modjo/core")
+const { reqCtx } = require("@modjo/express/ctx")
 
 const isInteger = require("common/oapi/validators/is-integer")
 const {
@@ -101,7 +102,7 @@ module.exports = async function ({ services: { signJwt } }) {
         if (!user) {
           throw httpError(404, "username not found")
         }
-        userId = user.Id
+        userId = user.id
         break
       }
       default: {
@@ -134,6 +135,22 @@ module.exports = async function ({ services: { signJwt } }) {
     if (user.deleted) {
       throw httpError(422, "user is deleted")
     }
+
+    // Audit: impersonation issues a fully authoritative token for another user.
+    // Record who impersonated whom so the action is traceable if a `dev` account
+    // is ever misused.
+    const logger = ctx.require("logger")
+    const session = reqCtx.get("session")
+    logger.warn(
+      {
+        impersonatorUserId: session?.userId,
+        impersonatorDeviceId: session?.deviceId,
+        targetUserId: userId,
+        targetDeviceId: deviceId,
+        targetKind,
+      },
+      "AUDIT: account impersonation token issued"
+    )
 
     const plainAuthToken = nanoid()
     await sql`
