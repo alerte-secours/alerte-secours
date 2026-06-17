@@ -72,6 +72,16 @@ select_permissions:
       filter:
         user_id:
           _eq: X-Hasura-User-Id
+  - role: public_anon
+    permission:
+      columns:
+        - email
+      filter: {}
+    comment: "RETRO-COMPAT (C2 security review): kept so the CURRENT published app's
+      email-registered check (selectManyEmail, used by account recovery in
+      ConnectViaEmail) keeps working. The new app uses lookupEmailRegistered()
+      instead; once it is published & adopted, REMOVE this permission to close the
+      email-enumeration vector."
 delete_permissions:
   - role: owner
     permission:
