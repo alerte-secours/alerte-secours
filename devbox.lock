@@ -112,7 +112,7 @@
       }
     },
     "nodejs_20": {
-      "plugin_version": "0.0.2",
+      "plugin_version": "0.0.3",
       "resolved": "github:NixOS/nixpkgs/ca77296380960cd497a765102eeb1356eb80fed0?narHash=sha256-PgLSZDBEWUHpfTRfFyklmiiLBE1i1aGCtz4eRA3POao%3D#nodejs_20",
       "source": "nixpkg",
       "systems": {
