@@ -1,6 +1,6 @@
 {
   "name": "alerte-secours",
-  "version": "1.17.8",
+  "version": "1.17.9",
   "main": "index.js",
   "scripts": {
     "start": "expo start --dev-client --private-key-path ./keys/private-key.pem",
@@ -57,8 +57,8 @@
     "useful-places:ensure": "./scripts/ensure-useful-places-data.sh"
   },
   "customExpoVersioning": {
-    "versionCode": 252,
-    "buildNumber": 252
+    "versionCode": 253,
+    "buildNumber": 253
   },
   "_moduleAliases": {
     "~": "src"

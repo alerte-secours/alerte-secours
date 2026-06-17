@@ -2,6 +2,15 @@
 
 All notable changes to this project will be documented in this file. See [commit-and-tag-version](https://github.com/absolute-version/commit-and-tag-version) for commit guidelines.
 
+## [1.17.9](https://codeberg.org/alerte-secours/alerte-secours/compare/v1.17.8...v1.17.9) (2026-06-17)
+
+
+### Bug Fixes
+
+* **hasura:** defer public_anon email removal until app rollout ([81a90b5](https://codeberg.org/alerte-secours/alerte-secours/commit/81a90b5a86d976db624e7f26c2cd056f93d66101))
+* **ios:** manage App Transport Security via app.config.js (M6) ([6f95a00](https://codeberg.org/alerte-secours/alerte-secours/commit/6f95a0078ce13afd03938640de33956ba2c18dcc))
+* **security:** remediate security review findings ([e683b9f](https://codeberg.org/alerte-secours/alerte-secours/commit/e683b9f8e2fb0a9ab54ad4a6b8f3251f6a7a3f50))
+
 ## [1.17.8](https://codeberg.org/alerte-secours/alerte-secours/compare/v1.17.7...v1.17.8) (2026-05-28)
 
 
