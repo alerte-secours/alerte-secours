@@ -138,6 +138,30 @@ let config = {
           "com.transistorsoft.fetch",
           "com.transistorsoft.customtask",
         ],
+        // App Transport Security (M6 security review): enforce TLS 1.2 + forward
+        // secrecy for our own domains and Sentry; only localhost (dev) may use
+        // cleartext. Managed here so `expo prebuild` regenerates Info.plist with it
+        // (previously edited directly in Info.plist, which prebuild would reset).
+        NSAppTransportSecurity: {
+          NSAllowsArbitraryLoads: false,
+          NSExceptionDomains: {
+            "alertesecours.fr": {
+              NSExceptionAllowsInsecureHTTPLoads: false,
+              NSExceptionMinimumTLSVersion: "TLSv1.2",
+              NSExceptionRequiresForwardSecrecy: true,
+              NSIncludesSubdomains: true,
+            },
+            localhost: {
+              NSExceptionAllowsInsecureHTTPLoads: true,
+              NSIncludesSubdomains: true,
+            },
+            "sentry.io": {
+              NSExceptionMinimumTLSVersion: "TLSv1.2",
+              NSExceptionRequiresForwardSecrecy: true,
+              NSIncludesSubdomains: true,
+            },
+          },
+        },
       },
       UIBackgroundModes: ["location", "fetch", "processing"],
       TSLocationManagerLicense: process.env.BACKGROUND_GEOLOCATION_LICENSE_IOS,
