@@ -32,11 +32,10 @@ module.exports = async function () {
         return
       }
 
-      const { words, nearestPlace } = what3wordsResult
+      const { words } = what3wordsResult
 
-      const fields = isLast
-        ? { last_what3words: words, last_nearest_place: nearestPlace }
-        : { what3words: words, nearest_place: nearestPlace }
+      // nearest_place is owned by geocodeAlertGuessAddress
+      const fields = isLast ? { last_what3words: words } : { what3words: words }
 
       await sql`
         UPDATE

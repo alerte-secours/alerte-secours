@@ -31,13 +31,23 @@ module.exports = async function () {
         logger.error({ params }, "Failed to get geocode reverse result")
         return
       }
-      const { display_name: address } = result
+      const { display_name: address, nearestPlace } = result
 
-      if (!address) {
-        return
+      const fields = {}
+      if (address) {
+        fields[isLast ? "last_address" : "address"] = address
+      }
+      if (nearestPlace) {
+        fields[isLast ? "last_nearest_place" : "nearest_place"] = nearestPlace
       }
 
-      const fields = isLast ? { last_address: address } : { address }
+      if (Object.keys(fields).length === 0) {
+        logger.warn(
+          { params, result },
+          "geocode reverse result has no usable field"
+        )
+        return
+      }
 
       await sql`
         UPDATE

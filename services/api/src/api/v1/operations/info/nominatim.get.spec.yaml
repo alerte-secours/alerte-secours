@@ -24,4 +24,6 @@ responses:
           properties:
             address:
               type: string
+            nearestPlace:
+              type: string
             

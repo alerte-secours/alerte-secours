@@ -11,9 +11,9 @@ module.exports = function ({ services: { middlewareRateLimiterIpUser } }) {
     if (!result) {
       return
     }
-    const { display_name: displayName } = result
+    const { display_name: displayName, nearestPlace } = result
     const address = displayName || ""
-    return { address }
+    return { address, nearestPlace: nearestPlace || "" }
   }
   return [
     middlewareRateLimiterIpUser({

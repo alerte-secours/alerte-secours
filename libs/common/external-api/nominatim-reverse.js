@@ -3,6 +3,20 @@ const qs = require("qs")
 const { ctx } = require("@modjo/core")
 // see https://nominatim.org/release-docs/latest/api/Reverse/
 
+// human-readable locality, formatted as "Bayonne, Nouvelle-Aquitaine"
+// reverse returns addressdetails by default, no need to ask for them
+function getNearestPlace(address = {}) {
+  const locality =
+    address.village ||
+    address.town ||
+    address.city ||
+    address.municipality ||
+    address.hamlet ||
+    address.suburb
+  const region = address.state || address.county
+  return [locality, region].filter(Boolean).join(", ")
+}
+
 module.exports = async function nominatimReverse(coords, options = {}) {
   const config = ctx.get("config.project")
   const { nominatimUrl } = config
@@ -34,7 +48,7 @@ module.exports = async function nominatimReverse(coords, options = {}) {
         "nominatim server did not answer with a HTTP code 200"
       )
     }
-    data = res.data
+    data = { ...res.data, nearestPlace: getNearestPlace(res.data?.address) }
   } catch (e) {
     if (e.response?.data)
       logger.error(

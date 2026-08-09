@@ -5,6 +5,17 @@ const { ctx } = require("@modjo/core")
 
 const DEFAULT_URL = "https://data.geopf.fr/geocodage"
 
+// human-readable locality, formatted as "Bayonne, Nouvelle-Aquitaine"
+// context is "<dept code>, <dept name>, <region name>", region is its last part
+function getNearestPlace(properties = {}) {
+  const contextParts = (properties.context || "")
+    .split(",")
+    .map((part) => part.trim())
+    .filter(Boolean)
+  const region = contextParts[contextParts.length - 1]
+  return [properties.city, region].filter(Boolean).join(", ")
+}
+
 module.exports = async function geoplatformeReverse(coords, options = {}) {
   const config = ctx.get("config.project")
   const geoplatformeUrl = config.geoplatformeUrl || DEFAULT_URL
@@ -43,6 +54,7 @@ module.exports = async function geoplatformeReverse(coords, options = {}) {
       // Map GeoJSON feature to Nominatim-compatible shape
       data = {
         display_name: feature.properties.label || "",
+        nearestPlace: getNearestPlace(feature.properties),
       }
     }
   } catch (e) {
