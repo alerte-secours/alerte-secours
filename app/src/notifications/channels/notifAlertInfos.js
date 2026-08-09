@@ -54,15 +54,13 @@ export default async function notifAlertInfos(data) {
     });
     return;
   }
-  const { code, level, what3Words, address, nearestPlace } =
-    alertData.selectOneAlert;
+  const { code, level, address, nearestPlace } = alertData.selectOneAlert;
 
   const largeIcon = largeIcons[level];
 
   // Generate notification content
   const { title, body, bigText } = generateAlertEmergencyInfoContent({
     code,
-    what3Words,
     address,
     nearestPlace,
   });
@@ -75,7 +73,6 @@ export default async function notifAlertInfos(data) {
     largeIcon,
     color: custom.appColors[level],
     bigText,
-    data,
     data,
     android: {
       pressAction: {

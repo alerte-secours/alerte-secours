@@ -21,7 +21,7 @@ import { normalizeNumber } from "~/utils/phone";
 import AlertInfoLineSubject from "~/containers/AlertInfoLines/Subject";
 import AlertInfoLineAddress from "~/containers/AlertInfoLines/Address";
 import AlertInfoLineNear from "~/containers/AlertInfoLines/Near";
-import AlertInfoLineW3w from "~/containers/AlertInfoLines/W3w";
+import AlertInfoLinePlusCode from "~/containers/AlertInfoLines/PlusCode";
 import AlertInfoLineRadius from "~/containers/AlertInfoLines/Radius";
 import AlertInfoLineSentBy from "~/containers/AlertInfoLines/SentBy";
 import AlertInfoLineNotifiedCount from "~/containers/AlertInfoLines/NotifiedCount";
@@ -255,7 +255,7 @@ export default function AlertRow({ row, isLast, isFirst, sortBy }) {
           <AlertInfoLineSubject alert={alert} isFirst />
           <AlertInfoLineAddress alert={alert} />
           <AlertInfoLineNear alert={alert} />
-          <AlertInfoLineW3w alert={alert} />
+          <AlertInfoLinePlusCode alert={alert} />
           <AlertInfoLineNotifiedCount alert={alert} />
           <AlertInfoLineRadius alert={alert} />
           <AlertInfoLineSentBy alert={alert} />

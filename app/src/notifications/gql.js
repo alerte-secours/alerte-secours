@@ -32,7 +32,6 @@ export const ALERT_INFOS_QUERY = gql`
       id
       code
       level
-      what3Words
       address
       nearestPlace
     }

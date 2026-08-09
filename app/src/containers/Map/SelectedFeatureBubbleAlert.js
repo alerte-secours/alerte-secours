@@ -10,6 +10,7 @@ import useTimeDisplay from "~/hooks/useTimeDisplay";
 import { useNavigation } from "@react-navigation/native";
 import { createStyles, useTheme } from "~/theme";
 import { alertActions } from "~/stores";
+import getPlusCode from "~/lib/geo/getPlusCode";
 
 export default function SelectedFeatureBubbleAlert({ feature, close }) {
   const { properties = {} } = feature;
@@ -109,8 +110,10 @@ export default function SelectedFeatureBubbleAlert({ feature, close }) {
             <Text style={styles.contentTextValue}>{alert.address}</Text>
           </View>
           <View style={styles.contentLine}>
-            <Text style={styles.contentText}>Localisation en 3 mots :</Text>
-            <Text style={styles.contentTextValue}>{alert.what3Words}</Text>
+            <Text style={styles.contentText}>Plus Code :</Text>
+            <Text style={styles.contentTextValue}>
+              {getPlusCode(feature.geometry.coordinates)}
+            </Text>
           </View>
           <TouchableRipple style={styles.alertLinkButton} onPress={goToAlert}>
             <View style={styles.alertLinkContent}>

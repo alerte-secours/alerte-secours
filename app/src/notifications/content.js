@@ -27,12 +27,11 @@ export const generateAlertContent = (data) => {
 export const generateAlertEmergencyInfoContent = (data) => {
   const {
     code,
-    what3words = "Non disponible",
     address = "Non disponible",
     nearestPlace = "Non disponible",
   } = data;
 
-  const localisationText = `Localisation en 3 mots: ${what3words}.\nAdresse: ${address}.\nÀ proximité de: ${nearestPlace}.`;
+  const localisationText = `Adresse: ${address}.\nÀ proximité de: ${nearestPlace}.`;
   const text = `${localisationText}`;
   const bigText = ` ${localisationText}\nCode Alerte-Secours #${code}.`;
 

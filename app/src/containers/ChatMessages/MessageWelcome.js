@@ -63,10 +63,6 @@ export default function MessageWelcome() {
             <View style={styles.contentLine}>
               <Text style={styles.contentText}>Depuis l'adresse :</Text>
               <Text style={styles.contentTextValue}>{alert.address}</Text>
-            </View>
-            <View style={styles.contentLine}>
-              <Text style={styles.contentText}>Localisation en 3 mots :</Text>
-              <Text style={styles.contentTextValue}>{alert.what3Words}</Text>
             </View> */}
             <View style={[styles.contentLine, styles.contentLineBottom]}>
               <Text style={[styles.contentText, styles.contentTextBottom]}>

@@ -18,7 +18,7 @@ Fonctionalités:
 - vous raproche de vos concitoyens et vous relie à la communauté augmente vos chances de pouvoir devenir le héros dont votre prochain a besoin, peut-être pas très loin de vous, en ce moment même
 
 Aux services de secours
-- localiser plus efficacement les personnes en difficulté (géolocalisation, what3words, géocodage inversé)
+- localiser plus efficacement les personnes en difficulté (géolocalisation, Plus Code, géocodage inversé)
 - confirmer la validité des informations grâce au recoupement des informations partagées par les citoyens
 - suivre en temps réel la situation sur le terrain grâce aux remontées d'informations fournies pour les citoyens
 - communiquer avec les citoyens déjà présents sur le terrain

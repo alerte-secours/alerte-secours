@@ -13,10 +13,8 @@ const ALERT_FIELDS_FRAGMENT = gql`
     createdAt
     closedAt
     address
-    what3Words
     nearestPlace
     lastAddress
-    lastWhat3Words
     lastNearestPlace
     username
     code

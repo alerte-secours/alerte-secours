@@ -2,52 +2,42 @@ import React, { useMemo, useEffect, useState } from "react";
 import { View, ScrollView, AppState } from "react-native";
 import { Title, Button } from "react-native-paper";
 import Text from "~/components/Text";
-import { OpenLocationCode } from "open-location-code";
 import { useQuery } from "@apollo/client";
 import * as Location from "expo-location";
 
 import useLocation from "~/hooks/useLocation";
+import getPlusCode from "~/lib/geo/getPlusCode";
 import getTimeDisplay from "~/utils/time/getTimeDisplay";
 import requestPermissionLocationForeground from "~/permissions/requestPermissionLocationForeground";
 import openSettings from "~/lib/native/openSettings";
 
-import { QUERY_GET_WHAT3WORDS, QUERY_GET_NOMINATIM } from "./gql";
+import { QUERY_GET_NOMINATIM } from "./gql";
 import LittleLoader from "~/components/LittleLoader";
 import { createStyles } from "~/theme";
 import Loader from "~/components/Loader";
 import MapLinksButton from "~/containers/MapLinksButton";
 
 export default function LocationScene() {
-  const openLocationCode = useMemo(() => new OpenLocationCode(), []);
   const { coords, isLastKnown, lastKnownTimestamp, reload } = useLocation();
   const [permissionStatus, setPermissionStatus] = useState(null);
 
   const { latitude, longitude } = coords;
 
-  const plusCode = useMemo(() => {
-    if (latitude && longitude) {
-      return openLocationCode.encode(latitude, longitude);
-    }
-    return null;
-  }, [latitude, longitude, openLocationCode]);
+  const plusCode = useMemo(
+    () => getPlusCode([longitude, latitude]),
+    [latitude, longitude],
+  );
 
-  const queryWhat3words = useQuery(QUERY_GET_WHAT3WORDS, {
-    variables: { latitude, longitude },
-    skip: !(latitude && longitude),
-  });
   const queryNominatim = useQuery(QUERY_GET_NOMINATIM, {
     variables: { latitude, longitude },
     skip: !(latitude && longitude),
   });
 
-  const words = useMemo(() => {
-    return queryWhat3words.data?.getOneInfoWhat3Words.words || "-";
-  }, [queryWhat3words.data]);
   const nearestPlace = useMemo(() => {
-    if (queryWhat3words.data) {
-      return queryWhat3words.data?.getOneInfoWhat3Words.nearestPlace || "-";
+    if (queryNominatim.data) {
+      return queryNominatim.data?.getOneInfoNominatim.nearestPlace || "-";
     }
-  }, [queryWhat3words.data]);
+  }, [queryNominatim.data]);
   const address = useMemo(() => {
     return queryNominatim.data?.getOneInfoNominatim.address || "-";
   }, [queryNominatim.data]);
@@ -95,13 +85,6 @@ export default function LocationScene() {
           </View>
         )}
         <View style={styles.coordsContainer}>
-          <View style={styles.coordsRow}>
-            <Text style={styles.coordsRowLabel}>En 3 mots : </Text>
-            {queryWhat3words.loading && <LittleLoader style={styles.loader} />}
-            {!queryWhat3words.loading && words && (
-              <Text style={styles.coordRowValue}>{words}</Text>
-            )}
-          </View>
           {plusCode && (
             <View style={styles.coordsRow}>
               <Text style={styles.coordsRowLabel}>Plus Code : </Text>
@@ -125,8 +108,8 @@ export default function LocationScene() {
           </View>
           <View style={styles.coordsRow}>
             <Text style={styles.coordsRowLabel}>À proximité de : </Text>
-            {queryWhat3words.loading && <LittleLoader style={styles.loader} />}
-            {!queryWhat3words.loading && nearestPlace && (
+            {queryNominatim.loading && <LittleLoader style={styles.loader} />}
+            {!queryNominatim.loading && nearestPlace && (
               <Text style={styles.coordRowValue}>{nearestPlace}</Text>
             )}
           </View>

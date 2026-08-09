@@ -20,7 +20,6 @@ export const ALERTED_FIELDS = gql`
       location
       createdAt
       address
-      what3Words
       nearestPlace
       username
       code

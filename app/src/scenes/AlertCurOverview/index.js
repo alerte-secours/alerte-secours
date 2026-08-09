@@ -34,7 +34,7 @@ import AlertInfoLineClosedTime from "~/containers/AlertInfoLines/ClosedTime";
 import AlertInfoLineSubject from "~/containers/AlertInfoLines/Subject";
 import AlertInfoLineAddress from "~/containers/AlertInfoLines/Address";
 import AlertInfoLineNear from "~/containers/AlertInfoLines/Near";
-import AlertInfoLineW3w from "~/containers/AlertInfoLines/W3w";
+import AlertInfoLinePlusCode from "~/containers/AlertInfoLines/PlusCode";
 import AlertInfoLineNotifiedCount from "~/containers/AlertInfoLines/NotifiedCount";
 import AlertInfoLineRadius from "~/containers/AlertInfoLines/Radius";
 import AlertInfoLineSentBy from "~/containers/AlertInfoLines/SentBy";
@@ -693,7 +693,7 @@ export default withConnectivity(
                   <>
                     <AlertInfoLineAddress alert={alert} />
                     <AlertInfoLineNear alert={alert} />
-                    <AlertInfoLineW3w alert={alert} />
+                    <AlertInfoLinePlusCode alert={alert} />
                   </>
                 );
               }
