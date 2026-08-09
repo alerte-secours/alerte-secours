@@ -139,9 +139,9 @@ let config = {
           "com.transistorsoft.customtask",
         ],
         // App Transport Security (M6 security review): enforce TLS 1.2 + forward
-        // secrecy for our own domains and Sentry; only localhost (dev) may use
-        // cleartext. Managed here so `expo prebuild` regenerates Info.plist with it
-        // (previously edited directly in Info.plist, which prebuild would reset).
+        // secrecy for our own domains and the error tracker; only localhost (dev)
+        // may use cleartext. Managed here so `expo prebuild` regenerates
+        // Info.plist with it (editing Info.plist directly, prebuild would reset).
         NSAppTransportSecurity: {
           NSAllowsArbitraryLoads: false,
           NSExceptionDomains: {
@@ -151,13 +151,15 @@ let config = {
               NSExceptionRequiresForwardSecrecy: true,
               NSIncludesSubdomains: true,
             },
-            localhost: {
-              NSExceptionAllowsInsecureHTTPLoads: true,
-              NSIncludesSubdomains: true,
-            },
-            "sentry.io": {
+            // glitchtip.devthefuture.org — self-hosted error tracking
+            "devthefuture.org": {
+              NSExceptionAllowsInsecureHTTPLoads: false,
               NSExceptionMinimumTLSVersion: "TLSv1.2",
               NSExceptionRequiresForwardSecrecy: true,
+              NSIncludesSubdomains: true,
+            },
+            localhost: {
+              NSExceptionAllowsInsecureHTTPLoads: true,
               NSIncludesSubdomains: true,
             },
           },

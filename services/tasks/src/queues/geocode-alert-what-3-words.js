@@ -32,10 +32,25 @@ module.exports = async function () {
         return
       }
 
-      const { words } = what3wordsResult
+      const { words, nearestPlace } = what3wordsResult
 
-      // nearest_place is owned by geocodeAlertGuessAddress
-      const fields = isLast ? { last_what3words: words } : { what3words: words }
+      // nearest_place is written by both this handler and
+      // geocodeAlertGuessAddress; each only writes what it actually resolved,
+      // so neither clobbers the other with a null. what3words is the only
+      // source that covers the overseas territories, where the self-hosted
+      // Nominatim extract stops at "France".
+      const fields = {}
+      if (words) {
+        fields[isLast ? "last_what3words" : "what3words"] = words
+      }
+      if (nearestPlace) {
+        fields[isLast ? "last_nearest_place" : "nearest_place"] = nearestPlace
+      }
+
+      if (Object.keys(fields).length === 0) {
+        logger.warn({ params }, "what3words result has no usable field")
+        return
+      }
 
       await sql`
         UPDATE

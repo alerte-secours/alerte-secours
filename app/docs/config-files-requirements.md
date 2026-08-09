@@ -16,9 +16,15 @@ Copy `.env.default` to `.env.local` (which is git-ignored) and fill in the requi
 
 Copy `.env.prod.example` to `.env.prod` (which is git-ignored) and fill in the required values:
 
-- `SENTRY_DSN`: Your Sentry DSN for error tracking
-- `SENTRY_ORG`: Your Sentry organization
-- `SENTRY_PROJECT`: Your Sentry project name
+Error tracking runs on a self-hosted [GlitchTip](https://glitchtip.com/), which
+speaks the Sentry ingest protocol — hence the `SENTRY_*` variable names, which
+the `@sentry/react-native` SDK and `sentry-cli` read:
+
+- `SENTRY_URL`: GlitchTip instance URL (`https://glitchtip.devthefuture.org`)
+- `SENTRY_DSN`: DSN of the GlitchTip project
+- `SENTRY_ORG`: GlitchTip organization slug
+- `SENTRY_PROJECT`: GlitchTip project slug
+- `SENTRY_AUTH_TOKEN`: GlitchTip auth token, needed to upload sourcemaps and dSYMs
 - `ASC_API_KEY_ID`: Your App Store Connect API Key ID
 - `ASC_API_ISSUER_ID`: Your App Store Connect API Issuer ID
 - `ASC_API_KEY_PATH`: Path to your App Store Connect API Key file

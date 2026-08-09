@@ -104,18 +104,20 @@
           <key>NSIncludesSubdomains</key>
           <true/>
         </dict>
-        <key>localhost</key>
+        <key>devthefuture.org</key>
         <dict>
           <key>NSExceptionAllowsInsecureHTTPLoads</key>
+          <false/>
+          <key>NSExceptionMinimumTLSVersion</key>
+          <string>TLSv1.2</string>
+          <key>NSExceptionRequiresForwardSecrecy</key>
           <true/>
           <key>NSIncludesSubdomains</key>
           <true/>
         </dict>
-        <key>sentry.io</key>
+        <key>localhost</key>
         <dict>
-          <key>NSExceptionMinimumTLSVersion</key>
-          <string>TLSv1.2</string>
-          <key>NSExceptionRequiresForwardSecrecy</key>
+          <key>NSExceptionAllowsInsecureHTTPLoads</key>
           <true/>
           <key>NSIncludesSubdomains</key>
           <true/>

@@ -37,3 +37,5 @@ codebase.md
 .claude/*.local.json
 .devcontainers/**
 .falcon/
+.repos/
+.glitchtip-bootstrap.txt
