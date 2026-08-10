@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [commit-and-tag-version](https://github.com/absolute-version/commit-and-tag-version) for commit guidelines.
 
+## [1.19.0](https://codeberg.org/alerte-secours/alerte-secours/compare/v1.18.0...v1.19.0) (2026-08-10)
+
+
+### Features
+
+* **ci:** build through buildkit-operator (per-image daemons, OIDC-bound identity) ([1e4b35a](https://codeberg.org/alerte-secours/alerte-secours/commit/1e4b35a62a6ec7a7629716b8046929429e85f3e2))
+
 ## [1.18.0](https://codeberg.org/alerte-secours/alerte-secours/compare/v1.17.9...v1.18.0) (2026-08-10)
 
 
