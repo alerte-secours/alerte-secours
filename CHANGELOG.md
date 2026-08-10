@@ -2,6 +2,20 @@
 
 All notable changes to this project will be documented in this file. See [commit-and-tag-version](https://github.com/absolute-version/commit-and-tag-version) for commit guidelines.
 
+## [1.18.0](https://codeberg.org/alerte-secours/alerte-secours/compare/v1.17.9...v1.18.0) (2026-08-10)
+
+
+### Features
+
+* **app:** replace what3words with Plus Code ([549935d](https://codeberg.org/alerte-secours/alerte-secours/commit/549935d72361b30f0d6c33541ce4a89741e4071c))
+* **geocode:** derive nearestPlace from reverse geocoding ([c57b581](https://codeberg.org/alerte-secours/alerte-secours/commit/c57b5812d98f784218da6bf03d57b1165ed32606))
+
+
+### Bug Fixes
+
+* **geocode:** fall back to geoplateforme where nominatim has no coverage ([062984d](https://codeberg.org/alerte-secours/alerte-secours/commit/062984dacd370103b9fce1c20e5a84070e1cdfb8))
+* **geocode:** keep what3words filling nearest_place ([eeebce3](https://codeberg.org/alerte-secours/alerte-secours/commit/eeebce3c59584aa5f58513eb37bbed423a449d9c))
+
 ## [1.17.9](https://codeberg.org/alerte-secours/alerte-secours/compare/v1.17.8...v1.17.9) (2026-06-17)
 
 
