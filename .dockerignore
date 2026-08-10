@@ -12,6 +12,9 @@
 **/node_modules
 **/.eslintcache
 **/.npm
+# The yarn cache lives in a buildkit cache mount now (YARN_GLOBAL_FOLDER); the
+# in-tree .yarn/cache is unused by the build — keep it out of the context.
+**/.yarn/cache
 
 /.osm-files
 /osm-files
