@@ -64,11 +64,11 @@ jobs:
           REGISTRY_PASSWORD: ${{ secrets.M8A_ORG_BOT_PACKAGE_TOKEN }}
 
       - name: 📦 Build and push via buildkit-operator
-        # Pinned to the immutable commit of v0.21.0 — the version of buildd/companion
-        # deployed on the cluster. `@v1` is a moving tag: it would let the client action
-        # drift ahead of the server and, cross-forge from github.com, break every run on a
-        # breaking repoint. Bump this SHA together with the operator chart.
-        uses: https://github.com/socialgouv/buildkit-operator/forgejo@42071022f7c68070aeba92e8c30e95d8564eeb53 # v0.21.0
+        # Fetched from our own forge (devthefuture/buildkit-operator, a public pull mirror of
+        # SocialGouv/buildkit-operator, auto-synced) — no cross-forge github.com dependency at
+        # run time. Pinned to the immutable commit of v0.21.0, the buildd/companion version
+        # deployed on the cluster; `@v1` is a moving tag. Bump this SHA with the operator chart.
+        uses: https://git.devthefuture.org/devthefuture/buildkit-operator/forgejo@42071022f7c68070aeba92e8c30e95d8564eeb53 # v0.21.0
         with:
           buildd-url: ${{ vars.BUILDKIT_OPERATOR_BUILDD_URL }}
           ca: ${{ secrets.BUILDKIT_OPERATOR_CA }}
