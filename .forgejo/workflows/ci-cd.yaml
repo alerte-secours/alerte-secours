@@ -15,10 +15,12 @@ jobs:
     outputs:
       tags: ${{ steps.meta.outputs.tags }}
     runs-on: ubuntu-latest
+    # Forgejo's OIDC opt-in: the runner injects ACTIONS_ID_TOKEN_REQUEST_URL only when the
+    # job declares this — NOT GitHub's `permissions: id-token: write`. buildd verifies the
+    # minted token and binds the build (and its cache identity) to the repository claim.
+    enable-openid-connect: true
     container:
       image: devthefuture/act-runner:latest
-      volumes:
-        - /buildkit-certs:/buildkit-certs
     strategy:
       matrix:
         build:
@@ -54,16 +56,26 @@ jobs:
             type=ref,event=pr,priority=600
             type=raw,value=latest,enable=${{ github.ref == format('refs/heads/{0}', github.event.repository.default_branch) }},priority=200
 
-      - name: 📦 Build and push Docker image
-        uses: https://git.devthefuture.org/devthefuture/actions/buildkit@main
+      - name: 🔑 Registry login
+        # The build runs on the remote daemon; push auth travels from the client's docker
+        # config over the buildx session — no local docker daemon involved.
+        run: printf '%s' "$REGISTRY_PASSWORD" | docker login git.devthefuture.org -u "org-bot-${{ github.repository_owner }}" --password-stdin
+        env:
+          REGISTRY_PASSWORD: ${{ secrets.M8A_ORG_BOT_PACKAGE_TOKEN }}
+
+      - name: 📦 Build and push via buildkit-operator
+        uses: https://github.com/socialgouv/buildkit-operator/forgejo@v1
         with:
+          buildd-url: ${{ vars.BUILDKIT_OPERATOR_BUILDD_URL }}
+          ca: ${{ secrets.BUILDKIT_OPERATOR_CA }}
+          cert: ${{ secrets.BUILDKIT_OPERATOR_CERT }}
+          key: ${{ secrets.BUILDKIT_OPERATOR_KEY }}
+          name: ${{ matrix.build.name }} # monorepo component → its own daemon + cache
           context: ${{ matrix.build.context || '.' }}
-          dockerfile: ${{ matrix.build.dockerfile }}
+          file: ${{ matrix.build.dockerfile }}
           tags: ${{ steps.meta.outputs.tags }}
           labels: ${{ steps.meta.outputs.labels }}
-          registry: git.devthefuture.org
-          registry-username: "org-bot-${{ github.repository_owner }}"
-          registry-password: ${{ secrets.M8A_ORG_BOT_PACKAGE_TOKEN }}
+          push: "true"
 
   deploy:
     needs: [build]
