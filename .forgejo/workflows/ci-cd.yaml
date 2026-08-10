@@ -49,7 +49,6 @@ jobs:
           images: git.devthefuture.org/${{ github.repository }}/${{ matrix.build.name }}
           tags: |
             type=semver,pattern={{version}},priority=900
-            type=semver,pattern=v{{version}},priority=900
             type=sha,priority=890
             type=ref,event=branch,priority=600
             type=ref,event=pr,priority=600
