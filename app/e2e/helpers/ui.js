@@ -266,6 +266,41 @@ async function completeOnboardingIfPresent() {
   throw new Error("Onboarding wizard could not be completed within 90s");
 }
 
+/**
+ * Tap an element through adb/uiautomator (content-desc or text match) —
+ * bypasses Espresso for controls whose in-app taps are unreliable.
+ */
+function adbTapByLabel(label) {
+  const adb = `adb -s ${device.id}`;
+  let xml = null;
+  // uiautomator dump intermittently fails while instrumentation runs: retry.
+  for (let i = 0; i < 4 && xml === null; i++) {
+    try {
+      execSync(`${adb} shell uiautomator dump /sdcard/detox_ui.xml`, {
+        timeout: 10_000,
+      });
+      xml = execSync(`${adb} shell cat /sdcard/detox_ui.xml`, {
+        timeout: 10_000,
+      }).toString();
+    } catch (_e) {
+      execSync("sleep 1");
+    }
+  }
+  if (xml === null) {
+    throw new Error("adbTapByLabel: uiautomator dump kept failing");
+  }
+  const re = new RegExp(
+    `(?:content-desc|text)="${label}"[^>]*bounds="\\[(\\d+),(\\d+)\\]\\[(\\d+),(\\d+)\\]"`,
+  );
+  const m = xml.match(re);
+  if (!m) {
+    throw new Error(`adbTapByLabel: "${label}" not found on screen`);
+  }
+  const x = Math.floor((parseInt(m[1], 10) + parseInt(m[3], 10)) / 2);
+  const y = Math.floor((parseInt(m[2], 10) + parseInt(m[4], 10)) / 2);
+  execSync(`${adb} shell input tap ${x} ${y}`);
+}
+
 async function openDrawer() {
   await tapById("header-right-menu");
 }
@@ -378,6 +413,7 @@ async function scrollUntilVisibleById(id, opts = {}) {
 
 module.exports = {
   DEFAULT_TIMEOUT_MS,
+  adbTapByLabel,
   byId,
   prepareAndroidDevice,
   completeOnboardingIfPresent,

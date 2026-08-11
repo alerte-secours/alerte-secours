@@ -75,9 +75,13 @@ let config = {
       // Play policy: gallery access goes through the system picker
       // (ACTION_GET_CONTENT), which requires no permission — broad media
       // permissions are banned unless the system picker is insufficient.
+      // FOREGROUND_SERVICE_MEDIA_PLAYBACK comes from expo-audio but the app
+      // never plays audio in background (shouldPlayInBackground: false) —
+      // shipping it would require a new Play foreground-service declaration.
       blockedPermissions: [
         "android.permission.READ_MEDIA_IMAGES",
         "android.permission.READ_MEDIA_VIDEO",
+        "android.permission.FOREGROUND_SERVICE_MEDIA_PLAYBACK",
       ],
     },
     ios: {
