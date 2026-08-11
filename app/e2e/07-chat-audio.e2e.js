@@ -1,5 +1,6 @@
 const {
   launchApp,
+  sendChatMessage,
   tapByIdRaw,
   waitForVisibleByLabel,
   isVisibleByLabel,
@@ -39,9 +40,7 @@ describe("Chat (text + audio messages on staging)", () => {
 
   it("sends a text message and sees it in the thread", async () => {
     const message = `e2e message ${device.id}`;
-    await tapById("chat-input-text");
-    await element(by.id("chat-input-text")).replaceText(message);
-    await tapById("chat-input-send");
+    await sendChatMessage(message);
     await waitForVisibleByText(message, 60_000);
   });
 

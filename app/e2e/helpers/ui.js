@@ -2,10 +2,15 @@ const { execSync } = require("child_process");
 
 const DEFAULT_TIMEOUT_MS = 20_000;
 
+// Deterministic device location, overridable per backend: the local stack's
+// geo data (tiles, osrm, nominatim) covers Switzerland only, so local-backend
+// runs set E2E_GEO_FIX="8.5417 47.3769" (Zurich). Default: Paris (staging).
+const GEO_FIX = process.env.E2E_GEO_FIX || "2.3522 48.8566";
+
 /**
  * Device prep that Detox cannot do through the app: battery-optimization
  * whitelist (avoids the system dialog during the wizard hero step) and a
- * deterministic location (Paris).
+ * deterministic location.
  */
 function prepareAndroidDevice() {
   if (device.getPlatform() !== "android") return;
@@ -16,7 +21,7 @@ function prepareAndroidDevice() {
     // "Location Accuracy" consent dialog during the wizard.
     execSync(`${adb} shell settings put secure location_mode 3`);
     execSync(`${adb} shell cmd location set-location-enabled true`);
-    execSync(`${adb} emu geo fix 2.3522 48.8566`);
+    execSync(`${adb} emu geo fix ${GEO_FIX}`);
   } catch (e) {
     // Non-fatal (tests fall back to wizard skip buttons) but must be visible.
     console.warn(`prepareAndroidDevice failed: ${e.message}`);
@@ -230,6 +235,106 @@ function tapSystemDialogButton() {
 }
 
 /**
+ * Closes the soft keyboard if (and only if) it is shown. The fullscreen IME
+ * can cover the chat input bar entirely (edge-to-edge), leaving the send
+ * button off-screen — Espresso frames then point under the keyboard and any
+ * tap lands on the IME. ESC dismisses the keyboard without the navigate-back
+ * semantics of KEYCODE_BACK (which would leave the chat when the keyboard is
+ * already closed).
+ */
+async function dismissKeyboardIfShown() {
+  const adb = `adb -s ${device.id}`;
+  try {
+    const ime = execSync(`${adb} shell dumpsys input_method`, {
+      timeout: 10_000,
+      maxBuffer: 8 * 1024 * 1024,
+    }).toString();
+    if (/mInputShown=true|isInputViewShown=true/.test(ime)) {
+      execSync(`${adb} shell input keyevent 111`);
+      await sleep(800);
+    }
+  } catch (e) {
+    console.warn(`dismissKeyboardIfShown failed: ${e.message}`);
+  }
+}
+
+/**
+ * Types and sends a chat text message. The send tap must happen with the
+ * keyboard CLOSED (input bar back at the bottom, the layout every raw tap
+ * was validated on) and must be a raw tap (Espresso taps on the input bar
+ * are unreliable).
+ */
+async function sendChatMessage(message) {
+  await tapById("chat-input-text");
+  await element(by.id("chat-input-text")).replaceText(message);
+  await dismissKeyboardIfShown();
+  await tapByIdRaw("chat-input-send");
+}
+
+/**
+ * Waits for a notification whose title contains `text`, then taps it in the
+ * shade and verifies the app took the foreground.
+ *
+ * uiautomator CANNOT run while a Detox test is active (the instrumentation
+ * holds the device's single UiAutomation connection), so:
+ * - arrival is asserted through `dumpsys notification --noredact`
+ *   (android.title carries the notification title);
+ * - the tap is coordinate-based on the first shade card. The layout is
+ *   stable for the pinned AVD; three vertical ratios are probed and the tap
+ *   is validated by the window focus moving to the app.
+ */
+async function tapNotificationByText(text, timeoutMs = 60_000) {
+  const adb = `adb -s ${device.id}`;
+  const deadline = Date.now() + timeoutMs;
+  for (;;) {
+    let found = false;
+    try {
+      const dump = execSync(
+        `${adb} shell dumpsys notification --noredact`,
+        { timeout: 15_000, maxBuffer: 32 * 1024 * 1024 },
+      ).toString();
+      found = dump.includes(text);
+    } catch (e) {
+      console.warn(`notification dumpsys failed: ${e.message}`);
+    }
+    if (found) break;
+    if (Date.now() > deadline) {
+      throw new Error(
+        `no notification containing "${text}" within ${timeoutMs}ms`,
+      );
+    }
+    await sleep(2_000);
+  }
+
+  const sizeMatch = execSync(`${adb} shell wm size`)
+    .toString()
+    .match(/(\d+)x(\d+)/);
+  const width = parseInt(sizeMatch[1], 10);
+  const height = parseInt(sizeMatch[2], 10);
+  // First card sits around 32% of the screen height on the pinned AVD
+  // (measured); neighbors probed in case of a group summary shift.
+  for (const ratio of [0.32, 0.27, 0.37]) {
+    execSync(`${adb} shell cmd statusbar expand-notifications`);
+    await sleep(1_500);
+    execSync(
+      `${adb} shell input tap ${Math.round(width / 2)} ${Math.round(height * ratio)}`,
+    );
+    await sleep(2_500);
+    const focus = execSync(`${adb} shell dumpsys window`, {
+      timeout: 15_000,
+      maxBuffer: 32 * 1024 * 1024,
+    }).toString();
+    if (/mCurrentFocus=[^\n]*com\.alertesecours/.test(focus)) {
+      return;
+    }
+  }
+  execSync(`${adb} shell cmd statusbar collapse`);
+  throw new Error(
+    `notification "${text}" is displayed but tapping it never foregrounded the app`,
+  );
+}
+
+/**
  * Walk through the permission wizard if it is displayed.
  *
  * Detox installs the APK with all runtime permissions pre-granted, so the
@@ -437,9 +542,12 @@ module.exports = {
   reloadApp,
   scrollUntilVisibleById,
   sleep,
+  dismissKeyboardIfShown,
+  sendChatMessage,
   tapById,
   tapByLabel,
   tapByText,
+  tapNotificationByText,
   waitForVisibleById,
   waitForVisibleByText,
 };
