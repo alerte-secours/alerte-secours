@@ -1,6 +1,8 @@
 const {
-  adbTapByLabel,
   launchApp,
+  tapByIdRaw,
+  waitForVisibleByLabel,
+  isVisibleByLabel,
   completeOnboardingIfPresent,
   scrollUntilVisibleById,
   waitForVisibleById,
@@ -44,41 +46,30 @@ describe("Chat (text + audio messages on staging)", () => {
   });
 
   it("records an audio message, sends it and plays it back", async () => {
-    // Close the keyboard left open by the text test — it swallows the first
-    // tap otherwise.
-    try {
-      await device.pressBack();
-    } catch (_e) {
-      // ignore
-    }
-    // Empty input → the right button is the microphone. Espresso taps on
-    // this control are unreliable: go through adb/uiautomator instead,
-    // retrying until the recording UI is up (the delete control only exists
-    // while recording).
-    let recordingStarted = false;
-    for (let i = 0; i < 3; i++) {
-      adbTapByLabel("Démarrer l'enregistrement audio");
-      if (await isVisibleById("chat-input-delete-recording", 4_000)) {
-        recordingStarted = true;
-        break;
-      }
-    }
-    if (!recordingStarted) {
-      await waitForVisibleById("chat-input-delete-recording", 5_000);
-    }
-    await sleep(3_000); // record ~3s from the (virtual) microphone
-    // Same button now sends the recording.
-    adbTapByLabel("Envoyer l'enregistrement audio");
+    // NOTE: no back-press here to "close the keyboard" — when the keyboard
+    // is already down, back NAVIGATES AWAY from the chat and the input bar
+    // disappears entirely.
+    await sleep(1_500);
 
-    // The audio message appears in the thread with its player.
-    await waitForVisibleByText("Lire le message audio", 30_000);
+    // Empty input → the right button is the microphone. Constraints learned
+    // the hard way on this screen:
+    // - Espresso-synthesized taps never reach this pressable → raw adb tap;
+    // - any Espresso wait executed WHILE a recording is active hangs (the
+    //   countdown re-renders every second);
+    // - the in-app countdown auto-sends the recording (59s worst case).
+    // So: one raw tap to start, then a fixed wait longer than the countdown
+    // with zero Espresso traffic, then assert on the thread.
+    await tapByIdRaw("chat-input-mic"); // start recording
+    await sleep(65_000); // recording + auto-send, no Espresso calls meanwhile
+    // The play control only exposes an accessibility label (no text).
+    await waitForVisibleByLabel("Lire le message audio", 30_000);
 
     // Play it back: no crash, and the control switches to pause (playback
     // actually started) — poll a few seconds for the state change.
     await tapByLabel("Lire le message audio");
     let playing = false;
     for (let i = 0; i < 10; i++) {
-      if (await isVisibleByText("Mettre en pause", 1_000)) {
+      if (await isVisibleByLabel("Mettre en pause", 1_000)) {
         playing = true;
         break;
       }
@@ -87,9 +78,9 @@ describe("Chat (text + audio messages on staging)", () => {
       await sleep(500);
     }
     if (!playing) {
-      // Playback may already have completed (3s clip): the play button must
-      // still be there and the app alive.
-      await waitForVisibleByText("Lire le message audio", 5_000);
+      // Playback may already have completed: the play button must still be
+      // there and the app alive.
+      await waitForVisibleByLabel("Lire le message audio", 5_000);
     }
   });
 
