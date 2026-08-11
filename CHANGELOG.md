@@ -2,6 +2,17 @@
 
 All notable changes to this project will be documented in this file. See [commit-and-tag-version](https://github.com/absolute-version/commit-and-tag-version) for commit guidelines.
 
+## [2.0.0](https://codeberg.org/alerte-secours/alerte-secours/compare/v1.19.0...v2.0.0) (2026-08-11)
+
+
+### ⚠ BREAKING CHANGES
+
+* **app:** target Android 16 (API 36) and drop READ_MEDIA_IMAGES for the system photo picker
+
+### Features
+
+* **app:** target Android 16 (API 36) and drop READ_MEDIA_IMAGES for the system photo picker ([ba7f519](https://codeberg.org/alerte-secours/alerte-secours/commit/ba7f51976b3eb6c9aa7e81421b6ef9f08b5e2412))
+
 ## [1.19.0](https://codeberg.org/alerte-secours/alerte-secours/compare/v1.18.0...v1.19.0) (2026-08-10)
 
 

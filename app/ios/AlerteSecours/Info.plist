@@ -25,7 +25,7 @@
     <key>CFBundlePackageType</key>
     <string>$(PRODUCT_BUNDLE_PACKAGE_TYPE)</string>
     <key>CFBundleShortVersionString</key>
-    <string>1.19.0</string>
+    <string>2.0.0</string>
     <key>CFBundleSignature</key>
     <string>????</string>
     <key>CFBundleURLTypes</key>
@@ -48,7 +48,7 @@
       </dict>
     </array>
     <key>CFBundleVersion</key>
-    <string>255</string>
+    <string>256</string>
     <key>ITSAppUsesNonExemptEncryption</key>
     <false/>
     <key>LSApplicationQueriesSchemes</key>
@@ -148,6 +148,8 @@
     <string>[Alerte-Secours] Cette application utilise les notifications pour pouvoir vous prévenir lorsque quelqu'un a besoin d'aide à proximité</string>
     <key>NSUserNotificationUsageDescription</key>
     <string>Alerte-Secours utilise les notifications pour vous informer immédiatement lorsqu'une personne à proximité nécessite une assistance urgente. Ces alertes sont essentielles pour une réponse rapide aux situations d'urgence.</string>
+    <key>RCTNewArchEnabled</key>
+    <true/>
     <key>TSLocationManagerLicense</key>
     <string>eyJhbGciOiJFZERTQSIsImtpZCI6ImVkMjU1MTktbWFpbi12MSJ9.eyJvcyI6ImlvcyIsImFwcF9pZCI6ImNvbS5hbGVydGVzZWNvdXJzLmFsZXJ0ZXNlY291cnMiLCJvcmRlcl9udW1iZXIiOjg2NDAsInJlbmV3YWxfdXJsIjoiaHR0cHM6Ly9zaG9wLnRyYW5zaXN0b3Jzb2Z0LmNvbS9jYXJ0LzE2NTA3ODYxNTA1OjE_bm90ZT02MTkzIiwiY3VzdG9tZXJfaWQiOjU3NDIsInByb2R1Y3QiOiJyZWFjdC1uYXRpdmUtYmFja2dyb3VuZC1nZW9sb2NhdGlvbiIsImtleV92ZXJzaW9uIjoxLCJhbGxvd2VkX3N1ZmZpeGVzIjpbIi5kZXYiLCIuZGV2ZWxvcG1lbnQiLCIuc3RhZ2luZyIsIi5zdGFnZSIsIi5xYSIsIi51YXQiLCIudGVzdCIsIi5kZWJ1ZyJdLCJtYXhfYnVpbGRfc3RhbXAiOjIwMjcwMjIyLCJncmFjZV9idWlsZHMiOjAsImVudGl0bGVtZW50cyI6WyJjb3JlIl0sImlhdCI6MTc2OTEyNjI4OX0.bOJmTwxkRlRVAMHuNeXUVlSFTQyai3wal2TEz6jlOvEHFadbP6WG0E_KUMatinSRgKEIxs0L_SmSn6G5eWAYDQ</string>
     <key>UIBackgroundModes</key>
