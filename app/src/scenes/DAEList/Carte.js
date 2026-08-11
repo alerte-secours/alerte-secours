@@ -6,7 +6,7 @@ import React, {
   useEffect,
 } from "react";
 import { View, StyleSheet } from "react-native";
-import Maplibre from "@maplibre/maplibre-react-native";
+import * as Maplibre from "@maplibre/maplibre-react-native";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
 import { useNavigation } from "@react-navigation/native";
 
@@ -112,14 +112,14 @@ export default React.memo(function DAEListCarte() {
 
   // Camera state — simple follow user
   const [followUserLocation] = useState(true);
-  const [followUserMode] = useState(Maplibre.UserTrackingMode.Follow);
+  const [followUserMode] = useState("default");
   const [zoomLevel, setZoomLevel] = useState(DEFAULT_ZOOM_LEVEL);
 
   const geoJSON = useMemo(() => defibsToGeoJSON(defibs), [defibs]);
 
   const onMarkerPress = useCallback(
     (e) => {
-      const feature = e?.features?.[0];
+      const feature = e?.nativeEvent?.features?.[0];
       if (!feature) return;
 
       const defibId = feature.properties?.id;
@@ -171,12 +171,13 @@ export default React.memo(function DAEListCarte() {
         <Maplibre.Images images={{ dae: markerDae }} />
 
         {geoJSON.features.length > 0 && (
-          <Maplibre.ShapeSource
+          <Maplibre.GeoJSONSource
             id="defibSource"
-            shape={geoJSON}
+            data={geoJSON}
             onPress={onMarkerPress}
           >
-            <Maplibre.SymbolLayer
+            <Maplibre.Layer
+              type="symbol"
               id="defibSymbolLayer"
               style={{
                 iconImage: "dae",
@@ -193,7 +194,7 @@ export default React.memo(function DAEListCarte() {
                 textOptional: true,
               }}
             />
-          </Maplibre.ShapeSource>
+          </Maplibre.GeoJSONSource>
         )}
 
         {isLastKnown && hasCoords ? (
@@ -203,7 +204,7 @@ export default React.memo(function DAEListCarte() {
             id="lastKnownLocation_daeList"
           />
         ) : (
-          <Maplibre.UserLocation visible showsUserHeadingIndicator />
+          <Maplibre.UserLocation heading />
         )}
       </MapView>
       <StepZoomButtonGroup mapRef={mapRef} setZoomLevel={setZoomLevel} />

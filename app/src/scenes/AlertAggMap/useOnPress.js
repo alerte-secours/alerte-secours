@@ -15,7 +15,7 @@ export default function useOnPress({
   const navigation = useNavigation();
   return useCallback(
     async (event) => {
-      const features = prioritizeFeatures(event.features);
+      const features = prioritizeFeatures(event.nativeEvent.features);
       if (!features.length > 0) {
         return;
       }
@@ -25,12 +25,12 @@ export default function useOnPress({
       if (properties.cluster) {
         // center and expand to cluster's points
         const { current: camera } = cameraRef;
-        camera.setCamera({
-          centerCoordinate: feature.geometry.coordinates,
-          zoomLevel: superCluster.getClusterExpansionZoom(
+        camera.easeTo({
+          center: feature.geometry.coordinates,
+          zoom: superCluster.getClusterExpansionZoom(
             feature.properties.cluster_id,
           ),
-          animationDuration: ANIMATION_DURATION,
+          duration: ANIMATION_DURATION,
         });
         return;
       }

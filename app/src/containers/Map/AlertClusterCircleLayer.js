@@ -1,5 +1,5 @@
 import React from "react";
-import Maplibre from "@maplibre/maplibre-react-native";
+import * as Maplibre from "@maplibre/maplibre-react-native";
 
 import { useTheme } from "~/theme";
 
@@ -14,11 +14,12 @@ export default function AlertClusterCircleLayer({ level }) {
 
   const key = `clusteredPoints-${level}`;
   return (
-    <Maplibre.CircleLayer
+    <Maplibre.Layer
+      type="circle"
       key={key}
       id={key}
-      minZoomLevel={CLUSTER_MIN_ZOOM_LEVEL}
-      belowLayerID="pointCount"
+      minzoom={CLUSTER_MIN_ZOOM_LEVEL}
+      beforeId="pointCount"
       filter={["==", ["get", "x_max_level"], level]}
       style={style}
     />

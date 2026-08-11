@@ -101,6 +101,7 @@ export default function FieldConfirm({ style, autoConfirmEnabled, confirmed }) {
 
       <Animatable.View ref={confirmViewRef}>
         <Button
+          testID="send-alert-confirm-submit"
           onPress={onSubmit}
           mode="contained"
           style={styles.confirmBtn}

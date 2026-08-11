@@ -1,5 +1,5 @@
 import React from "react";
-import Maplibre from "@maplibre/maplibre-react-native";
+import * as Maplibre from "@maplibre/maplibre-react-native";
 
 import { levelNum, numLevel, numMax } from "~/misc/levelNum";
 
@@ -14,17 +14,18 @@ export default function AlertSymbolLayer({ level, isDisabled }) {
   const aboveLevel = numLevel[num + 1];
   const icon = `${level}${isDisabled ? "Disabled" : ""}`;
 
-  let belowLayerID = null;
+  let beforeId = null;
   if (aboveLevel) {
     // Maintain level ordering within each group (disabled and non-disabled)
-    belowLayerID = `points-${aboveLevel}${isDisabled ? "-disabled" : ""}`;
+    beforeId = `points-${aboveLevel}${isDisabled ? "-disabled" : ""}`;
   } else if (!isDisabled) {
     // If this is the highest non-disabled level (red), put it above the highest disabled level
-    belowLayerID = `points-${numLevel[numMax]}-disabled`;
+    beforeId = `points-${numLevel[numMax]}-disabled`;
   }
 
   return (
-    <Maplibre.SymbolLayer
+    <Maplibre.Layer
+      type="symbol"
       filter={[
         "all",
         ["==", ["get", "icon"], icon],
@@ -33,7 +34,7 @@ export default function AlertSymbolLayer({ level, isDisabled }) {
       ]}
       key={key}
       id={key}
-      belowLayerID={belowLayerID}
+      beforeId={beforeId}
       style={iconStyle}
     />
   );

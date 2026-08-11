@@ -30,26 +30,25 @@ export default function useOnRegionDidChange({
         return;
       }
 
-      const { isUserInteraction } = event.properties;
-      if (isUserInteraction && setDetached) {
+      const { userInteraction } = event.nativeEvent;
+      if (userInteraction && setDetached) {
         setDetached(true);
       }
 
-      const visibleBounds = await map.getVisibleBounds();
+      // LngLatBounds: [west, south, east, north]
+      const visibleBounds = await map.getBounds();
 
-      // for some unidentified reason, the regionDidChange event is triggered crazily often (I suspect a bug in the maplibre lib)
-      // so, as workaround, bypass when no change in visibleBounds
+      // the regionDidChange event can fire very often;
+      // as workaround, bypass when no change in visibleBounds
       if (
         visibleBoundsRef.current &&
-        shallowCompare(visibleBounds[0], visibleBoundsRef.current[0]) &&
-        shallowCompare(visibleBounds[1], visibleBoundsRef.current[1])
+        shallowCompare(visibleBounds, visibleBoundsRef.current)
       ) {
         return;
       }
       visibleBoundsRef.current = visibleBounds;
 
-      const [eastLng, northLat] = visibleBounds[0];
-      const [westLng, southLat] = visibleBounds[1];
+      const [westLng, southLat, eastLng, northLat] = visibleBounds;
 
       let zoom = Math.round(await map.getZoom());
 

@@ -21,7 +21,7 @@ import useLocation from "~/hooks/useLocation";
 
 import withConnectivity from "~/hoc/withConnectivity";
 
-import Maplibre from "@maplibre/maplibre-react-native";
+import * as Maplibre from "@maplibre/maplibre-react-native";
 
 import Camera from "~/containers/Map/Camera";
 import MapView from "~/containers/Map/MapView";
@@ -132,6 +132,14 @@ function AlertAggMap() {
     [setUserCoords],
   );
 
+  // v11: UserLocation has no onUpdate prop; use the position hook instead
+  const currentPosition = Maplibre.useCurrentPosition();
+  useEffect(() => {
+    if (currentPosition) {
+      onUserLocationUpdate(currentPosition);
+    }
+  }, [currentPosition, onUserLocationUpdate]);
+
   const [isMapReady, setIsMapReady] = useState(false);
   const [error, setError] = useState(null);
 
@@ -202,7 +210,7 @@ function AlertAggMap() {
 
   const onPlacePress = useCallback(
     (e) => {
-      const feature = e?.features?.[0];
+      const feature = e?.nativeEvent?.features?.[0];
       if (!feature) return;
       const placeId = feature.properties?.id;
       const place = filteredPlaces.find((p) => p.id === placeId);
@@ -229,8 +237,8 @@ function AlertAggMap() {
     setIsMapReady(true);
   }, []);
 
-  const onMapError = useCallback((err) => {
-    console.error("Map error:", err);
+  const onMapError = useCallback(() => {
+    console.error("Map error: failed to load map style");
     setError("An error occurred while loading the map.");
   }, []);
 
@@ -255,8 +263,8 @@ function AlertAggMap() {
         contentInset={contentInset}
         compassViewPosition={compassViewPosition}
         compassViewMargin={compassViewMargin}
-        onMapReady={onMapReady}
-        onError={onMapError}
+        onDidFinishLoadingMap={onMapReady}
+        onDidFailLoadingMap={onMapError}
       >
         <Camera
           cameraKey={cameraKey}
@@ -276,12 +284,13 @@ function AlertAggMap() {
 
         {/* Useful places markers */}
         {placesGeoJSON.features.length > 0 && (
-          <Maplibre.ShapeSource
+          <Maplibre.GeoJSONSource
             id="alertAggPlacesSource"
-            shape={placesGeoJSON}
+            data={placesGeoJSON}
             onPress={onPlacePress}
           >
-            <Maplibre.SymbolLayer
+            <Maplibre.Layer
+              type="symbol"
               id="alertAggPlacesDaeLayer"
               filter={["==", ["get", "type"], "dae"]}
               style={{
@@ -299,7 +308,8 @@ function AlertAggMap() {
                 textOptional: true,
               }}
             />
-            <Maplibre.SymbolLayer
+            <Maplibre.Layer
+              type="symbol"
               id="alertAggPlacesIconLayer"
               filter={["!=", ["get", "type"], "dae"]}
               style={{
@@ -317,7 +327,7 @@ function AlertAggMap() {
                 textOptional: true,
               }}
             />
-          </Maplibre.ShapeSource>
+          </Maplibre.GeoJSONSource>
         )}
 
         {selectedFeature && (
@@ -333,11 +343,7 @@ function AlertAggMap() {
             id="lastKnownLocation_agg"
           />
         ) : (
-          <Maplibre.UserLocation
-            visible
-            showsUserHeadingIndicator
-            onUpdate={onUserLocationUpdate}
-          />
+          <Maplibre.UserLocation heading />
         )}
       </MapView>
       <SettingsMenu

@@ -24,16 +24,14 @@ export default function useOnRegionDidChange({
         return;
       }
 
-      const { isUserInteraction } = event.properties;
-      if (isUserInteraction && setDetached) {
+      const { userInteraction } = event.nativeEvent;
+      if (userInteraction && setDetached) {
         setDetached(true);
       }
 
       const zoom = Math.round(await map.getZoom());
-      const visibleBounds = await map.getVisibleBounds();
-
-      const [eastLng, northLat] = visibleBounds[0];
-      const [westLng, southLat] = visibleBounds[1];
+      // LngLatBounds: [west, south, east, north]
+      const [westLng, southLat, eastLng, northLat] = await map.getBounds();
 
       if (zoom < 7) {
         if (!displayedMaxRadiusInfoRef.current) {

@@ -6,6 +6,7 @@ let config = {
   expo: {
     name: "Alerte Secours",
     slug: "alerte-secours",
+    newArchEnabled: true,
     runtimeVersion: `${version.split(".")[0]}.0.0`,
     version,
     updates: {
@@ -65,12 +66,18 @@ let config = {
         "android.permission.MODIFY_AUDIO_SETTINGS",
         "android.permission.READ_CONTACTS",
         "android.permission.READ_EXTERNAL_STORAGE",
-        "android.permission.READ_MEDIA_IMAGES",
         "android.permission.RECORD_AUDIO",
         "android.permission.SYSTEM_ALERT_WINDOW",
         "android.permission.VIBRATE",
         "android.permission.WRITE_CONTACTS",
         "android.permission.WRITE_EXTERNAL_STORAGE",
+      ],
+      // Play policy: gallery access goes through the system picker
+      // (ACTION_GET_CONTENT), which requires no permission — broad media
+      // permissions are banned unless the system picker is insufficient.
+      blockedPermissions: [
+        "android.permission.READ_MEDIA_IMAGES",
+        "android.permission.READ_MEDIA_VIDEO",
       ],
     },
     ios: {
@@ -220,7 +227,6 @@ let config = {
       "expo-audio",
       "./plugins/withXcode15Fix",
       "./plugins/withCustomScheme", // Preserve URL schemes during prebuild
-      "./plugins/withUCropEdgeToEdge", // Fix uCrop toolbar under status bar on Android 15+
     ],
     // Disable Flipper
     extra: {

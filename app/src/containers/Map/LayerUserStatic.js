@@ -1,5 +1,5 @@
 import React from "react";
-import Maplibre from "@maplibre/maplibre-react-native";
+import * as Maplibre from "@maplibre/maplibre-react-native";
 import { useTheme } from "~/theme";
 
 export default function LayerUserStatic() {
@@ -25,25 +25,28 @@ export default function LayerUserStatic() {
 
   return (
     <>
-      <Maplibre.CircleLayer
+      <Maplibre.Layer
+        type="circle"
         filter={["==", "isUserLocation", true]}
         key="mapboxUserLocationPluseCircle"
         id="mapboxUserLocationPluseCircle"
         style={layerStyles.pluse}
-        aboveLayerID="points-red"
+        afterId="points-red"
       />
-      <Maplibre.CircleLayer
+      <Maplibre.Layer
+        type="circle"
         filter={["==", "isUserLocation", true]}
         key="mapboxUserLocationWhiteCircle"
         id="mapboxUserLocationWhiteCircle"
         style={layerStyles.background}
-        aboveLayerID="points-red"
+        afterId="points-red"
       />
-      <Maplibre.CircleLayer
+      <Maplibre.Layer
+        type="circle"
         filter={["==", "isUserLocation", true]}
         key="mapboxUserLocationBlueCicle"
         id="mapboxUserLocationBlueCicle"
-        aboveLayerID="mapboxUserLocationWhiteCircle"
+        afterId="mapboxUserLocationWhiteCircle"
         style={layerStyles.foreground}
       />
     </>

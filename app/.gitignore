@@ -104,3 +104,4 @@ screenshot-*.png
 /.data
 
 src/assets/db/*.db
+android/.kotlin/

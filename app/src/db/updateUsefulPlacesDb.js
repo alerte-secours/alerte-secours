@@ -52,7 +52,7 @@ export async function updateUsefulPlacesDb({ onProgress, onPhase } = {}) {
 
 async function _doUpdate({ onProgress, onPhase } = {}) {
   // eslint-disable-next-line global-require
-  const FileSystemModule = require("expo-file-system");
+  const FileSystemModule = require("expo-file-system/legacy");
   const FileSystem = FileSystemModule?.default ?? FileSystemModule;
 
   const sqliteDirUri = `${FileSystem.documentDirectory}SQLite`;

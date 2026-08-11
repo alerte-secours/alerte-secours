@@ -73,44 +73,15 @@ export const ensureCameraPermission = async () => {
 };
 
 /**
- * Ensure photo library / media images read permission.
- * On Android:
- *  - API >= 33: READ_MEDIA_IMAGES
- *  - API < 33: READ_EXTERNAL_STORAGE
+ * Ensure photo library access.
+ * On Android: no permission needed — the gallery is opened through the system
+ * picker (ACTION_GET_CONTENT), which grants access to the selected file only
+ * (Play policy forbids READ_MEDIA_IMAGES when the system picker suffices).
  * On iOS: PHOTO_LIBRARY (LIMITED is accepted).
  */
 export const ensurePhotoPermission = async () => {
   if (Platform.OS === "android") {
-    // Coerce API level to number to avoid misclassification on some devices
-    const apiLevel = Number(Platform.Version);
-    const isApi33Plus = !Number.isNaN(apiLevel) && apiLevel >= 33;
-
-    const primary = isApi33Plus
-      ? PERMISSIONS.ANDROID.READ_MEDIA_IMAGES
-      : PERMISSIONS.ANDROID.READ_EXTERNAL_STORAGE;
-    const secondary = isApi33Plus
-      ? PERMISSIONS.ANDROID.READ_EXTERNAL_STORAGE
-      : PERMISSIONS.ANDROID.READ_MEDIA_IMAGES;
-
-    // Try primary permission first
-    const primaryGranted = await ensurePermission(primary, "à vos photos");
-    if (primaryGranted) return true;
-
-    // If primary failed and secondary is not explicitly blocked, try secondary as a fallback
-    try {
-      const statusSecondary = await check(secondary);
-      if (statusSecondary !== RESULTS.BLOCKED) {
-        const secondaryGranted = await ensurePermission(
-          secondary,
-          "à vos photos",
-        );
-        if (secondaryGranted) return true;
-      }
-    } catch (e) {
-      // ignore and fall through
-    }
-
-    return false;
+    return true;
   }
 
   return ensurePermission(PERMISSIONS.IOS.PHOTO_LIBRARY, "à vos photos");

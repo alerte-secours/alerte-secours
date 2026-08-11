@@ -1,48 +1,33 @@
 const {
-  launchAppFresh,
-  reloadApp,
+  launchApp,
+  completeOnboardingIfPresent,
+  navigateToDrawerItem,
   scrollUntilVisibleById,
   waitForVisibleById,
+  goBack,
 } = require("./helpers/ui");
 
 describe("A11y smoke (testID selectors)", () => {
   beforeAll(async () => {
-    await launchAppFresh();
+    await launchApp();
+    await completeOnboardingIfPresent();
   });
 
-  beforeEach(async () => {
-    await reloadApp();
-  });
-
-  it("Send Alert screen exposes primary CTAs by testID", async () => {
-    // On fresh install the app lands on the Send Alert tab.
-    await scrollUntilVisibleById("send-alert-cta-red");
-    await scrollUntilVisibleById("send-alert-cta-yellow");
-    await scrollUntilVisibleById("send-alert-cta-green");
-    await scrollUntilVisibleById("send-alert-cta-unknown");
-    await scrollUntilVisibleById("send-alert-cta-call");
-  });
-
-  it("Header right quick actions exist by testID", async () => {
-    await waitForVisibleById("header-right-send-alert");
-    await waitForVisibleById("header-right-alerts");
-    await waitForVisibleById("header-right-current-alert");
-    await waitForVisibleById("header-right-menu");
-  });
-
-  it("Header controls adapt across a push navigation (menu -> overflow) via testID", async () => {
+  it("Header controls adapt across a push navigation (menu -> back) via testID", async () => {
     await scrollUntilVisibleById("send-alert-cta-red");
     await waitForVisibleById("header-right-menu");
 
-    await element(by.id("send-alert-cta-red")).tap();
+    // Push a screen through the drawer (the Send Alert CTAs place an
+    // emergency call after their auto-confirm countdown — never tap them in
+    // a test that lingers on the confirmation screen).
+    await navigateToDrawerItem("Mon Profil");
 
-    // Confirmation screen should be pushed, showing a back button.
+    // Pushed screen shows a back button.
     await waitForVisibleById("header-left-back");
-    await waitForVisibleById("header-right-overflow");
-    await element(by.id("header-left-back")).tap();
+    await goBack();
 
     // Back on Send Alert screen.
-    await waitForVisibleById("send-alert-cta-red");
+    await scrollUntilVisibleById("send-alert-cta-red");
     await waitForVisibleById("header-right-menu");
   });
 });

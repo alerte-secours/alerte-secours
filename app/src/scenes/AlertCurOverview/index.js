@@ -578,6 +578,7 @@ export default withConnectivity(
                 style={[styles.actionContainer, styles.actionClose]}
               >
                 <Button
+                  testID="alert-cur-close"
                   mode="contained"
                   icon={() => (
                     <MaterialCommunityIcons

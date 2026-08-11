@@ -3,7 +3,7 @@ import { View } from "react-native";
 import { IconButton, TouchableRipple } from "react-native-paper";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
 
-import Maplibre from "@maplibre/maplibre-react-native";
+import * as Maplibre from "@maplibre/maplibre-react-native";
 import Text from "~/components/Text";
 import useTimeDisplay from "~/hooks/useTimeDisplay";
 import { useNavigation } from "@react-navigation/native";
@@ -35,12 +35,11 @@ export default function SelectedFeatureBubbleAlertInitial({ feature, close }) {
   const levelColor = custom.appColors[level];
 
   return (
-    <Maplibre.MarkerView
+    <Maplibre.Marker
       key={feature.properties.id}
       id="selectedFeaturePointAnnotation"
-      aboveLayerID="lineLayer"
-      coordinate={feature.geometry.coordinates}
-      anchor={{ x: 0, y: 1 }}
+      lngLat={feature.geometry.coordinates}
+      anchor="bottom-left"
     >
       <View style={styles.bubbleContainer}>
         <View
@@ -109,7 +108,7 @@ export default function SelectedFeatureBubbleAlertInitial({ feature, close }) {
           </TouchableRipple>
         </View>
       </View>
-    </Maplibre.MarkerView>
+    </Maplibre.Marker>
   );
 }
 

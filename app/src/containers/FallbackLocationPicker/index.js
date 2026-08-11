@@ -5,7 +5,7 @@ import {
   TouchableOpacity,
   ActivityIndicator,
 } from "react-native";
-import Maplibre from "@maplibre/maplibre-react-native";
+import * as Maplibre from "@maplibre/maplibre-react-native";
 import { Ionicons } from "@expo/vector-icons";
 
 import { createStyles, useTheme } from "~/theme";
@@ -103,11 +103,10 @@ export default function FallbackLocationPicker({
 
   const moveCameraTo = useCallback((lon, lat) => {
     if (cameraRef.current) {
-      cameraRef.current.setCamera({
-        centerCoordinate: [lon, lat],
-        zoomLevel: DEFAULT_ZOOM,
-        animationDuration: 500,
-        animationMode: "flyTo",
+      cameraRef.current.flyTo({
+        center: [lon, lat],
+        zoom: DEFAULT_ZOOM,
+        duration: 500,
       });
     }
   }, []);
@@ -144,9 +143,9 @@ export default function FallbackLocationPicker({
 
   const handleMapPress = useCallback(
     (event) => {
-      const { geometry } = event;
-      if (geometry && geometry.coordinates) {
-        const [lon, lat] = geometry.coordinates;
+      const lngLat = event?.nativeEvent?.lngLat;
+      if (lngLat) {
+        const [lon, lat] = lngLat;
         selectLocation(lon, lat, null);
       }
     },
@@ -259,15 +258,15 @@ export default function FallbackLocationPicker({
         >
           <Maplibre.Camera
             ref={cameraRef}
-            defaultSettings={{
-              centerCoordinate: initialCameraCenter,
-              zoomLevel: DEFAULT_ZOOM,
+            initialViewState={{
+              center: initialCameraCenter,
+              zoom: DEFAULT_ZOOM,
             }}
           />
           {selectedCoords && (
-            <Maplibre.ShapeSource
+            <Maplibre.GeoJSONSource
               id="fallback_location_source"
-              shape={{
+              data={{
                 type: "Feature",
                 geometry: {
                   type: "Point",
@@ -276,7 +275,8 @@ export default function FallbackLocationPicker({
                 properties: {},
               }}
             >
-              <Maplibre.CircleLayer
+              <Maplibre.Layer
+                type="circle"
                 id="fallback_location_circle"
                 style={{
                   circleRadius: 12,
@@ -286,7 +286,7 @@ export default function FallbackLocationPicker({
                   circleStrokeColor: "#fff",
                 }}
               />
-            </Maplibre.ShapeSource>
+            </Maplibre.GeoJSONSource>
           )}
         </MapView>
       </View>

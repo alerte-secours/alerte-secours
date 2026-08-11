@@ -14,7 +14,7 @@ describe("db/ensureEmbeddedDb", () => {
     };
 
     jest.doMock(
-      "expo-file-system",
+      "expo-file-system/legacy",
       () => ({
         documentDirectory: "file:///docs/",
         getInfoAsync: jest.fn(async (uri) => {
@@ -65,7 +65,7 @@ describe("db/ensureEmbeddedDb", () => {
   test("does not copy when destination already exists and is non-empty", async () => {
     const calls = { copyAsync: [] };
     jest.doMock(
-      "expo-file-system",
+      "expo-file-system/legacy",
       () => ({
         documentDirectory: "file:///docs/",
         getInfoAsync: jest.fn(async (uri) => {

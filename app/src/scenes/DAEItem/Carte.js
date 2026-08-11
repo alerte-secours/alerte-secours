@@ -6,7 +6,7 @@ import React, {
   useState,
 } from "react";
 import { View, StyleSheet } from "react-native";
-import Maplibre from "@maplibre/maplibre-react-native";
+import * as Maplibre from "@maplibre/maplibre-react-native";
 import polyline from "@mapbox/polyline";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
 import Drawer from "react-native-drawer";
@@ -98,8 +98,8 @@ export default React.memo(function DAEItemCarte() {
 
   const onRegionDidChange = useCallback(
     (event) => {
-      const { isUserInteraction } = event.properties;
-      if (isUserInteraction) {
+      const { userInteraction } = event.nativeEvent;
+      if (userInteraction) {
         setDetached(true);
       }
     },
@@ -419,8 +419,9 @@ export default React.memo(function DAEItemCarte() {
 
             {/* Route line */}
             {routeGeoJSON && (
-              <Maplibre.ShapeSource id="routeSource" shape={routeGeoJSON}>
-                <Maplibre.LineLayer
+              <Maplibre.GeoJSONSource id="routeSource" data={routeGeoJSON}>
+                <Maplibre.Layer
+                  type="line"
                   id="routeLineLayer"
                   style={{
                     lineColor: "rgba(49, 76, 205, 0.84)",
@@ -430,15 +431,16 @@ export default React.memo(function DAEItemCarte() {
                     lineOpacity: 0.84,
                   }}
                 />
-              </Maplibre.ShapeSource>
+              </Maplibre.GeoJSONSource>
             )}
 
             <Maplibre.Images images={{ dae: markerDae }} />
 
             {/* Defib marker */}
             {defibGeoJSON && (
-              <Maplibre.ShapeSource id="defibItemSource" shape={defibGeoJSON}>
-                <Maplibre.SymbolLayer
+              <Maplibre.GeoJSONSource id="defibItemSource" data={defibGeoJSON}>
+                <Maplibre.Layer
+                  type="symbol"
                   id="defibItemSymbol"
                   style={{
                     iconImage: "dae",
@@ -454,7 +456,7 @@ export default React.memo(function DAEItemCarte() {
                     textHaloWidth: 1,
                   }}
                 />
-              </Maplibre.ShapeSource>
+              </Maplibre.GeoJSONSource>
             )}
 
             {/* User location */}
@@ -465,7 +467,7 @@ export default React.memo(function DAEItemCarte() {
                 id="lastKnownLocation_daeItem"
               />
             ) : (
-              <Maplibre.UserLocation visible showsUserHeadingIndicator />
+              <Maplibre.UserLocation heading />
             )}
           </MapView>
 

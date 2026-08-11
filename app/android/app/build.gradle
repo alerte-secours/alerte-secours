@@ -136,6 +136,11 @@ android {
 // @generated end react-native-background-fetch-proguard
             crunchPngs false
             proguardFile "${rootProject.projectDir}/../node_modules/detox/android/detox/proguard-rules-app.pro"
+            // Detox e2e builds only: keep Kotlin stdlib/coroutines for the
+            // in-process instrumentation (never enabled on Play builds).
+            if (findProperty('detoxE2E') == 'true') {
+                proguardFile 'proguard-e2e-rules.pro'
+            }
             // Enable R8 full mode
             debuggable false
             jniDebuggable false
@@ -182,8 +187,8 @@ android {
 
 configurations.all {
     resolutionStrategy {
-        // Force non-native UCrop artifact (no .so), avoids 64KB page size issue from 2.2.6-native
-        force "com.github.yalantis:ucrop:2.2.6"
+        // uCrop comes from react-native-image-crop-picker (2.2.11-native: edge-to-edge
+        // fix + 16KB-aligned .so) — no version force needed.
 
         // Force Fresco/FBJNI versions with 16KB page support (or newer)
         force "com.facebook.fresco:fresco:3.6.0"
@@ -195,7 +200,7 @@ configurations.all {
         force "com.facebook.fresco:webpsupport:3.6.0"
         force "com.facebook.fresco:animated-webp:3.6.0"
         force "com.facebook.fresco:animated-gif:3.6.0"
-        force "com.facebook.fbjni:fbjni:0.6.0"
+        // fbjni: RN 0.81 ships 0.7.0 (16KB-aligned) — no force needed.
     }
     // Exclude Huawei UCS native credential libs from Play build (causes 64KB alignment)
     exclude group: "com.huawei.hms", module: "ucs-credential"
@@ -221,15 +226,15 @@ dependencies {
 
     if (isGifEnabled) {
         // For animated gif support
-        implementation("com.facebook.fresco:animated-gif:${reactAndroidLibs.versions.fresco.get()}")
+        implementation("com.facebook.fresco:animated-gif:${expoLibs.versions.fresco.get()}")
     }
 
     if (isWebpEnabled) {
         // For webp support
-        implementation("com.facebook.fresco:webpsupport:${reactAndroidLibs.versions.fresco.get()}")
+        implementation("com.facebook.fresco:webpsupport:${expoLibs.versions.fresco.get()}")
         if (isWebpAnimatedEnabled) {
             // Animated webp support
-            implementation("com.facebook.fresco:animated-webp:${reactAndroidLibs.versions.fresco.get()}")
+            implementation("com.facebook.fresco:animated-webp:${expoLibs.versions.fresco.get()}")
         }
     }
 

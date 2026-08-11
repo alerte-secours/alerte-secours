@@ -1,9 +1,4 @@
-import {
-  requestNotifications,
-  request,
-  PERMISSIONS,
-  RESULTS,
-} from "react-native-permissions";
+import { requestNotifications, RESULTS } from "react-native-permissions";
 import messaging from "@react-native-firebase/messaging";
 import { Platform } from "react-native";
 import { createLogger } from "~/lib/logger";
@@ -46,26 +41,13 @@ export default async () => {
 
     // Handle Android permissions
     permissionLogger.debug("Requesting Android notification permissions");
+    // requestNotifications handles POST_NOTIFICATIONS itself on Android 13+
+    // and NotificationManagerCompat below — its status is authoritative.
     const { status } = await requestNotifications(["alert", "sound", "badge"]);
-
-    let postNotifications = RESULTS.UNAVAILABLE;
-    if (Platform.Version >= 33) {
-      permissionLogger.debug(
-        "Requesting POST_NOTIFICATIONS permission (Android 13+)",
-      );
-      postNotifications = await request(PERMISSIONS.ANDROID.POST_NOTIFICATIONS);
-    }
-
-    // Determine grant state:
-    // - Android 13+ requires POST_NOTIFICATIONS granted
-    // - Below 13, POST_NOTIFICATIONS is unavailable; use requestNotifications result
-    const isGranted =
-      (Platform.Version >= 33 && postNotifications === RESULTS.GRANTED) ||
-      (Platform.Version < 33 && status === RESULTS.GRANTED);
+    const isGranted = status === RESULTS.GRANTED;
 
     permissionLogger.info("Android notification permission result", {
       notificationStatus: status,
-      postNotificationsStatus: postNotifications,
       osVersion: Platform.Version,
       granted: isGranted,
     });

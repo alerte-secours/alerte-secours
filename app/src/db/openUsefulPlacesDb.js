@@ -59,7 +59,7 @@ export async function openUsefulPlacesDb() {
         const open = opSqliteMod?.open ?? opSqliteMod?.default?.open;
         if (typeof open === "function") {
           // eslint-disable-next-line global-require
-          const FileSystemModule = require("expo-file-system");
+          const FileSystemModule = require("expo-file-system/legacy");
           const FileSystem = FileSystemModule?.default ?? FileSystemModule;
           const sqliteDir = `${FileSystem.documentDirectory}SQLite`;
 

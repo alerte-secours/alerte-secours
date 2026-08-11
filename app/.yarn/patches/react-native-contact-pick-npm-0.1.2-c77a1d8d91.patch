@@ -1,0 +1,13 @@
+diff --git a/android/src/main/java/com/contactpick/ContactPickModule.kt b/android/src/main/java/com/contactpick/ContactPickModule.kt
+index a7fd2d68d91b66bd11b266f02f87d5f826887c14..afbd23dedfdd2c2e4a525446e75cdcc56999bdc7 100644
+--- a/android/src/main/java/com/contactpick/ContactPickModule.kt
++++ b/android/src/main/java/com/contactpick/ContactPickModule.kt
+@@ -29,7 +29,7 @@ class ContactPickModule(reactContext: ReactApplicationContext) :
+     }
+ 
+     val intent = Intent(Intent.ACTION_PICK, ContactsContract.Contacts.CONTENT_URI)
+-    val activity = currentActivity
++    val activity = reactApplicationContext.currentActivity
+ 
+     if (activity == null) {
+       _promise.reject("Activity not available")

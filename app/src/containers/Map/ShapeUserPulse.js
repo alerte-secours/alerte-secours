@@ -1,7 +1,7 @@
 import React from "react";
 import { Animated } from "react-native";
 // import createAnimatedComponentFrowardingRef from "~/components/createAnimatedComponentFrowardingRef";
-import Maplibre from "@maplibre/maplibre-react-native";
+import * as Maplibre from "@maplibre/maplibre-react-native";
 
 const styles = {
   innerCircle: {
@@ -117,26 +117,29 @@ class ShapeUserPulse extends React.Component {
     ];
 
     return (
-      <Maplibre.Animated.ShapeSource
+      <Maplibre.Animated.GeoJSONSource
         id="pulseCircleSource"
-        shape={this.props.shape}
+        data={this.props.shape}
       >
-        <Maplibre.Animated.CircleLayer
+        <Maplibre.Animated.Layer
+          type="circle"
           id="pulseOuterCircle"
           style={outerCircleStyle}
-          aboveLayerID={this.props.aboveLayerID}
+          afterId={this.props.aboveLayerID}
         />
-        <Maplibre.Animated.CircleLayer
+        <Maplibre.Animated.Layer
+          type="circle"
           id="pulseInnerCircleCnt"
           style={innerCircleStyle}
-          aboveLayerID="pulseOuterCircle"
+          afterId="pulseOuterCircle"
         />
-        <Maplibre.Animated.CircleLayer
+        <Maplibre.Animated.Layer
+          type="circle"
           id="pulseInnerCircle"
           style={innerCirclePulseStyle}
-          aboveLayerID="pulseInnerCircleCnt"
+          afterId="pulseInnerCircleCnt"
         />
-      </Maplibre.Animated.ShapeSource>
+      </Maplibre.Animated.GeoJSONSource>
     );
   }
 }

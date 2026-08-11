@@ -9,8 +9,7 @@ export { MAX_BASEUSER_DEVICE_TRACKING } from "~/misc/devicePrefs";
 export const ZOOM_DURATION = 100;
 // export const ANIMATION_DURATION = 150;
 export const ANIMATION_DURATION = 1500;
-// export const ANIMATION_MODE = "linearTo"; // One of: flyTo, easeTo, linearTo, moveTo
-export const ANIMATION_MODE = "flyTo"; // One of: flyTo, easeTo, linearTo, moveTo
+export const ANIMATION_MODE = "fly"; // camera easing, one of: linear, ease, fly
 // export  const CLUSTER_MIN_ZOOM_LEVEL = 6;
 export const CLUSTER_MIN_ZOOM_LEVEL = 0;
 export const DEFAULT_ZOOM_LEVEL = 16;
@@ -37,8 +36,9 @@ Ce service est gratuit mais ne peut être activé que sur demande au cas par cas
 
 export const FOLLOW_PITCH = 60;
 
+// Map contentInset (v11 ViewPadding): shifts the logical viewport center
 export const Alignments = {
-  Center: [0, 0, 0, 0],
-  Bottom: [300, 0, 0, 0],
-  Top: [0, 0, 300, 0],
+  Center: { top: 0, right: 0, bottom: 0, left: 0 },
+  Bottom: { top: 300, right: 0, bottom: 0, left: 0 },
+  Top: { top: 0, right: 0, bottom: 300, left: 0 },
 };

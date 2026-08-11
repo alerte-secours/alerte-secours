@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import Maplibre from "@maplibre/maplibre-react-native";
+import * as Maplibre from "@maplibre/maplibre-react-native";
 import * as Location from "expo-location";
 
 import {
@@ -20,7 +20,6 @@ export default function Camera({
   refreshCamera,
   bounds,
   detached,
-  compassViewPosition,
 }) {
   const [hasPermission, setHasPermission] = useState(false);
 
@@ -52,41 +51,45 @@ export default function Camera({
     if (!cameraRef.current || !bounds) {
       return;
     }
-    cameraRef.current.fitBounds(bounds.ne, bounds.sw, 20, 300);
+    // bounds: { ne: [lng, lat], sw: [lng, lat] } → [west, south, east, north]
+    cameraRef.current.fitBounds(
+      [bounds.sw[0], bounds.sw[1], bounds.ne[0], bounds.ne[1]],
+      {
+        padding: { top: 20, right: 20, bottom: 20, left: 20 },
+        duration: 300,
+      },
+    );
   }, [bounds, cameraRef]);
 
-  // Only enable followUserLocation if:
+  // Only enable user tracking if:
   // 1. We have permission
   // 2. followUserLocation is explicitly enabled
-  // 3. We have a valid mode (not None)
-  // 4. Mode is defined
-  const safeFollowUserLocation =
-    hasPermission &&
-    followUserLocation &&
-    followUserMode != null &&
-    followUserMode !== Maplibre.UserTrackingMode.None;
+  // 3. We have a valid mode
+  const trackUserLocation =
+    hasPermission && followUserLocation && followUserMode != null
+      ? followUserMode
+      : undefined;
 
   return (
     <Maplibre.Camera
       key={cameraKey}
       // triggerKey={cameraKey} // doesn't seem to work, using key instead
       ref={cameraRef}
-      animationDuration={ANIMATION_DURATION}
-      animationMode={ANIMATION_MODE}
+      duration={ANIMATION_DURATION}
+      easing={ANIMATION_MODE}
       padding={{
-        paddingLeft: 15,
-        paddingRight: 15,
-        paddingTop: 5,
-        paddingBottom: 5,
+        left: 15,
+        right: 15,
+        top: 5,
+        bottom: 5,
       }}
-      followUserLocation={safeFollowUserLocation}
-      followUserMode={followUserMode}
-      followHeading={compassViewPosition} // 0: TopLeft, 1: TopRight, 2: BottomLeft, 3: BottomRight
-      followPitch={followPitch}
-      followZoomLevel={zoomLevel}
-      // zoomLevel={zoomLevel}
-      maxZoomLevel={MAPS_MAX_ZOOM_LEVEL}
-      minZoomLevel={MAPS_MIN_ZOOM_LEVEL}
+      trackUserLocation={trackUserLocation}
+      // Only drive zoom/pitch while tracking (v10 followZoomLevel/followPitch
+      // semantics); otherwise let fitBounds/user interactions own the camera.
+      pitch={trackUserLocation ? followPitch : undefined}
+      zoom={trackUserLocation ? zoomLevel : undefined}
+      maxZoom={MAPS_MAX_ZOOM_LEVEL}
+      minZoom={MAPS_MIN_ZOOM_LEVEL}
     />
   );
 }

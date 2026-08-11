@@ -1,5 +1,4 @@
 import { useRef, useState, useEffect, useCallback } from "react";
-import Maplibre from "@maplibre/maplibre-react-native";
 import { getBounds } from "geolib";
 import { useSessionState, getAlertState } from "~/stores";
 
@@ -26,12 +25,10 @@ export default function useMapInit({
   const [boundType, setBoundType] = useState(initialBoundType);
   const [clusterFeature, setClusterFeature] = useState([]);
 
-  const [contentInset, setContentInset] = useState(Alignments.center);
+  const [contentInset, setContentInset] = useState(Alignments.Center);
   const [followUserLocation, setFollowUserLocation] = useState(false);
   const [detached, setDetached] = useState(false);
-  const [followUserMode, setFollowUserMode] = useState(
-    Maplibre.UserTrackingMode.FollowWithCourse,
-  );
+  const [followUserMode, setFollowUserMode] = useState("course");
 
   const { radiusAll, radiusReach } = useSessionState([
     "radiusAll",
@@ -50,7 +47,7 @@ export default function useMapInit({
     // If we have no coordinates at all, disable following and reset camera
     if (!hasUserCoords) {
       setFollowUserLocation(false);
-      setFollowUserMode(Maplibre.UserTrackingMode.None);
+      setFollowUserMode(null);
       setFollowPitch(0);
       setZoomLevel(DEFAULT_ZOOM_LEVEL);
       setBounds(null);
@@ -72,7 +69,7 @@ export default function useMapInit({
         };
         const newZoomLevel = calculateZoomLevelFromRadius(latlon, radius);
 
-        setFollowUserMode(Maplibre.UserTrackingMode.Follow);
+        setFollowUserMode("default");
         setZoomLevel(newZoomLevel);
         setFollowUserLocation(true); // Let Camera handle permission check
         setFollowPitch(0);
@@ -105,7 +102,7 @@ export default function useMapInit({
           sw: { lng: minLng, lat: minLat },
         };
         const newZoomLevel = calculateZoomLevelFromBounds(bounds);
-        setFollowUserMode(Maplibre.UserTrackingMode.Follow);
+        setFollowUserMode("default");
         setFollowUserLocation(false);
         setZoomLevel(newZoomLevel);
         setFollowPitch(0);
@@ -118,7 +115,7 @@ export default function useMapInit({
       }
       case BoundType.NAVIGATION: {
         setFollowUserLocation(true); // Let Camera handle permission check
-        setFollowUserMode(Maplibre.UserTrackingMode.FollowWithCourse);
+        setFollowUserMode("course");
         setZoomLevel(DEFAULT_ZOOM_LEVEL);
         setFollowPitch(FOLLOW_PITCH);
         setContentInset(Alignments.Bottom);

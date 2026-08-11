@@ -1,6 +1,6 @@
 import React from "react";
 
-import Maplibre from "@maplibre/maplibre-react-native";
+import * as Maplibre from "@maplibre/maplibre-react-native";
 
 import markerRed from "~/assets/img/marker-red.png";
 import markerYellow from "~/assets/img/marker-yellow.png";

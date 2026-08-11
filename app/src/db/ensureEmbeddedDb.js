@@ -55,7 +55,7 @@ async function ensureEmbeddedDb(options = {}) {
 
   // Lazy require: keeps Jest/node stable.
   // eslint-disable-next-line global-require
-  const FileSystemModule = require("expo-file-system");
+  const FileSystemModule = require("expo-file-system/legacy");
   const FileSystem = FileSystemModule?.default ?? FileSystemModule;
   // eslint-disable-next-line global-require
   const ExpoAssetModule = require("expo-asset");

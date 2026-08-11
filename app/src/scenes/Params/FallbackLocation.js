@@ -2,7 +2,7 @@ import React, { useCallback, useState } from "react";
 import { View } from "react-native";
 import { Title } from "react-native-paper";
 import { Ionicons } from "@expo/vector-icons";
-import Maplibre from "@maplibre/maplibre-react-native";
+import * as Maplibre from "@maplibre/maplibre-react-native";
 
 import { createStyles, useTheme } from "~/theme";
 import Text from "~/components/Text";
@@ -87,14 +87,14 @@ export default function ParamsFallbackLocation({ data }) {
           <View style={styles.mapPreviewContainer}>
             <MapView compassViewPosition={1}>
               <Maplibre.Camera
-                defaultSettings={{
-                  centerCoordinate: currentCoords,
-                  zoomLevel: 14,
+                initialViewState={{
+                  center: currentCoords,
+                  zoom: 14,
                 }}
               />
-              <Maplibre.ShapeSource
+              <Maplibre.GeoJSONSource
                 id="fallback_preview_source"
-                shape={{
+                data={{
                   type: "Feature",
                   geometry: {
                     type: "Point",
@@ -103,7 +103,8 @@ export default function ParamsFallbackLocation({ data }) {
                   properties: {},
                 }}
               >
-                <Maplibre.CircleLayer
+                <Maplibre.Layer
+                  type="circle"
                   id="fallback_preview_circle"
                   style={{
                     circleRadius: 12,
@@ -113,7 +114,7 @@ export default function ParamsFallbackLocation({ data }) {
                     circleStrokeColor: "#fff",
                   }}
                 />
-              </Maplibre.ShapeSource>
+              </Maplibre.GeoJSONSource>
             </MapView>
           </View>
           <View style={styles.currentLocationInfo}>

@@ -1,5 +1,5 @@
 import React from "react";
-import Maplibre from "@maplibre/maplibre-react-native";
+import * as Maplibre from "@maplibre/maplibre-react-native";
 import LastKnownLocationCallout from "./LastKnownLocationCallout";
 
 export default function LastKnownLocationMarker({
@@ -18,8 +18,9 @@ export default function LastKnownLocationMarker({
 
   return (
     <>
-      <Maplibre.ShapeSource id={`${id}_source`} shape={point}>
-        <Maplibre.CircleLayer
+      <Maplibre.GeoJSONSource id={`${id}_source`} data={point}>
+        <Maplibre.Layer
+          type="circle"
           id={`${id}_circle`}
           style={{
             circleRadius: 8,
@@ -29,14 +30,15 @@ export default function LastKnownLocationMarker({
             circleStrokeColor: "#fff",
           }}
         />
-      </Maplibre.ShapeSource>
-      <Maplibre.MarkerView
+      </Maplibre.GeoJSONSource>
+      <Maplibre.Marker
         id={`${id}_marker`}
-        coordinate={[coordinates.longitude, coordinates.latitude]}
-        anchor={{ x: 0.5, y: 1.2 }}
+        lngLat={[coordinates.longitude, coordinates.latitude]}
+        anchor="bottom"
+        offset={[0, -8]}
       >
         <LastKnownLocationCallout timestamp={timestamp} />
-      </Maplibre.MarkerView>
+      </Maplibre.Marker>
     </>
   );
 }

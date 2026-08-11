@@ -6,6 +6,9 @@ module.exports = {
     "node_modules/(?!(@react-native|react-native|expo)/)",
   ],
   testEnvironment: "node",
+  globals: {
+    __DEV__: false,
+  },
   moduleNameMapper: {
     "^~/(.*)$": "<rootDir>/src/$1",
   },

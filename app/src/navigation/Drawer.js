@@ -88,6 +88,10 @@ export default React.memo(function DrawerNav() {
   return (
     <Drawer.Navigator
       backBehavior="history"
+      // Reanimated 4 removed `isConfigured`, which drawer v6 uses to pick its
+      // default implementation — without this it falls back to the legacy one
+      // and throws at mount.
+      useLegacyImplementation={false}
       drawerContent={(props) => <DrawerContent {...props} />}
       drawerStyle={{
         width: getDefaultDrawerWidth(dimensions),

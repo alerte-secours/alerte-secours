@@ -6,7 +6,7 @@ import React, {
   useState,
 } from "react";
 import { View, StyleSheet } from "react-native";
-import Maplibre from "@maplibre/maplibre-react-native";
+import * as Maplibre from "@maplibre/maplibre-react-native";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
 import { useNavigation } from "@react-navigation/native";
 import { useTranslation } from "react-i18next";
@@ -144,14 +144,14 @@ export default React.memo(function UsefulPlacesCarte() {
     coords && coords.latitude !== null && coords.longitude !== null;
 
   const followUserLocation = true;
-  const followUserMode = Maplibre.UserTrackingMode.Follow;
+  const followUserMode = "default";
   const [zoomLevel, setZoomLevel] = useState(DEFAULT_ZOOM_LEVEL);
 
   const geoJSON = useMemo(() => placesToGeoJSON(places), [places]);
 
   const onMarkerPress = useCallback(
     (e) => {
-      const feature = e?.features?.[0];
+      const feature = e?.nativeEvent?.features?.[0];
       if (!feature) return;
 
       const placeId = feature.properties?.id;
@@ -217,13 +217,14 @@ export default React.memo(function UsefulPlacesCarte() {
           />
 
           {geoJSON.features.length > 0 && (
-            <Maplibre.ShapeSource
+            <Maplibre.GeoJSONSource
               id="placesSource"
-              shape={geoJSON}
+              data={geoJSON}
               onPress={onMarkerPress}
             >
               {/* DAE places: marker icon */}
-              <Maplibre.SymbolLayer
+              <Maplibre.Layer
+                type="symbol"
                 id="placesDaeLayer"
                 filter={["==", ["get", "type"], "dae"]}
                 style={{
@@ -242,7 +243,8 @@ export default React.memo(function UsefulPlacesCarte() {
                 }}
               />
               {/* Other place types: marker icons */}
-              <Maplibre.SymbolLayer
+              <Maplibre.Layer
+                type="symbol"
                 id="placesIconLayer"
                 filter={["!=", ["get", "type"], "dae"]}
                 style={{
@@ -260,7 +262,7 @@ export default React.memo(function UsefulPlacesCarte() {
                   textOptional: true,
                 }}
               />
-            </Maplibre.ShapeSource>
+            </Maplibre.GeoJSONSource>
           )}
 
           {isLastKnown && hasCoords ? (
@@ -270,7 +272,7 @@ export default React.memo(function UsefulPlacesCarte() {
               id="lastKnownLocation_usefulPlaces"
             />
           ) : (
-            <Maplibre.UserLocation visible showsUserHeadingIndicator />
+            <Maplibre.UserLocation heading />
           )}
         </MapView>
         <StepZoomButtonGroup mapRef={mapRef} setZoomLevel={setZoomLevel} />

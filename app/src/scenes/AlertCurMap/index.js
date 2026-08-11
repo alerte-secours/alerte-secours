@@ -7,7 +7,7 @@ import React, {
 } from "react";
 import { StyleSheet, View, AppState } from "react-native";
 import cloneDeep from "lodash.clonedeep";
-import Maplibre from "@maplibre/maplibre-react-native";
+import * as Maplibre from "@maplibre/maplibre-react-native";
 import polyline from "@mapbox/polyline";
 import { getDistance } from "geolib";
 import { routeToInstructions } from "~/lib/geo/osrmTextInstructions";
@@ -128,6 +128,14 @@ function AlertCurMap() {
       storeLocation(coords, timestamp);
     }
   }, []);
+
+  // v11: UserLocation has no onUpdate prop; use the position hook instead
+  const currentPosition = Maplibre.useCurrentPosition();
+  useEffect(() => {
+    if (currentPosition) {
+      onUserLocationUpdate(currentPosition);
+    }
+  }, [currentPosition, onUserLocationUpdate]);
 
   const {
     clusterFeature,
@@ -619,10 +627,11 @@ function AlertCurMap() {
             />
             <FeatureImages />
             <ShapePoints shape={shape} onPress={onPress}>
-              <Maplibre.LineLayer
+              <Maplibre.Layer
+                type="line"
                 id="lineLayer"
                 key="lineLayer"
-                belowLayerID="points-green"
+                beforeId="points-green"
                 style={layerStyles.route}
               />
             </ShapePoints>
@@ -640,11 +649,7 @@ function AlertCurMap() {
                 id="lastKnownLocation_cur"
               />
             ) : (
-              <Maplibre.UserLocation
-                visible
-                showsUserHeadingIndicator
-                onUpdate={onUserLocationUpdate}
-              />
+              <Maplibre.UserLocation heading />
             )}
           </MapView>
           <MapHeadRouting
@@ -713,7 +718,7 @@ const layerStyles = {
   },
   route: {
     lineColor: "rgba(49, 76, 205, 0.84)",
-    lineCap: Maplibre.LineJoin.Round,
+    lineCap: "round",
     lineWidth: 3,
     lineOpacity: 0.84,
   },

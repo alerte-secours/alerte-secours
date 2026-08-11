@@ -1,5 +1,5 @@
 import React from "react";
-import Maplibre from "@maplibre/maplibre-react-native";
+import * as Maplibre from "@maplibre/maplibre-react-native";
 import { createStyles, useTheme } from "~/theme";
 
 import { CLUSTER_MIN_ZOOM_LEVEL, HITBOX_SIZE, textFont } from "./constants";
@@ -7,9 +7,12 @@ import { CLUSTER_MIN_ZOOM_LEVEL, HITBOX_SIZE, textFont } from "./constants";
 import AlertClusterCircleLayer from "./AlertClusterCircleLayer";
 import AlertSymbolLayer from "./AlertSymbolLayer";
 
+// v11 ViewPadding hitbox: half the legacy square size on each side
 const hitbox = {
-  width: HITBOX_SIZE,
-  height: HITBOX_SIZE,
+  top: HITBOX_SIZE / 2,
+  right: HITBOX_SIZE / 2,
+  bottom: HITBOX_SIZE / 2,
+  left: HITBOX_SIZE / 2,
 };
 
 const iconStyle = {
@@ -36,12 +39,13 @@ export default function ShapePoints({ shape, children, ...shapeSourceProps }) {
   const styles = useStyles();
 
   return (
-    <Maplibre.ShapeSource shape={shape} hitbox={hitbox} {...shapeSourceProps}>
-      <Maplibre.SymbolLayer
+    <Maplibre.GeoJSONSource data={shape} hitbox={hitbox} {...shapeSourceProps}>
+      <Maplibre.Layer
+        type="symbol"
         id="pointCount"
-        belowLayerID="points-green"
+        beforeId="points-green"
         filter={["has", "point_count"]}
-        minZoomLevel={CLUSTER_MIN_ZOOM_LEVEL}
+        minzoom={CLUSTER_MIN_ZOOM_LEVEL}
         style={styles.clusterCount}
       />
 
@@ -57,7 +61,8 @@ export default function ShapePoints({ shape, children, ...shapeSourceProps }) {
       <AlertSymbolLayer level="yellow" isDisabled />
       <AlertSymbolLayer level="green" isDisabled />
 
-      <Maplibre.SymbolLayer
+      <Maplibre.Layer
+        type="symbol"
         filter={["==", ["get", "icon"], "origin"]}
         key="points-origin"
         id="points-origin"
@@ -65,15 +70,16 @@ export default function ShapePoints({ shape, children, ...shapeSourceProps }) {
       />
 
       {/* Defibrillators (DAE) – separate layer (non-clustered) */}
-      <Maplibre.SymbolLayer
+      <Maplibre.Layer
+        type="symbol"
         filter={["==", ["get", "isDefib"], true]}
         key="points-defib"
         id="points-defib"
-        aboveLayerID="points-origin"
+        afterId="points-origin"
         style={defibStyle}
       />
 
       {children}
-    </Maplibre.ShapeSource>
+    </Maplibre.GeoJSONSource>
   );
 }
