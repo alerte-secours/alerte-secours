@@ -39,3 +39,4 @@ codebase.md
 .falcon/
 .repos/
 .glitchtip-bootstrap.txt
+.playwright-mcp/
