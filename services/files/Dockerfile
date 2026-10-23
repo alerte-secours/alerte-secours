@@ -29,5 +29,8 @@ FROM ./dockerfile-x/node
 ENV NODE_ENV=production
 CMD ["node","/app/dist/index.js","start"]
 COPY --from=build /app/services/files/dist/ /app/dist/
+# @sentry/profiling-node 8.x ships no binding for the node 24 ABI; the
+# bundle resolves it from the app root, so ship the one built from source.
+COPY --from=build /app/node_modules/@sentry/profiling-node/lib/sentry_cpu_profiler-linux-x64-glibc-137.node /app/
 
 LABEL project="alertesecours"
