@@ -3,7 +3,7 @@
 FROM ./downloader.dockerfile AS build-node
 
 # renovate: datasource=node depName=node versioning=node
-ARG NODE_VERSION=20.3.0
+ARG NODE_VERSION=24.22.1
 
 ARG NODE_PACKAGE=node-v$NODE_VERSION-linux-x64
 

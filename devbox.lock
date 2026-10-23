@@ -111,20 +111,10 @@
         }
       }
     },
-    "nodejs_20": {
-      "plugin_version": "0.0.4",
-      "resolved": "github:NixOS/nixpkgs/ca77296380960cd497a765102eeb1356eb80fed0?narHash=sha256-PgLSZDBEWUHpfTRfFyklmiiLBE1i1aGCtz4eRA3POao%3D#nodejs_20",
-      "source": "nixpkg",
-      "systems": {
-        "x86_64-linux": {
-          "outputs": [
-            {
-              "path": "/nix/store/4i5h4acwfks571bagg651zdp0fybv93s-nodejs-20.19.4",
-              "default": true
-            }
-          ]
-        }
-      }
+    "nodejs_24": {
+      "plugin_version": "0.0.5",
+      "resolved": "github:NixOS/nixpkgs/ca77296380960cd497a765102eeb1356eb80fed0?narHash=sha256-PgLSZDBEWUHpfTRfFyklmiiLBE1i1aGCtz4eRA3POao%3D#nodejs_24",
+      "source": "nixpkg"
     },
     "tilt": {
       "resolved": "github:NixOS/nixpkgs/ca77296380960cd497a765102eeb1356eb80fed0?narHash=sha256-PgLSZDBEWUHpfTRfFyklmiiLBE1i1aGCtz4eRA3POao%3D#tilt",

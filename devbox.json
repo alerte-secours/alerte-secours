@@ -1,7 +1,7 @@
 {
   "$schema": "https://raw.githubusercontent.com/jetpack-io/devbox/0.13.6/.schema/devbox.schema.json",
   "packages": [
-    "nodejs_20",
+    "nodejs_24",
     "yarn",
     "git",
     "git-lfs",

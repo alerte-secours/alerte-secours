@@ -24,7 +24,7 @@ cd alerte-secours
 curl -fsSL https://get.jetpack.io/devbox | bash
 ```
 
-3. Enter devbox shell (this will automatically install Node.js 20 and Yarn 4.6.0):
+3. Enter devbox shell (this will automatically install Node.js 24 and Yarn 4.10.3):
 ```sh
 devbox shell
 ```
@@ -77,7 +77,7 @@ devbox run compose:down
 ### Using Devbox
 
 Once you're in the devbox shell, you have access to:
-- Node.js 20 (automatically installed)
+- Node.js 24 (automatically installed)
 - Yarn 4.6.0 (automatically installed)
 - All project scripts and environment variables
 - PostgreSQL client tools
@@ -135,7 +135,7 @@ For development and testing, you can use our public staging environment:
 ## Technical Stack
 
 ### Backend
-- **Node.js** (>=20) - Core runtime
+- **Node.js** (>=22) - Core runtime
 - **PostgreSQL** - Primary database
 - **Redis** - Caching and queue deduplication
 - **RabbitMQ** - Message queue
