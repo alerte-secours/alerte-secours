@@ -2,6 +2,22 @@
 
 All notable changes to this project will be documented in this file. See [commit-and-tag-version](https://github.com/absolute-version/commit-and-tag-version) for commit guidelines.
 
+## [2.1.0](https://codeberg.org/alerte-secours/alerte-secours/compare/v2.0.0...v2.1.0) (2026-10-23)
+
+
+### Features
+
+* **e2e:** cover bidirectional alerts, deep links, FCM push and SMS auth on a local backend ([1eb3d02](https://codeberg.org/alerte-secours/alerte-secours/commit/1eb3d02f3524ad843369148d118008d298b0b0cd))
+
+
+### Bug Fixes
+
+* **app:** block expo-audio FOREGROUND_SERVICE_MEDIA_PLAYBACK and cover chat text/audio in e2e ([edea81c](https://codeberg.org/alerte-secours/alerte-secours/commit/edea81c56bec1f152beb7cc51afe034da5eb9cd6))
+* **docker:** install native build toolchain in api, files, watchers ([c1665fa](https://codeberg.org/alerte-secours/alerte-secours/commit/c1665faac400790ca50e63db0d1accfc46122bfc))
+* **docker:** ship source-built sentry profiler binding in node 24 images ([91d630f](https://codeberg.org/alerte-secours/alerte-secours/commit/91d630fe1ce00a9b30f438f550b35ae0e2b301ef))
+* **e2e:** stabilize the chat audio spec ([1ec5288](https://codeberg.org/alerte-secours/alerte-secours/commit/1ec52882d9698c7cfcea7830ed7553106aa0cf06))
+* **runtime:** upgrade node 20.3.0 (EOL) to 24.22.1 ([d014150](https://codeberg.org/alerte-secours/alerte-secours/commit/d0141505ca062d35ddc128eb287a26739e62a51c))
+
 ## [2.0.0](https://codeberg.org/alerte-secours/alerte-secours/compare/v1.19.0...v2.0.0) (2026-08-11)
 
 
