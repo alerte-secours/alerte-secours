@@ -6,6 +6,11 @@ ENV NODE_ENV=production
 # invalidation, so a yarn.lock bump re-downloads only what changed.
 ENV YARN_ENABLE_GLOBAL_CACHE=true YARN_GLOBAL_FOLDER=/yarn-global
 
+# Install build dependencies for native modules (@sentry/profiling-node)
+USER root
+RUN apt-get update && apt-get install -y python3 make g++ && rm -rf /var/lib/apt/lists/*
+USER 1000
+
 # fetch
 COPY --chown=1000:1000 yarn.lock .yarnrc.yml ./
 COPY --chown=1000:1000 .yarn .yarn
