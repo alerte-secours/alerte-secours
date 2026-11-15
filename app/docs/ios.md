@@ -26,3 +26,41 @@ cd ios
 codesign -dvvv build/extracted/Payload/AlerteSecours.app
 codesign --verify --deep --strict --verbose=2 build/extracted/Payload/AlerteSecours.app
 xcrun altool --validate-app --type ios --file build/AlerteSecours.ipa --apiKey $ASC_API_KEY_ID --apiIssuer $ASC_API_ISSUER_ID
+
+# toolchain
+The app (Expo SDK 54 / React Native 0.81) must be built with **Xcode 26.x**. Built with
+Xcode 27 it compiles but aborts at launch: the iOS 27 SDK requires the UIScene life cycle,
+which this Expo SDK does not adopt. With several Xcode versions installed:
+```sh
+export DEVELOPER_DIR=/Applications/Xcode-26.6.app/Contents/Developer
+```
+
+# release from a machine without an Apple ID in Xcode
+`ios-archive.sh` and `ios-export.sh` pass the App Store Connect API key to `xcodebuild`
+when `ASC_API_KEY_ID`, `ASC_API_ISSUER_ID` and `ASC_API_KEY_PATH` are set (`.env.prod`), so
+certificates and profiles are managed without signing in to Xcode. The key needs the Admin
+role for that. `altool` looks for it in `~/.private_keys/AuthKey_<KEY_ID>.p8`.
+
+`ios/AlerteSecours/Supporting/Expo.plist` is generated from `app.config.js` by
+`yarn bundle:ios:expo-plist` (part of `yarn bundle:ios:build`); it needs
+`keys/certificate.pem`.
+
+# CI (GitHub Actions)
+`.github/workflows/ios-release.yaml` (manual trigger) runs `yarn bundle:ios:build` on a
+macOS runner and, when the `upload` input is ticked, `yarn bundle:ios:upload`.
+
+Repository secrets:
+
+| secret | content |
+| --- | --- |
+| `ASC_API_KEY_ID`, `ASC_API_ISSUER_ID` | App Store Connect API key identifiers |
+| `ASC_API_KEY_P8` | content of `AuthKey_<KEY_ID>.p8` |
+| `IOS_DEV_CERT_P12_B64`, `IOS_DEV_CERT_PASSWORD` | Apple Development certificate + key (base64 `.p12`) used to sign the archive |
+| `SENTRY_URL`, `SENTRY_ORG`, `SENTRY_PROJECT`, `SENTRY_DSN` | error tracking values of `.env.prod` |
+| `SENTRY_AUTH_TOKEN` | token used to upload sourcemaps and dSYMs |
+| `IOS_GOOGLE_SERVICE_INFO_PLIST_B64` | base64 of `ios/GoogleService-Info.plist` |
+| `EXPO_UPDATES_CERTIFICATE` | content of `keys/certificate.pem` (public) |
+
+The App Store distribution certificate is cloud-managed: it is used through the API key at
+export time and is not stored in the repository secrets. The development certificate
+expires after one year and must then be replaced.

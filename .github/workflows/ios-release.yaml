@@ -1,0 +1,168 @@
+# yaml-language-server: $schema=https://json.schemastore.org/github-workflow.json
+name: 📱 iOS release
+
+# Builds the iOS app with the same scripts as a local release (app/scripts/ios-*.sh)
+# and, when asked, uploads the build to App Store Connect (TestFlight).
+# Required secrets are documented in app/docs/ios.md.
+
+on:
+  workflow_dispatch:
+    inputs:
+      upload:
+        description: "Upload the build to App Store Connect (TestFlight)"
+        type: boolean
+        default: false
+
+concurrency:
+  group: ios-release
+  cancel-in-progress: false
+
+permissions:
+  contents: read
+
+jobs:
+  build-ios:
+    runs-on: macos-26
+    timeout-minutes: 120
+    defaults:
+      run:
+        shell: bash
+        working-directory: app
+    env:
+      LANG: en_US.UTF-8
+      LC_ALL: en_US.UTF-8
+      COREPACK_ENABLE_DOWNLOAD_PROMPT: "0"
+    steps:
+      - name: ⏬ Checkout code repository
+        uses: actions/checkout@v4
+
+      - name: 🧰 Select Xcode 26
+        # Expo SDK 54 / React Native 0.81 does not adopt the UIScene life cycle required
+        # by the iOS 27 SDK: an app built with Xcode 27 aborts at launch.
+        run: |
+          xcode=$(ls -d /Applications/Xcode_26*.app | sort -V | tail -n 1)
+          sudo xcode-select -s "$xcode/Contents/Developer"
+          xcodebuild -version
+
+      - name: ⬢ Setup node version
+        uses: actions/setup-node@v4
+        with:
+          node-version-file: app/.node-version
+
+      - name: 🧶 Enable Yarn
+        run: corepack enable
+
+      - name: ⛾ Yarn cache
+        uses: actions/cache@v4
+        with:
+          path: |
+            app/.yarn/cache
+            app/scripts/useful-places/.yarn/cache
+          key: ${{ runner.os }}-yarn-${{ hashFiles('app/yarn.lock', 'app/scripts/useful-places/yarn.lock') }}
+          restore-keys: |
+            ${{ runner.os }}-yarn-
+
+      - name: 🔽 Yarn install
+        run: |
+          yarn install --immutable
+          yarn --cwd scripts/useful-places install --immutable
+
+      - name: 🔐 Restore build configuration
+        env:
+          ASC_API_KEY_ID: ${{ secrets.ASC_API_KEY_ID }}
+          ASC_API_ISSUER_ID: ${{ secrets.ASC_API_ISSUER_ID }}
+          ASC_API_KEY_P8: ${{ secrets.ASC_API_KEY_P8 }}
+          SENTRY_URL: ${{ secrets.SENTRY_URL }}
+          SENTRY_ORG: ${{ secrets.SENTRY_ORG }}
+          SENTRY_PROJECT: ${{ secrets.SENTRY_PROJECT }}
+          SENTRY_DSN: ${{ secrets.SENTRY_DSN }}
+          IOS_GOOGLE_SERVICE_INFO_PLIST_B64: ${{ secrets.IOS_GOOGLE_SERVICE_INFO_PLIST_B64 }}
+          EXPO_UPDATES_CERTIFICATE: ${{ secrets.EXPO_UPDATES_CERTIFICATE }}
+        run: |
+          set -euo pipefail
+          umask 077
+
+          # App Store Connect API key, where altool and the release scripts expect it.
+          mkdir -p "$HOME/.private_keys"
+          key_path="$HOME/.private_keys/AuthKey_${ASC_API_KEY_ID}.p8"
+          printf '%s\n' "$ASC_API_KEY_P8" > "$key_path"
+
+          # .env.prod: public values from the example, then the per-environment ones.
+          # The release scripts `source` it, so later lines win.
+          cp .env.prod.example .env.prod
+          {
+            echo "SENTRY_URL=$SENTRY_URL"
+            echo "SENTRY_ORG=$SENTRY_ORG"
+            echo "SENTRY_PROJECT=$SENTRY_PROJECT"
+            echo "SENTRY_DSN=$SENTRY_DSN"
+            echo "ASC_API_KEY_ID=$ASC_API_KEY_ID"
+            echo "ASC_API_ISSUER_ID=$ASC_API_ISSUER_ID"
+            echo "ASC_API_KEY_PATH=$key_path"
+          } >> .env.prod
+
+          # Firebase configuration (git-ignored).
+          echo "$IOS_GOOGLE_SERVICE_INFO_PLIST_B64" | base64 --decode > ios/GoogleService-Info.plist
+          cp ios/GoogleService-Info.plist ios/AlerteSecours/GoogleService-Info.plist
+
+          # Public certificate used by expo-updates to verify signed OTA updates.
+          mkdir -p keys
+          printf '%s\n' "$EXPO_UPDATES_CERTIFICATE" > keys/certificate.pem
+
+      - name: ⛾ CocoaPods cache
+        uses: actions/cache@v4
+        with:
+          path: |
+            app/ios/Pods
+            ~/Library/Caches/CocoaPods
+          key: ${{ runner.os }}-pods-${{ hashFiles('app/ios/Podfile.lock') }}
+          restore-keys: |
+            ${{ runner.os }}-pods-
+
+      - name: 🫛 Install Pods
+        working-directory: app/ios
+        run: pod install
+
+      - name: 📲 Ensure the iOS platform is installed
+        # xcodebuild refuses iOS destinations until the platform matching its SDK is installed.
+        run: |
+          if xcodebuild -workspace ios/AlerteSecours.xcworkspace -scheme AlerteSecours -showdestinations 2>&1 | grep -q "is not installed"; then
+            xcodebuild -downloadPlatform iOS
+          fi
+
+      - name: 🔏 Import the development signing certificate
+        # The archive is signed with a development identity; the App Store distribution
+        # certificate is cloud-managed and used through the API key at export time.
+        env:
+          IOS_DEV_CERT_P12_B64: ${{ secrets.IOS_DEV_CERT_P12_B64 }}
+          IOS_DEV_CERT_PASSWORD: ${{ secrets.IOS_DEV_CERT_PASSWORD }}
+        run: |
+          set -euo pipefail
+          umask 077
+          keychain="$RUNNER_TEMP/ios-build.keychain-db"
+          keychain_password=$(openssl rand -hex 24)
+          security create-keychain -p "$keychain_password" "$keychain"
+          security set-keychain-settings -lut 21600 "$keychain"
+          security unlock-keychain -p "$keychain_password" "$keychain"
+          echo "$IOS_DEV_CERT_P12_B64" | base64 --decode > "$RUNNER_TEMP/dev.p12"
+          security import "$RUNNER_TEMP/dev.p12" -k "$keychain" -f pkcs12 -P "$IOS_DEV_CERT_PASSWORD" \
+            -T /usr/bin/codesign -T /usr/bin/security
+          rm -f "$RUNNER_TEMP/dev.p12"
+          security set-key-partition-list -S apple-tool:,apple: -s -k "$keychain_password" "$keychain" > /dev/null
+          security list-keychains -d user -s "$keychain" $(security list-keychains -d user | tr -d '"')
+          security find-identity -v -p codesigning "$keychain"
+
+      - name: 📦 Build the archive and the IPA
+        env:
+          SENTRY_AUTH_TOKEN: ${{ secrets.SENTRY_AUTH_TOKEN }}
+        run: yarn bundle:ios:build
+
+      - name: 🎁 Upload the build to App Store Connect
+        if: ${{ inputs.upload }}
+        run: yarn bundle:ios:upload
+
+      - name: 🧹 Remove signing material
+        if: always()
+        run: |
+          security delete-keychain "$RUNNER_TEMP/ios-build.keychain-db" || true
+          rm -rf "$HOME/.private_keys" .env.prod keys \
+            ios/GoogleService-Info.plist ios/AlerteSecours/GoogleService-Info.plist
