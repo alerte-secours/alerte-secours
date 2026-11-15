@@ -99,13 +99,29 @@ mkdir -p build/generated/ios
 # Create logs directory if it doesn't exist
 mkdir -p ../logs
 
+# When an App Store Connect API key is configured, let xcodebuild use it to manage
+# signing assets (certificates, profiles). Needed on machines with no Apple ID
+# signed in to Xcode, CI included. Without it, signing relies on the local Xcode account.
+XCODE_AUTH_ARGS=()
+if [ -n "$ASC_API_KEY_ID" ] && [ -n "$ASC_API_ISSUER_ID" ] && [ -f "$ASC_API_KEY_PATH" ]; then
+  echo "Using App Store Connect API key $ASC_API_KEY_ID for provisioning"
+  XCODE_AUTH_ARGS=(
+    -allowProvisioningUpdates
+    -authenticationKeyPath "$ASC_API_KEY_PATH"
+    -authenticationKeyID "$ASC_API_KEY_ID"
+    -authenticationKeyIssuerID "$ASC_API_ISSUER_ID"
+  )
+fi
+
 # Create archive using xcodebuild
 echo "Creating archive..."
 xcodebuild \
   -workspace AlerteSecours.xcworkspace \
   -scheme AlerteSecours \
   -configuration Release \
+  -destination 'generic/platform=iOS' \
   -archivePath AlerteSecours.xcarchive \
+  "${XCODE_AUTH_ARGS[@]}" \
   archive 2>&1 | tee "../logs/ios-archive-$(date +%Y%m%d-%H%M%S).log"
 
 # Verify archive version matches source Info.plist
