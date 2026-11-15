@@ -26,6 +26,7 @@ cd ios
 codesign -dvvv build/extracted/Payload/AlerteSecours.app
 codesign --verify --deep --strict --verbose=2 build/extracted/Payload/AlerteSecours.app
 xcrun altool --validate-app --type ios --file build/AlerteSecours.ipa --apiKey $ASC_API_KEY_ID --apiIssuer $ASC_API_ISSUER_ID
+```
 
 # toolchain
 The app (Expo SDK 54 / React Native 0.81) must be built with **Xcode 26.x**. Built with
@@ -42,12 +43,15 @@ certificates and profiles are managed without signing in to Xcode. The key needs
 role for that. `altool` looks for it in `~/.private_keys/AuthKey_<KEY_ID>.p8`.
 
 `ios/AlerteSecours/Supporting/Expo.plist` is generated from `app.config.js` by
-`yarn bundle:ios:expo-plist` (part of `yarn bundle:ios:build`); it needs
-`keys/certificate.pem`.
+`yarn bundle:ios:expo-plist` (part of `yarn bundle:ios:build`, run it once by hand before a
+development build on a fresh clone). It needs `keys/certificate.pem` and fails when that
+certificate is missing, invalid, expired or different from the one in the Android manifest.
 
 # CI (GitHub Actions)
 `.github/workflows/ios-release.yaml` (manual trigger) runs `yarn bundle:ios:build` on a
-macOS runner and, when the `upload` input is ticked, `yarn bundle:ios:upload`.
+macOS runner and, when the `upload` input is ticked on a run of the `main` branch,
+`yarn bundle:ios:upload`. The job fails early when a secret is missing or when the
+development certificate is no longer valid.
 
 Repository secrets:
 

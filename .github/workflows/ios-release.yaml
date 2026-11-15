@@ -48,7 +48,14 @@ jobs:
         # Expo SDK 54 / React Native 0.81 does not adopt the UIScene life cycle required
         # by the iOS 27 SDK: an app built with Xcode 27 aborts at launch.
         run: |
-          xcode=$(ls -d /Applications/Xcode_26*.app | sort -V | tail -n 1)
+          # Latest released 26.x on the runner; beta and release-candidate builds are
+          # skipped, App Store Connect rejects uploads made with them.
+          xcode=$(ls -d /Applications/Xcode_26*.app 2>/dev/null | grep -viE 'beta|rc|candidate' | sort -V | tail -n 1 || true)
+          if [ -z "$xcode" ]; then
+            echo "::error::No released Xcode 26.x found on this runner"
+            ls -d /Applications/Xcode*.app
+            exit 1
+          fi
           sudo xcode-select -s "$xcode/Contents/Developer"
           xcodebuild -version
 
@@ -89,6 +96,16 @@ jobs:
         run: |
           set -euo pipefail
           umask 077
+
+          # An unset secret expands to an empty string: the build would stay green and
+          # ship an app without crash reporting or unable to verify OTA updates.
+          for name in ASC_API_KEY_ID ASC_API_ISSUER_ID ASC_API_KEY_P8 SENTRY_URL SENTRY_ORG \
+            SENTRY_PROJECT SENTRY_DSN IOS_GOOGLE_SERVICE_INFO_PLIST_B64 EXPO_UPDATES_CERTIFICATE; do
+            if [ -z "${!name}" ]; then
+              echo "::error::Repository secret $name is not set"
+              exit 1
+            fi
+          done
 
           # App Store Connect API key, where altool and the release scripts expect it.
           mkdir -p "$HOME/.private_keys"
@@ -133,8 +150,21 @@ jobs:
       - name: 📲 Ensure the iOS platform is installed
         # xcodebuild refuses iOS destinations until the platform matching its SDK is installed.
         run: |
-          if xcodebuild -workspace ios/AlerteSecours.xcworkspace -scheme AlerteSecours -showdestinations 2>&1 | grep -q "is not installed"; then
+          # Capture the output first: piping straight into `grep -q` under pipefail could
+          # report a false "installed" when grep exits before xcodebuild is done writing.
+          destinations() {
+            xcodebuild -workspace ios/AlerteSecours.xcworkspace -scheme AlerteSecours -showdestinations 2>&1 || true
+          }
+          available=$(destinations)
+          if grep -q "is not installed" <<< "$available"; then
             xcodebuild -downloadPlatform iOS
+            available=$(destinations)
+          fi
+          # An eligible entry ends right after the name; an ineligible one carries an error.
+          if ! grep -q "name:Any iOS Device }" <<< "$available"; then
+            echo "::error::xcodebuild cannot build for iOS devices on this runner"
+            tail -n 20 <<< "$available"
+            exit 1
           fi
 
       - name: 🔏 Import the development signing certificate
@@ -146,6 +176,12 @@ jobs:
         run: |
           set -euo pipefail
           umask 077
+          for name in IOS_DEV_CERT_P12_B64 IOS_DEV_CERT_PASSWORD; do
+            if [ -z "${!name}" ]; then
+              echo "::error::Repository secret $name is not set"
+              exit 1
+            fi
+          done
           keychain="$RUNNER_TEMP/ios-build.keychain-db"
           keychain_password=$(openssl rand -hex 24)
           security create-keychain -p "$keychain_password" "$keychain"
@@ -157,15 +193,28 @@ jobs:
           rm -f "$RUNNER_TEMP/dev.p12"
           security set-key-partition-list -S apple-tool:,apple: -s -k "$keychain_password" "$keychain" > /dev/null
           security list-keychains -d user -s "$keychain" $(security list-keychains -d user | tr -d '"')
-          security find-identity -v -p codesigning "$keychain"
+          # An expired certificate still imports. Without a valid identity xcodebuild would
+          # ask Apple for a brand new development certificate on every run: stop here.
+          identities=$(security find-identity -v -p codesigning "$keychain")
+          echo "$identities"
+          if ! grep -qE '^ +[1-9][0-9]* valid identities found' <<< "$identities"; then
+            echo "::error::The development certificate in IOS_DEV_CERT_P12_B64 is not valid (expired?). See app/docs/ios.md"
+            exit 1
+          fi
 
       - name: 📦 Build the archive and the IPA
         env:
           SENTRY_AUTH_TOKEN: ${{ secrets.SENTRY_AUTH_TOKEN }}
-        run: yarn bundle:ios:build
+        run: |
+          if [ -z "$SENTRY_AUTH_TOKEN" ]; then
+            echo "::error::Repository secret SENTRY_AUTH_TOKEN is not set"
+            exit 1
+          fi
+          yarn bundle:ios:build
 
       - name: 🎁 Upload the build to App Store Connect
-        if: ${{ inputs.upload }}
+        # Only a manual run on the default branch may publish.
+        if: ${{ inputs.upload && github.ref == 'refs/heads/main' }}
         run: yarn bundle:ios:upload
 
       - name: 🧹 Remove signing material
