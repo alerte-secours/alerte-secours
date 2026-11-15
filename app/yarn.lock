@@ -3372,13 +3372,23 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@bam.tech/react-native-image-resizer@npm:^3.0.7":
+"@bam.tech/react-native-image-resizer@npm:3.0.7":
   version: 3.0.7
   resolution: "@bam.tech/react-native-image-resizer@npm:3.0.7"
   peerDependencies:
     react: "*"
     react-native: "*"
   checksum: 10/3e84b155ad67aa29d930e3652b3b99f3d246d9ed4f501d9cd90ae5f9a3600e0dd8440f90ef310e6d85c41e90543dd1dec269aaa5c086ad44178592f8dcea177f
+  languageName: node
+  linkType: hard
+
+"@bam.tech/react-native-image-resizer@patch:@bam.tech/react-native-image-resizer@npm%3A3.0.7#~/.yarn/patches/@bam.tech-react-native-image-resizer-npm-3.0.7-3436107748.patch":
+  version: 3.0.7
+  resolution: "@bam.tech/react-native-image-resizer@patch:@bam.tech/react-native-image-resizer@npm%3A3.0.7#~/.yarn/patches/@bam.tech-react-native-image-resizer-npm-3.0.7-3436107748.patch::version=3.0.7&hash=282c5c"
+  peerDependencies:
+    react: "*"
+    react-native: "*"
+  checksum: 10/8d686621ec3ea102e5ba4ae437c5e1495048678da049352f48e18cee35ea9426d52a6fa69278e3a4478ca9e91ef3a48acf26375939c69e6b6de255935cbba890
   languageName: node
   linkType: hard
 
@@ -7127,7 +7137,7 @@ __metadata:
     "@babel/plugin-transform-flow-strip-types": "npm:^7.25.2"
     "@babel/preset-env": "npm:^7.22.7"
     "@babel/preset-react": "npm:^7.24.1"
-    "@bam.tech/react-native-image-resizer": "npm:^3.0.7"
+    "@bam.tech/react-native-image-resizer": "patch:@bam.tech/react-native-image-resizer@npm%3A3.0.7#~/.yarn/patches/@bam.tech-react-native-image-resizer-npm-3.0.7-3436107748.patch"
     "@expo/config-plugins": "npm:~54.0.4"
     "@hookform/resolvers": "npm:^3.2.0"
     "@mapbox/geo-viewport": "npm:^0.5.0"
