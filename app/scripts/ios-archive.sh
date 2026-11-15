@@ -6,6 +6,9 @@ set -a
 source .env.prod
 set +a
 
+# xcodebuild authentication options (App Store Connect API key), resolved from the app root.
+source "$(dirname "${BASH_SOURCE[0]}")/ios-xcode-auth-args.sh"
+
 # Export build time for consistent release naming
 export BUILD_TIME=$(date +%s000)
 
@@ -99,18 +102,9 @@ mkdir -p build/generated/ios
 # Create logs directory if it doesn't exist
 mkdir -p ../logs
 
-# When an App Store Connect API key is configured, let xcodebuild use it to manage
-# signing assets (certificates, profiles). Needed on machines with no Apple ID
-# signed in to Xcode, CI included. Without it, signing relies on the local Xcode account.
-XCODE_AUTH_ARGS=()
-if [ -n "$ASC_API_KEY_ID" ] && [ -n "$ASC_API_ISSUER_ID" ] && [ -f "$ASC_API_KEY_PATH" ]; then
-  echo "Using App Store Connect API key $ASC_API_KEY_ID for provisioning"
-  XCODE_AUTH_ARGS=(
-    -allowProvisioningUpdates
-    -authenticationKeyPath "$ASC_API_KEY_PATH"
-    -authenticationKeyID "$ASC_API_KEY_ID"
-    -authenticationKeyIssuerID "$ASC_API_ISSUER_ID"
-  )
+# With an API key, let xcodebuild create or refresh the signing assets it needs.
+if [ ${#XCODE_AUTH_ARGS[@]} -gt 0 ]; then
+  XCODE_AUTH_ARGS=(-allowProvisioningUpdates "${XCODE_AUTH_ARGS[@]}")
 fi
 
 # Create archive using xcodebuild
