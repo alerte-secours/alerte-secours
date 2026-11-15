@@ -60,8 +60,10 @@ Copy `.env.staging.example` to `.env.staging` (which is git-ignored) and fill in
 
 ## Expo Updates Configuration
 
-1. Copy `ios/AlerteSecours/Supporting/Expo.example.plist` to `ios/AlerteSecours/Supporting/Expo.plist`
-2. Fill in the `EXUpdatesCodeSigningCertificate` with your Expo code signing certificate
+`ios/AlerteSecours/Supporting/Expo.plist` is git-ignored and generated from `app.config.js`:
+
+1. Put the Expo code signing certificate in `keys/certificate.pem`
+2. Run `yarn bundle:ios:expo-plist` (done automatically by `yarn bundle:ios:build`)
 
 ## How to Obtain These Values
 
