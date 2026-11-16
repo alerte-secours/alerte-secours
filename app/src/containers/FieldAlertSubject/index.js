@@ -157,10 +157,12 @@ export default function FieldSubject({
           ItemSeparatorComponent: Divider,
         }}
         renderTextInput={() => (
-          <LinearGradient
-            {...styleOptions.gradientProps}
-            style={styles.linearGradient}
-          >
+          <View>
+            <LinearGradient
+              {...styleOptions.gradientProps}
+              style={styles.linearGradient}
+              pointerEvents="none"
+            />
             <OutlinedInputText
               ref={inputRef}
               label="Sujet de l'alerte"
@@ -225,7 +227,7 @@ export default function FieldSubject({
                 )}
               />
             </View>
-          </LinearGradient>
+          </View>
         )}
       />
     </View>
@@ -254,8 +256,15 @@ const useStyles = createStyles(
     container: {
       marginTop: hp(3),
     },
+    // Background layer behind the field, not its parent: on iOS the native gradient
+    // layer clips its children (masksToBounds) whatever `overflow` says, which cut
+    // off the label that straddles the top border.
     linearGradient: {
-      overflow: "visible",
+      position: "absolute",
+      top: 0,
+      right: 0,
+      bottom: 0,
+      left: 0,
     },
     textField: {
       paddingVertical: hp(2),

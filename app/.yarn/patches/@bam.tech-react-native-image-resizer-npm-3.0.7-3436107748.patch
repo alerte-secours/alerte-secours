@@ -1,0 +1,17 @@
+diff --git a/react-native-image-resizer.podspec b/react-native-image-resizer.podspec
+index c7ba7d9e261abbb890cccf0c9dd58eba118083be..d81968df5b9f96d67f00d699ecdac4009d422944 100644
+--- a/react-native-image-resizer.podspec
++++ b/react-native-image-resizer.podspec
+@@ -27,11 +27,11 @@ Pod::Spec.new do |s|
+         "OTHER_CPLUSPLUSFLAGS" => "-DFOLLY_NO_CONFIG -DFOLLY_MOBILE=1 -DFOLLY_USE_LIBCPP=1",
+         "CLANG_CXX_LANGUAGE_STANDARD" => "c++17"
+     }
+-    s.dependency "React-Codegen"
+     s.dependency "RCT-Folly"
+     s.dependency "RCTRequired"
+     s.dependency "RCTTypeSafety"
+     s.dependency "ReactCommon/turbomodule/core"
++    install_modules_dependencies(s)
+   end
+ end
+ 

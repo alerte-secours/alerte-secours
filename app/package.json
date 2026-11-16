@@ -17,7 +17,8 @@
     "bundle:ios:export": "./scripts/ios-export.sh",
     "bundle:ios:upload": "./scripts/ios-upload.sh",
     "bundle:ios:version": "bash ./scripts/ios-set-timestamp-build-number.sh | tail -n 1 | xargs -I{} echo 'iOS version timestamp: {}'",
-    "bundle:ios:build": "yarn useful-places:ensure && yarn bundle:ios:version && yarn bundle:ios:archive && yarn bundle:ios:export",
+    "bundle:ios:expo-plist": "node scripts/ios-generate-expo-plist.js",
+    "bundle:ios:build": "yarn useful-places:ensure && yarn bundle:ios:expo-plist && yarn bundle:ios:version && yarn bundle:ios:archive && yarn bundle:ios:export",
     "bundle:ios:release": "yarn bundle:ios:build && yarn bundle:ios:upload",
     "bundle:ios": "yarn bundle:ios:build",
     "ios": "expo run:ios",
@@ -74,7 +75,7 @@
   },
   "dependencies": {
     "@apollo/client": "^3.13.1",
-    "@bam.tech/react-native-image-resizer": "^3.0.7",
+    "@bam.tech/react-native-image-resizer": "patch:@bam.tech/react-native-image-resizer@npm%3A3.0.7#~/.yarn/patches/@bam.tech-react-native-image-resizer-npm-3.0.7-3436107748.patch",
     "@expo/config-plugins": "~54.0.4",
     "@hookform/resolvers": "^3.2.0",
     "@mapbox/geo-viewport": "^0.5.0",

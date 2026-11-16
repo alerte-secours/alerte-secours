@@ -6,6 +6,9 @@ set -a
 source .env.prod
 set +a
 
+# xcodebuild authentication options (App Store Connect API key), resolved from the app root.
+source "$(dirname "${BASH_SOURCE[0]}")/ios-xcode-auth-args.sh"
+
 # Export build time for consistent release naming
 export BUILD_TIME=$(date +%s000)
 
@@ -99,13 +102,20 @@ mkdir -p build/generated/ios
 # Create logs directory if it doesn't exist
 mkdir -p ../logs
 
+# With an API key, let xcodebuild create or refresh the signing assets it needs.
+if [ ${#XCODE_AUTH_ARGS[@]} -gt 0 ]; then
+  XCODE_AUTH_ARGS=(-allowProvisioningUpdates "${XCODE_AUTH_ARGS[@]}")
+fi
+
 # Create archive using xcodebuild
 echo "Creating archive..."
 xcodebuild \
   -workspace AlerteSecours.xcworkspace \
   -scheme AlerteSecours \
   -configuration Release \
+  -destination 'generic/platform=iOS' \
   -archivePath AlerteSecours.xcarchive \
+  "${XCODE_AUTH_ARGS[@]}" \
   archive 2>&1 | tee "../logs/ios-archive-$(date +%Y%m%d-%H%M%S).log"
 
 # Verify archive version matches source Info.plist

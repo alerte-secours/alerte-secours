@@ -1,82 +1,81 @@
-import EXUpdates
+import Expo
 import FirebaseCore
 import React
+import ReactAppDependencyProvider
 import TSBackgroundFetch
-import UIKit
 
-@objc(AppDelegate)
-class AppDelegate: RCTAppDelegate {
-  override func application(
+@UIApplicationMain
+public class AppDelegate: ExpoAppDelegate {
+  var window: UIWindow?
+
+  var reactNativeDelegate: ExpoReactNativeFactoryDelegate?
+  var reactNativeFactory: RCTReactNativeFactory?
+
+  public override func application(
     _ application: UIApplication,
     didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey: Any]? = nil
   ) -> Bool {
-    NSLog("[AppDelegate] didFinishLaunchingWithOptions (RCTAppDelegate)")
+    let delegate = ReactNativeDelegate()
+    let factory = ExpoReactNativeFactory(delegate: delegate)
+    delegate.dependencyProvider = RCTAppDependencyProvider()
 
-    // Configure Firebase (react-native-firebase).
-    FirebaseApp.configure()
+    reactNativeDelegate = delegate
+    reactNativeFactory = factory
+    bindReactNativeFactory(factory)
 
-    // Transistorsoft background fetch bootstrap.
+#if os(iOS) || os(tvOS)
+    window = UIWindow(frame: UIScreen.main.bounds)
+// @generated begin @react-native-firebase/app-didFinishLaunchingWithOptions - expo prebuild (DO NOT MODIFY) sync-10e8520570672fd76b2403b7e1e27f5198a6349a
+FirebaseApp.configure()
+// @generated end @react-native-firebase/app-didFinishLaunchingWithOptions
+
+    // react-native-background-geolocation: BGTaskScheduler launch handlers must be
+    // registered before the app finishes launching. Not covered by a config plugin,
+    // so `expo prebuild` will not regenerate this line.
     TSBackgroundFetch.sharedInstance().didFinishLaunching()
-    NSLog("[AppDelegate] TSBackgroundFetch didFinishLaunching")
 
-    // Initialize expo-updates controller so AppController.sharedInstance can be used safely.
-    AppController.initializeWithoutStarting()
+    factory.startReactNative(
+      withModuleName: "main",
+      in: window,
+      launchOptions: launchOptions)
+#endif
 
-    let updatesController = AppController.sharedInstance
-    if updatesController.isActiveController {
-      updatesController.start()
-    } else {
-      NSLog("[AppDelegate] Skipping AppController.start(): isActiveController is false (dev client or disabled updates)")
-    }
-
-    // Configure React Native root module.
-    self.moduleName = "main"
-    self.initialProps = [:]
-
-    let result = super.application(application, didFinishLaunchingWithOptions: launchOptions)
-    NSLog("[AppDelegate] super.application(...) -> %@", result ? "true" : "false")
-    return result
+    return super.application(application, didFinishLaunchingWithOptions: launchOptions)
   }
 
-  // MARK: - RCTBridgeDelegate / JS bundle location
-
-  @objc
-  override func sourceURL(for bridge: RCTBridge!) -> URL! {
-    #if DEBUG
-      let url = RCTBundleURLProvider.sharedSettings().jsBundleURL(
-        forBundleRoot: ".expo/.virtual-metro-entry",
-        fallbackExtension: nil
-      )
-      NSLog("[AppDelegate] sourceURL(for:) (DEBUG) -> %@", url?.absoluteString ?? "nil")
-      return url
-    #else
-      let url = self.bundleURL()
-      NSLog("[AppDelegate] sourceURL(for:) (RELEASE) -> %@", url?.absoluteString ?? "nil")
-      return url
-    #endif
+  // Linking API
+  public override func application(
+    _ app: UIApplication,
+    open url: URL,
+    options: [UIApplication.OpenURLOptionsKey: Any] = [:]
+  ) -> Bool {
+    return super.application(app, open: url, options: options) || RCTLinkingManager.application(app, open: url, options: options)
   }
 
-  @objc
-  override func bundleURL() -> URL! {
-    #if DEBUG
-      let url = RCTBundleURLProvider.sharedSettings().jsBundleURL(
-        forBundleRoot: ".expo/.virtual-metro-entry",
-        fallbackExtension: nil
-      )
-      NSLog("[AppDelegate] bundleURL() (DEBUG) -> %@", url?.absoluteString ?? "nil")
-      return url
-    #else
-      if let updatesURL = AppController.sharedInstance.launchAssetUrl() {
-        NSLog("[AppDelegate] bundleURL() (RELEASE) -> %@", updatesURL.absoluteString)
-        return updatesURL
-      }
-      let url = Bundle.main.url(forResource: "main", withExtension: "jsbundle")
-      if let url = url {
-        NSLog("[AppDelegate] bundleURL() (RELEASE fallback) -> %@", url.absoluteString)
-      } else {
-        NSLog("[AppDelegate] bundleURL() (RELEASE fallback) -> nil (main.jsbundle not found)")
-      }
-      return url
-    #endif
+  // Universal Links
+  public override func application(
+    _ application: UIApplication,
+    continue userActivity: NSUserActivity,
+    restorationHandler: @escaping ([UIUserActivityRestoring]?) -> Void
+  ) -> Bool {
+    let result = RCTLinkingManager.application(application, continue: userActivity, restorationHandler: restorationHandler)
+    return super.application(application, continue: userActivity, restorationHandler: restorationHandler) || result
+  }
+}
+
+class ReactNativeDelegate: ExpoReactNativeFactoryDelegate {
+  // Extension point for config-plugins
+
+  override func sourceURL(for bridge: RCTBridge) -> URL? {
+    // needed to return the correct URL for expo-dev-client.
+    bridge.bundleURL ?? bundleURL()
+  }
+
+  override func bundleURL() -> URL? {
+#if DEBUG
+    return RCTBundleURLProvider.sharedSettings().jsBundleURL(forBundleRoot: ".expo/.virtual-metro-entry")
+#else
+    return Bundle.main.url(forResource: "main", withExtension: "jsbundle")
+#endif
   }
 }

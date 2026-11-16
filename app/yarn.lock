@@ -3372,13 +3372,23 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@bam.tech/react-native-image-resizer@npm:^3.0.7":
+"@bam.tech/react-native-image-resizer@npm:3.0.7":
   version: 3.0.7
   resolution: "@bam.tech/react-native-image-resizer@npm:3.0.7"
   peerDependencies:
     react: "*"
     react-native: "*"
   checksum: 10/3e84b155ad67aa29d930e3652b3b99f3d246d9ed4f501d9cd90ae5f9a3600e0dd8440f90ef310e6d85c41e90543dd1dec269aaa5c086ad44178592f8dcea177f
+  languageName: node
+  linkType: hard
+
+"@bam.tech/react-native-image-resizer@patch:@bam.tech/react-native-image-resizer@npm%3A3.0.7#~/.yarn/patches/@bam.tech-react-native-image-resizer-npm-3.0.7-3436107748.patch":
+  version: 3.0.7
+  resolution: "@bam.tech/react-native-image-resizer@patch:@bam.tech/react-native-image-resizer@npm%3A3.0.7#~/.yarn/patches/@bam.tech-react-native-image-resizer-npm-3.0.7-3436107748.patch::version=3.0.7&hash=64e581"
+  peerDependencies:
+    react: "*"
+    react-native: "*"
+  checksum: 10/0da59db13bb506df7d4864a5db30b8b974f18d32a4fe34a8002b935d26148f88f6551c51068437902500065f289e5f7137cfe5c71c5664489bcb1698fdf5f558
   languageName: node
   linkType: hard
 
@@ -7127,7 +7137,7 @@ __metadata:
     "@babel/plugin-transform-flow-strip-types": "npm:^7.25.2"
     "@babel/preset-env": "npm:^7.22.7"
     "@babel/preset-react": "npm:^7.24.1"
-    "@bam.tech/react-native-image-resizer": "npm:^3.0.7"
+    "@bam.tech/react-native-image-resizer": "patch:@bam.tech/react-native-image-resizer@npm%3A3.0.7#~/.yarn/patches/@bam.tech-react-native-image-resizer-npm-3.0.7-3436107748.patch"
     "@expo/config-plugins": "npm:~54.0.4"
     "@hookform/resolvers": "npm:^3.2.0"
     "@mapbox/geo-viewport": "npm:^0.5.0"
@@ -16860,11 +16870,11 @@ __metadata:
 
 "react-native-contact-pick@patch:react-native-contact-pick@npm%3A0.1.2#~/.yarn/patches/react-native-contact-pick-npm-0.1.2-c77a1d8d91.patch":
   version: 0.1.2
-  resolution: "react-native-contact-pick@patch:react-native-contact-pick@npm%3A0.1.2#~/.yarn/patches/react-native-contact-pick-npm-0.1.2-c77a1d8d91.patch::version=0.1.2&hash=6dced0"
+  resolution: "react-native-contact-pick@patch:react-native-contact-pick@npm%3A0.1.2#~/.yarn/patches/react-native-contact-pick-npm-0.1.2-c77a1d8d91.patch::version=0.1.2&hash=04949a"
   peerDependencies:
     react: "*"
     react-native: "*"
-  checksum: 10/0f84b1f06c268658cbd9d6370aaa3362703dc972f13a7c05bbc0b231571d3612ba8e556a422ff61abad0828a4d1a437c71476f05029c35ab83722341e4d3fef0
+  checksum: 10/bc12d2d58d01e34e64fe16bd1b6f1cfe1cbf2a21b1ca0d7f9ad3082d93b8ce09070facad4a0891a11ce97b7ccf0daae3f5d8f308ce7bd36d3dc9e63a4448745f
   languageName: node
   linkType: hard
 
