@@ -51,15 +51,22 @@ function unescapeXml(value) {
 }
 
 // The Android manifest is versioned and embeds the same certificate: use it as the
-// reference so iOS cannot ship trusting a different one.
+// reference so iOS cannot ship trusting a different one. Returns null only when the
+// manifest declares no code signing certificate at all; a declaration that cannot be
+// read is an error, so the comparison is never skipped by accident.
 function androidCertificate() {
   if (!fs.existsSync(androidManifestPath)) return null;
-  const match = fs
-    .readFileSync(androidManifestPath, "utf8")
-    .match(
-      /android:name="expo\.modules\.updates\.CODE_SIGNING_CERTIFICATE"\s+android:value="([^"]*)"/,
-    );
-  return match ? parseCertificate(unescapeXml(match[1]), "The Android manifest certificate") : null;
+  const manifest = fs.readFileSync(androidManifestPath, "utf8");
+  const name = "expo.modules.updates.CODE_SIGNING_CERTIFICATE";
+  if (!manifest.includes(name)) return null;
+  const tag = (manifest.match(/<meta-data\b[^>]*>/g) || []).find((element) =>
+    element.includes(`"${name}"`),
+  );
+  const value = tag && tag.match(/android:value="([^"]*)"/);
+  if (!value) {
+    throw new Error(`cannot read ${name} from the Android manifest`);
+  }
+  return parseCertificate(unescapeXml(value[1]), "The Android manifest certificate");
 }
 
 // A blank or wrong certificate would still build, and the app would then reject every
@@ -70,6 +77,9 @@ function checkCodeSigningCertificate(expoPlist) {
     throw new Error(
       "updates.codeSigningCertificate is empty: keys/certificate.pem is missing or blank",
     );
+  }
+  if ((pem.match(/-----BEGIN CERTIFICATE-----/g) || []).length !== 1) {
+    throw new Error("keys/certificate.pem must contain exactly one certificate");
   }
   const certificate = parseCertificate(pem, "keys/certificate.pem");
   const reference = androidCertificate();
@@ -96,6 +106,12 @@ async function main() {
 
   const signed = Boolean(exp.updates && exp.updates.codeSigningCertificate);
   const certificate = signed ? checkCodeSigningCertificate(next) : null;
+  if (certificate) {
+    // Embed the canonical PEM rather than the file as typed. OpenSSL, used for the
+    // check above, tolerates stray whitespace or a byte order mark that the strict
+    // decoder of expo-updates on iOS rejects.
+    next.EXUpdatesCodeSigningCertificate = certificate.toString();
+  }
 
   fs.mkdirSync(path.dirname(target), { recursive: true });
   fs.writeFileSync(target, plist.build(next));
