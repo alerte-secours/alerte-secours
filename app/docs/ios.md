@@ -11,13 +11,13 @@ xcrun altool --list-providers --apiKey $ASC_API_KEY_ID --apiIssuer $ASC_API_ISSU
 2. Click the "+" button to generate a new API key
 3. Give it a name (e.g., "AlerteSecours Build Key")
 4. Download the .p8 file when prompted
-5. Store the .p8 file in a secure location (recommended: `/Users/devthejo/Documents/as-app/ios/AuthKey.p8`)
+5. Store the .p8 file as `~/.private_keys/AuthKey_<KEY_ID>.p8` (mode 600): `altool` only looks for it there
 6. Note down the Key ID and Issuer ID shown on the website
 7. Set up environment variables:
 ```sh
 export ASC_API_KEY_ID="YOUR_KEY_ID"
 export ASC_API_ISSUER_ID="YOUR_ISSUER_ID"
-export ASC_API_KEY_PATH="/Users/devthejo/Documents/as-app/ios/AuthKey.p8"
+export ASC_API_KEY_PATH="$HOME/.private_keys/AuthKey_YOUR_KEY_ID.p8"
 ```
 
 # check build commands
@@ -50,8 +50,9 @@ certificate is missing, invalid, expired or different from the one in the Androi
 # CI (GitHub Actions)
 `.github/workflows/ios-release.yaml` (manual trigger) runs `yarn bundle:ios:build` on a
 macOS runner and, when the `upload` input is ticked on a run of the `main` branch,
-`yarn bundle:ios:upload`. The job fails early when a secret is missing or when the
-development certificate is no longer valid.
+`yarn bundle:ios:upload`. Its first step fails the job when a secret is missing or when
+an upload is requested from another branch; later steps stop it when the development
+certificate is no longer valid or when the useful places database has no defibrillators.
 
 Repository secrets:
 
@@ -68,3 +69,8 @@ Repository secrets:
 The App Store distribution certificate is cloud-managed: it is used through the API key at
 export time and is not stored in the repository secrets. The development certificate
 expires after one year and must then be replaced.
+
+# troubleshooting
+`pod install` fails with `invalid byte sequence in UTF-8` in its post-install hook when a
+previous release left `ios/AlerteSecours.xcarchive` behind: React Native reads every
+`Info.plist` under `ios/`, binary ones included. Delete the archive and run it again.

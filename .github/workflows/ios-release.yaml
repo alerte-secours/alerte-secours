@@ -41,6 +41,44 @@ jobs:
       LC_ALL: en_US.UTF-8
       COREPACK_ENABLE_DOWNLOAD_PROMPT: "0"
     steps:
+      - name: 🧾 Check the release request
+        # Fail in seconds rather than after a 30 minute build. An unset secret expands to
+        # an empty string: the build would stay green and ship an app without crash
+        # reporting, or unable to verify OTA updates. Only presence is exposed here.
+        working-directory: ${{ github.workspace }}
+        env:
+          UPLOAD: ${{ inputs.upload }}
+          HAS_ASC_API_KEY_ID: ${{ secrets.ASC_API_KEY_ID != '' }}
+          HAS_ASC_API_ISSUER_ID: ${{ secrets.ASC_API_ISSUER_ID != '' }}
+          HAS_ASC_API_KEY_P8: ${{ secrets.ASC_API_KEY_P8 != '' }}
+          HAS_IOS_DEV_CERT_P12_B64: ${{ secrets.IOS_DEV_CERT_P12_B64 != '' }}
+          HAS_IOS_DEV_CERT_PASSWORD: ${{ secrets.IOS_DEV_CERT_PASSWORD != '' }}
+          HAS_SENTRY_URL: ${{ secrets.SENTRY_URL != '' }}
+          HAS_SENTRY_ORG: ${{ secrets.SENTRY_ORG != '' }}
+          HAS_SENTRY_PROJECT: ${{ secrets.SENTRY_PROJECT != '' }}
+          HAS_SENTRY_DSN: ${{ secrets.SENTRY_DSN != '' }}
+          HAS_SENTRY_AUTH_TOKEN: ${{ secrets.SENTRY_AUTH_TOKEN != '' }}
+          HAS_IOS_GOOGLE_SERVICE_INFO_PLIST_B64: ${{ secrets.IOS_GOOGLE_SERVICE_INFO_PLIST_B64 != '' }}
+          HAS_EXPO_UPDATES_CERTIFICATE: ${{ secrets.EXPO_UPDATES_CERTIFICATE != '' }}
+        run: |
+          status=0
+          for name in ASC_API_KEY_ID ASC_API_ISSUER_ID ASC_API_KEY_P8 IOS_DEV_CERT_P12_B64 \
+            IOS_DEV_CERT_PASSWORD SENTRY_URL SENTRY_ORG SENTRY_PROJECT SENTRY_DSN SENTRY_AUTH_TOKEN \
+            IOS_GOOGLE_SERVICE_INFO_PLIST_B64 EXPO_UPDATES_CERTIFICATE; do
+            present="HAS_$name"
+            if [ "${!present}" != "true" ]; then
+              echo "::error::Repository secret $name is not set"
+              status=1
+            fi
+          done
+          # Only a manual run on the default branch may publish: say so instead of
+          # silently skipping the upload.
+          if [ "$UPLOAD" = "true" ] && [ "$GITHUB_REF" != "refs/heads/main" ]; then
+            echo "::error::Uploading to App Store Connect is only allowed from main (this run is on $GITHUB_REF_NAME)"
+            status=1
+          fi
+          exit "$status"
+
       - name: ⏬ Checkout code repository
         uses: actions/checkout@v4
 
@@ -97,25 +135,17 @@ jobs:
           set -euo pipefail
           umask 077
 
-          # An unset secret expands to an empty string: the build would stay green and
-          # ship an app without crash reporting or unable to verify OTA updates.
-          for name in ASC_API_KEY_ID ASC_API_ISSUER_ID ASC_API_KEY_P8 SENTRY_URL SENTRY_ORG \
-            SENTRY_PROJECT SENTRY_DSN IOS_GOOGLE_SERVICE_INFO_PLIST_B64 EXPO_UPDATES_CERTIFICATE; do
-            if [ -z "${!name}" ]; then
-              echo "::error::Repository secret $name is not set"
-              exit 1
-            fi
-          done
-
           # App Store Connect API key, where altool and the release scripts expect it.
           mkdir -p "$HOME/.private_keys"
           key_path="$HOME/.private_keys/AuthKey_${ASC_API_KEY_ID}.p8"
           printf '%s\n' "$ASC_API_KEY_P8" > "$key_path"
 
           # .env.prod: public values from the example, then the per-environment ones.
-          # The release scripts `source` it, so later lines win.
+          # The release scripts `source` it, so later lines win. The leading empty line
+          # keeps the first value from being glued to the last line of the example.
           cp .env.prod.example .env.prod
           {
+            echo
             echo "SENTRY_URL=$SENTRY_URL"
             echo "SENTRY_ORG=$SENTRY_ORG"
             echo "SENTRY_PROJECT=$SENTRY_PROJECT"
@@ -151,12 +181,17 @@ jobs:
         # xcodebuild refuses iOS destinations until the platform matching its SDK is installed.
         run: |
           # Capture the output first: piping straight into `grep -q` under pipefail could
-          # report a false "installed" when grep exits before xcodebuild is done writing.
+          # misreport when grep exits before xcodebuild is done writing.
           destinations() {
             xcodebuild -workspace ios/AlerteSecours.xcworkspace -scheme AlerteSecours -showdestinations 2>&1 || true
           }
+          # Only the generic device entry matters; other entries (simulators, toolchains)
+          # may carry their own "is not installed" message.
+          device_entry() {
+            grep "name:Any iOS Device" <<< "$1" || true
+          }
           available=$(destinations)
-          if grep -q "is not installed" <<< "$available"; then
+          if grep -q "is not installed" <<< "$(device_entry "$available")"; then
             xcodebuild -downloadPlatform iOS
             available=$(destinations)
           fi
@@ -176,12 +211,6 @@ jobs:
         run: |
           set -euo pipefail
           umask 077
-          for name in IOS_DEV_CERT_P12_B64 IOS_DEV_CERT_PASSWORD; do
-            if [ -z "${!name}" ]; then
-              echo "::error::Repository secret $name is not set"
-              exit 1
-            fi
-          done
           keychain="$RUNNER_TEMP/ios-build.keychain-db"
           keychain_password=$(openssl rand -hex 24)
           security create-keychain -p "$keychain_password" "$keychain"
@@ -207,34 +236,44 @@ jobs:
         # instead of failing the whole release. Files already fetched are not downloaded
         # again, and `yarn bundle:ios:build` then finds a fresh database.
         run: |
+          built=0
           for attempt in 1 2 3; do
             if yarn useful-places:ensure; then
-              exit 0
+              built=1
+              break
             fi
             echo "::warning::useful places build failed (attempt $attempt of 3)"
             sleep 20
           done
-          echo "::error::Could not build the useful places database"
-          exit 1
+          if [ "$built" != "1" ]; then
+            echo "::error::Could not build the useful places database"
+            exit 1
+          fi
+          # The pipeline only warns when the defibrillator dataset cannot be parsed and
+          # still writes a database. Never ship one without them.
+          dae=$(sqlite3 src/assets/db/useful-places.db "select count(*) from useful_places where type = 'dae'")
+          echo "Defibrillators in the database: $dae"
+          if [ "${dae:-0}" -lt 100000 ]; then
+            echo "::error::Only $dae defibrillators in the useful places database (expected more than 100000)"
+            exit 1
+          fi
 
       - name: 📦 Build the archive and the IPA
         env:
           SENTRY_AUTH_TOKEN: ${{ secrets.SENTRY_AUTH_TOKEN }}
-        run: |
-          if [ -z "$SENTRY_AUTH_TOKEN" ]; then
-            echo "::error::Repository secret SENTRY_AUTH_TOKEN is not set"
-            exit 1
-          fi
-          yarn bundle:ios:build
+        run: yarn bundle:ios:build
 
       - name: 🎁 Upload the build to App Store Connect
-        # Only a manual run on the default branch may publish.
+        # Only a manual run on the default branch may publish (enforced in the first step).
         if: ${{ inputs.upload && github.ref == 'refs/heads/main' }}
         run: yarn bundle:ios:upload
 
       - name: 🧹 Remove signing material
         if: always()
+        # Runs from the workspace root: the app directory does not exist when the job
+        # stopped before the checkout.
+        working-directory: ${{ github.workspace }}
         run: |
-          security delete-keychain "$RUNNER_TEMP/ios-build.keychain-db" || true
-          rm -rf "$HOME/.private_keys" .env.prod keys \
-            ios/GoogleService-Info.plist ios/AlerteSecours/GoogleService-Info.plist
+          security delete-keychain "$RUNNER_TEMP/ios-build.keychain-db" 2>/dev/null || true
+          rm -rf "$HOME/.private_keys" app/.env.prod app/keys \
+            app/ios/GoogleService-Info.plist app/ios/AlerteSecours/GoogleService-Info.plist
