@@ -61,7 +61,7 @@ Repository secrets:
 | `ASC_API_KEY_ID`, `ASC_API_ISSUER_ID` | App Store Connect API key identifiers |
 | `ASC_API_KEY_P8` | content of `AuthKey_<KEY_ID>.p8` |
 | `IOS_DEV_CERT_P12_B64`, `IOS_DEV_CERT_PASSWORD` | Apple Development certificate + key (base64 `.p12`) used to sign the archive |
-| `SENTRY_URL`, `SENTRY_ORG`, `SENTRY_PROJECT`, `SENTRY_DSN` | error tracking values of `.env.prod` |
+| `SENTRY_DSN` | error tracker DSN of `.env.prod` (its URL, organisation and project are public and come from `.env.prod.example`) |
 | `SENTRY_AUTH_TOKEN` | token used to upload sourcemaps and dSYMs |
 | `IOS_GOOGLE_SERVICE_INFO_PLIST_B64` | base64 of `ios/AlerteSecours/GoogleService-Info.plist`, the copy bundled in the app (`ios/GoogleService-Info.plist` must be identical) |
 | `EXPO_UPDATES_CERTIFICATE` | content of `keys/certificate.pem` (public) |
