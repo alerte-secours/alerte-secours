@@ -202,6 +202,21 @@ jobs:
             exit 1
           fi
 
+      - name: 🗺 Build the useful places database
+        # Downloads public datasets, one of them around 200 MB: retry a dropped transfer
+        # instead of failing the whole release. Files already fetched are not downloaded
+        # again, and `yarn bundle:ios:build` then finds a fresh database.
+        run: |
+          for attempt in 1 2 3; do
+            if yarn useful-places:ensure; then
+              exit 0
+            fi
+            echo "::warning::useful places build failed (attempt $attempt of 3)"
+            sleep 20
+          done
+          echo "::error::Could not build the useful places database"
+          exit 1
+
       - name: 📦 Build the archive and the IPA
         env:
           SENTRY_AUTH_TOKEN: ${{ secrets.SENTRY_AUTH_TOKEN }}
