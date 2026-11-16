@@ -3384,11 +3384,11 @@ __metadata:
 
 "@bam.tech/react-native-image-resizer@patch:@bam.tech/react-native-image-resizer@npm%3A3.0.7#~/.yarn/patches/@bam.tech-react-native-image-resizer-npm-3.0.7-3436107748.patch":
   version: 3.0.7
-  resolution: "@bam.tech/react-native-image-resizer@patch:@bam.tech/react-native-image-resizer@npm%3A3.0.7#~/.yarn/patches/@bam.tech-react-native-image-resizer-npm-3.0.7-3436107748.patch::version=3.0.7&hash=282c5c"
+  resolution: "@bam.tech/react-native-image-resizer@patch:@bam.tech/react-native-image-resizer@npm%3A3.0.7#~/.yarn/patches/@bam.tech-react-native-image-resizer-npm-3.0.7-3436107748.patch::version=3.0.7&hash=64e581"
   peerDependencies:
     react: "*"
     react-native: "*"
-  checksum: 10/8d686621ec3ea102e5ba4ae437c5e1495048678da049352f48e18cee35ea9426d52a6fa69278e3a4478ca9e91ef3a48acf26375939c69e6b6de255935cbba890
+  checksum: 10/0da59db13bb506df7d4864a5db30b8b974f18d32a4fe34a8002b935d26148f88f6551c51068437902500065f289e5f7137cfe5c71c5664489bcb1698fdf5f558
   languageName: node
   linkType: hard
 
@@ -16870,11 +16870,11 @@ __metadata:
 
 "react-native-contact-pick@patch:react-native-contact-pick@npm%3A0.1.2#~/.yarn/patches/react-native-contact-pick-npm-0.1.2-c77a1d8d91.patch":
   version: 0.1.2
-  resolution: "react-native-contact-pick@patch:react-native-contact-pick@npm%3A0.1.2#~/.yarn/patches/react-native-contact-pick-npm-0.1.2-c77a1d8d91.patch::version=0.1.2&hash=6dced0"
+  resolution: "react-native-contact-pick@patch:react-native-contact-pick@npm%3A0.1.2#~/.yarn/patches/react-native-contact-pick-npm-0.1.2-c77a1d8d91.patch::version=0.1.2&hash=04949a"
   peerDependencies:
     react: "*"
     react-native: "*"
-  checksum: 10/0f84b1f06c268658cbd9d6370aaa3362703dc972f13a7c05bbc0b231571d3612ba8e556a422ff61abad0828a4d1a437c71476f05029c35ab83722341e4d3fef0
+  checksum: 10/bc12d2d58d01e34e64fe16bd1b6f1cfe1cbf2a21b1ca0d7f9ad3082d93b8ce09070facad4a0891a11ce97b7ccf0daae3f5d8f308ce7bd36d3dc9e63a4448745f
   languageName: node
   linkType: hard
 

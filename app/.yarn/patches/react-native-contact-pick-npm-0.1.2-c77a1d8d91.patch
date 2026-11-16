@@ -11,3 +11,15 @@ index a7fd2d68d91b66bd11b266f02f87d5f826887c14..afbd23dedfdd2c2e4a525446e75cdcc5
  
      if (activity == null) {
        _promise.reject("Activity not available")
+diff --git a/react-native-contact-pick.podspec b/react-native-contact-pick.podspec
+index cfae0a3a87dc7a93b4788ba95ba0faa0332edc33..dc5945ca190f750acf0bcd5e66afade6603f83ac 100644
+--- a/react-native-contact-pick.podspec
++++ b/react-native-contact-pick.podspec
+@@ -26,7 +26,6 @@ Pod::Spec.new do |s|
+         "OTHER_CPLUSPLUSFLAGS" => "-DFOLLY_NO_CONFIG -DFOLLY_MOBILE=1 -DFOLLY_USE_LIBCPP=1",
+         "CLANG_CXX_LANGUAGE_STANDARD" => "c++17"
+     }
+-    s.dependency "React-Codegen"
+     s.dependency "RCT-Folly"
+     s.dependency "RCTRequired"
+     s.dependency "RCTTypeSafety"

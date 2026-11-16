@@ -545,7 +545,6 @@ PODS:
     - React-RCTText (= 0.81.5)
     - React-RCTVibration (= 0.81.5)
   - React-callinvoker (0.81.5)
-  - React-Codegen (0.1.0)
   - React-Core (0.81.5):
     - boost
     - DoubleConversion
@@ -2251,7 +2250,6 @@ PODS:
     - RCT-Folly
     - RCTRequired
     - RCTTypeSafety
-    - React-Codegen
     - React-Core
     - ReactCommon/turbomodule/core
   - react-native-device-country (1.0.5):
@@ -2269,7 +2267,6 @@ PODS:
     - RCT-Folly/Fabric
     - RCTRequired
     - RCTTypeSafety
-    - React-Codegen
     - React-Core
     - React-debug
     - React-Fabric
@@ -3581,7 +3578,6 @@ SPEC REPOS:
     - nanopb
     - PromisesObjC
     - ReachabilitySwift
-    - React-Codegen
     - Sentry
     - SocketRocket
     - TOCropViewController
@@ -3910,7 +3906,6 @@ SPEC CHECKSUMS:
   ReachabilitySwift: 32793e867593cfc1177f5d16491e3a197d2fccda
   React: 914f8695f9bf38e6418228c2ffb70021e559f92f
   React-callinvoker: 23cd4e33928608bd0cc35357597568b8b9a5f068
-  React-Codegen: 4b8b4817cea7a54b83851d4c1f91f79aa73de30a
   React-Core: 6a0a97598e9455348113bfe4c573fe8edac34469
   React-CoreModules: a88a6ca48b668401b9780e272e2a607e70f9f955
   React-cxxreact: 06265fd7e8d5c3b6b49e00d328ef76e5f1ae9c8b
@@ -3938,10 +3933,10 @@ SPEC CHECKSUMS:
   React-logger: a913317214a26565cd4c045347edf1bcacb80a3f
   React-Mapbuffer: 017336879e2e0fb7537bbc08c24f34e2384c9260
   React-microtasksnativemodule: 63ee6730cec233feab9cdcc0c100dc28a12e4165
-  react-native-contact-pick: 0fa663d82bd45185b77a365f24575a13784d89b9
+  react-native-contact-pick: 3b5b4be67c5fe7600205ec6df0e4e26e2b1db24c
   react-native-device-country: 80bb4a2759e22112a3e9560cfe704d9ea95674f2
   react-native-geolocation-service: 32b2c2a3b91e70ce2a8d0c684801aaeb0a07e0ec
-  react-native-image-resizer: 4d4556f73c9c5108a6524964b47770e4f4e193a1
+  react-native-image-resizer: 24dff1dafaecb985661a6eed0c48f12c4292c796
   react-native-immediate-phone-call: 31642355bfc4c20fb262ea0bdc50b575daa52335
   react-native-netinfo: cec9c4e86083cb5b6aba0e0711f563e2fbbff187
   react-native-pager-view: 0e228ec2dfdd87807d125c7bbfb83299edede19c
@@ -3998,6 +3993,6 @@ SPEC CHECKSUMS:
   UMAppLoader: 145337733539f9af9b3dd97eeaa7f3bd97cacb23
   Yoga: cc4a6600d61e4e9276e860d4d68eebb834a050ba
 
-PODFILE CHECKSUM: d9f0d7441b20eb32fa5464fc8a87e5cdec322901
+PODFILE CHECKSUM: 5da12d682f31c64ea7dc9ff57c3ab3f4eedef2c8
 
 COCOAPODS: 1.17.0

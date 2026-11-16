@@ -49,6 +49,18 @@ target 'AlerteSecours' do
     :privacy_file_aggregation_enabled => podfile_properties['apple.privacyManifestAggregationEnabled'] != 'false',
   )
 
+  # "React-Codegen" is the former name of a React Native pod (now ReactCodegen). A podspec
+  # that still depends on the old name makes CocoaPods resolve it from the public trunk,
+  # where it is an unrelated third-party pod, and link that pod into the app. Refuse it:
+  # patch the offending podspec instead (see .yarn/patches).
+  pre_install do |installer|
+    if installer.pod_targets.any? { |pod_target| pod_target.pod_name == 'React-Codegen' }
+      raise Pod::Informative, 'A pod depends on "React-Codegen", which is no longer a React Native pod: ' \
+        'CocoaPods would install an unrelated third-party pod of that name. ' \
+        'Patch its podspec to drop that dependency (install_modules_dependencies provides ReactCodegen).'
+    end
+  end
+
   post_install do |installer|
 # @generated begin @maplibre/maplibre-react-native:post-install - expo prebuild (DO NOT MODIFY) sync-6e76c80af0d70c0003d06822dd59b7c729fca472
     $MLRN.post_install(installer)
