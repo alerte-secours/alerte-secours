@@ -11,7 +11,7 @@ xcrun altool --list-providers --apiKey $ASC_API_KEY_ID --apiIssuer $ASC_API_ISSU
 2. Click the "+" button to generate a new API key
 3. Give it a name (e.g., "AlerteSecours Build Key")
 4. Download the .p8 file when prompted
-5. Store the .p8 file as `~/.private_keys/AuthKey_<KEY_ID>.p8` (mode 600): `altool` only looks for it there
+5. Store the .p8 file as `~/.private_keys/AuthKey_<KEY_ID>.p8` (mode 600), one of the places `altool` looks for it
 6. Note down the Key ID and Issuer ID shown on the website
 7. Set up environment variables:
 ```sh
@@ -63,7 +63,7 @@ Repository secrets:
 | `IOS_DEV_CERT_P12_B64`, `IOS_DEV_CERT_PASSWORD` | Apple Development certificate + key (base64 `.p12`) used to sign the archive |
 | `SENTRY_URL`, `SENTRY_ORG`, `SENTRY_PROJECT`, `SENTRY_DSN` | error tracking values of `.env.prod` |
 | `SENTRY_AUTH_TOKEN` | token used to upload sourcemaps and dSYMs |
-| `IOS_GOOGLE_SERVICE_INFO_PLIST_B64` | base64 of `ios/GoogleService-Info.plist` |
+| `IOS_GOOGLE_SERVICE_INFO_PLIST_B64` | base64 of `ios/AlerteSecours/GoogleService-Info.plist`, the copy bundled in the app (`ios/GoogleService-Info.plist` must be identical) |
 | `EXPO_UPDATES_CERTIFICATE` | content of `keys/certificate.pem` (public) |
 
 The App Store distribution certificate is cloud-managed: it is used through the API key at

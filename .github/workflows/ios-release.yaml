@@ -12,14 +12,6 @@ on:
         description: "Upload the build to App Store Connect (TestFlight)"
         type: boolean
         default: false
-  # TEMPORARY: lets the workflow be validated from the feature branch, since a manual
-  # run needs the file on the default branch. Never uploads (no `upload` input on push).
-  # Remove before merging.
-  push:
-    branches:
-      - fix/ios-expo-54-build
-    paths:
-      - .github/workflows/ios-release.yaml
 
 concurrency:
   group: ios-release
