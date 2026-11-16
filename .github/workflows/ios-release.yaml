@@ -45,9 +45,6 @@ jobs:
           HAS_ASC_API_KEY_P8: ${{ secrets.ASC_API_KEY_P8 != '' }}
           HAS_IOS_DEV_CERT_P12_B64: ${{ secrets.IOS_DEV_CERT_P12_B64 != '' }}
           HAS_IOS_DEV_CERT_PASSWORD: ${{ secrets.IOS_DEV_CERT_PASSWORD != '' }}
-          HAS_SENTRY_URL: ${{ secrets.SENTRY_URL != '' }}
-          HAS_SENTRY_ORG: ${{ secrets.SENTRY_ORG != '' }}
-          HAS_SENTRY_PROJECT: ${{ secrets.SENTRY_PROJECT != '' }}
           HAS_SENTRY_DSN: ${{ secrets.SENTRY_DSN != '' }}
           HAS_SENTRY_AUTH_TOKEN: ${{ secrets.SENTRY_AUTH_TOKEN != '' }}
           HAS_IOS_GOOGLE_SERVICE_INFO_PLIST_B64: ${{ secrets.IOS_GOOGLE_SERVICE_INFO_PLIST_B64 != '' }}
@@ -55,8 +52,8 @@ jobs:
         run: |
           status=0
           for name in ASC_API_KEY_ID ASC_API_ISSUER_ID ASC_API_KEY_P8 IOS_DEV_CERT_P12_B64 \
-            IOS_DEV_CERT_PASSWORD SENTRY_URL SENTRY_ORG SENTRY_PROJECT SENTRY_DSN SENTRY_AUTH_TOKEN \
-            IOS_GOOGLE_SERVICE_INFO_PLIST_B64 EXPO_UPDATES_CERTIFICATE; do
+            IOS_DEV_CERT_PASSWORD SENTRY_DSN SENTRY_AUTH_TOKEN IOS_GOOGLE_SERVICE_INFO_PLIST_B64 \
+            EXPO_UPDATES_CERTIFICATE; do
             present="HAS_$name"
             if [ "${!present}" != "true" ]; then
               echo "::error::Repository secret $name is not set"
@@ -112,49 +109,6 @@ jobs:
           yarn install --immutable
           yarn --cwd scripts/useful-places install --immutable
 
-      - name: 🔐 Restore build configuration
-        env:
-          ASC_API_KEY_ID: ${{ secrets.ASC_API_KEY_ID }}
-          ASC_API_ISSUER_ID: ${{ secrets.ASC_API_ISSUER_ID }}
-          ASC_API_KEY_P8: ${{ secrets.ASC_API_KEY_P8 }}
-          SENTRY_URL: ${{ secrets.SENTRY_URL }}
-          SENTRY_ORG: ${{ secrets.SENTRY_ORG }}
-          SENTRY_PROJECT: ${{ secrets.SENTRY_PROJECT }}
-          SENTRY_DSN: ${{ secrets.SENTRY_DSN }}
-          IOS_GOOGLE_SERVICE_INFO_PLIST_B64: ${{ secrets.IOS_GOOGLE_SERVICE_INFO_PLIST_B64 }}
-          EXPO_UPDATES_CERTIFICATE: ${{ secrets.EXPO_UPDATES_CERTIFICATE }}
-        run: |
-          set -euo pipefail
-          umask 077
-
-          # App Store Connect API key, where altool and the release scripts expect it.
-          mkdir -p "$HOME/.private_keys"
-          key_path="$HOME/.private_keys/AuthKey_${ASC_API_KEY_ID}.p8"
-          printf '%s\n' "$ASC_API_KEY_P8" > "$key_path"
-
-          # .env.prod: public values from the example, then the per-environment ones.
-          # The release scripts `source` it, so later lines win. The leading empty line
-          # keeps the first value from being glued to the last line of the example.
-          cp .env.prod.example .env.prod
-          {
-            echo
-            echo "SENTRY_URL=$SENTRY_URL"
-            echo "SENTRY_ORG=$SENTRY_ORG"
-            echo "SENTRY_PROJECT=$SENTRY_PROJECT"
-            echo "SENTRY_DSN=$SENTRY_DSN"
-            echo "ASC_API_KEY_ID=$ASC_API_KEY_ID"
-            echo "ASC_API_ISSUER_ID=$ASC_API_ISSUER_ID"
-            echo "ASC_API_KEY_PATH=$key_path"
-          } >> .env.prod
-
-          # Firebase configuration (git-ignored).
-          echo "$IOS_GOOGLE_SERVICE_INFO_PLIST_B64" | base64 --decode > ios/GoogleService-Info.plist
-          cp ios/GoogleService-Info.plist ios/AlerteSecours/GoogleService-Info.plist
-
-          # Public certificate used by expo-updates to verify signed OTA updates.
-          mkdir -p keys
-          printf '%s\n' "$EXPO_UPDATES_CERTIFICATE" > keys/certificate.pem
-
       - name: ⛾ CocoaPods cache
         uses: actions/cache@v4
         with:
@@ -194,6 +148,74 @@ jobs:
             exit 1
           fi
 
+      - name: 🗺 Build the useful places database
+        # Downloads public datasets, one of them around 200 MB: retry a dropped transfer
+        # instead of failing the whole release. Files already fetched are not downloaded
+        # again, and `yarn bundle:ios:build` then finds a fresh database.
+        run: |
+          built=0
+          for attempt in 1 2 3; do
+            if yarn useful-places:ensure; then
+              built=1
+              break
+            fi
+            echo "::warning::useful places build failed (attempt $attempt of 3)"
+            sleep 20
+          done
+          if [ "$built" != "1" ]; then
+            echo "::error::Could not build the useful places database"
+            exit 1
+          fi
+          # The pipeline only warns when the defibrillator dataset cannot be parsed and
+          # still writes a database. Never ship one without them.
+          dae=$(sqlite3 src/assets/db/useful-places.db "select count(*) from useful_places where type = 'dae'")
+          echo "Defibrillators in the database: $dae"
+          if [ "${dae:-0}" -lt 100000 ]; then
+            echo "::error::Only $dae defibrillators in the useful places database (expected more than 100000)"
+            exit 1
+          fi
+
+      - name: 🔐 Restore build configuration
+        # Deliberately after the dependency installs and the data pipeline: they run
+        # third-party code, which should not find the signing key and the tokens on
+        # disk.
+        env:
+          ASC_API_KEY_ID: ${{ secrets.ASC_API_KEY_ID }}
+          ASC_API_ISSUER_ID: ${{ secrets.ASC_API_ISSUER_ID }}
+          ASC_API_KEY_P8: ${{ secrets.ASC_API_KEY_P8 }}
+          SENTRY_DSN: ${{ secrets.SENTRY_DSN }}
+          IOS_GOOGLE_SERVICE_INFO_PLIST_B64: ${{ secrets.IOS_GOOGLE_SERVICE_INFO_PLIST_B64 }}
+          EXPO_UPDATES_CERTIFICATE: ${{ secrets.EXPO_UPDATES_CERTIFICATE }}
+        run: |
+          set -euo pipefail
+          umask 077
+
+          # App Store Connect API key, where altool and the release scripts expect it.
+          mkdir -p "$HOME/.private_keys"
+          key_path="$HOME/.private_keys/AuthKey_${ASC_API_KEY_ID}.p8"
+          printf '%s\n' "$ASC_API_KEY_P8" > "$key_path"
+
+          # .env.prod: public values from the example (API and error tracker URLs,
+          # organisation, project), then the secret ones. The release scripts `source`
+          # it, so later lines win. The leading empty line keeps the first value from
+          # being glued to the last line of the example.
+          cp .env.prod.example .env.prod
+          {
+            echo
+            echo "SENTRY_DSN=$SENTRY_DSN"
+            echo "ASC_API_KEY_ID=$ASC_API_KEY_ID"
+            echo "ASC_API_ISSUER_ID=$ASC_API_ISSUER_ID"
+            echo "ASC_API_KEY_PATH=$key_path"
+          } >> .env.prod
+
+          # Firebase configuration (git-ignored).
+          echo "$IOS_GOOGLE_SERVICE_INFO_PLIST_B64" | base64 --decode > ios/GoogleService-Info.plist
+          cp ios/GoogleService-Info.plist ios/AlerteSecours/GoogleService-Info.plist
+
+          # Public certificate used by expo-updates to verify signed OTA updates.
+          mkdir -p keys
+          printf '%s\n' "$EXPO_UPDATES_CERTIFICATE" > keys/certificate.pem
+
       - name: 🔏 Import the development signing certificate
         # The archive is signed with a development identity; the App Store distribution
         # certificate is cloud-managed and used through the API key at export time.
@@ -220,33 +242,6 @@ jobs:
           echo "$identities"
           if ! grep -qE '^ +[1-9][0-9]* valid identities found' <<< "$identities"; then
             echo "::error::The development certificate in IOS_DEV_CERT_P12_B64 is not valid (expired?). See app/docs/ios.md"
-            exit 1
-          fi
-
-      - name: 🗺 Build the useful places database
-        # Downloads public datasets, one of them around 200 MB: retry a dropped transfer
-        # instead of failing the whole release. Files already fetched are not downloaded
-        # again, and `yarn bundle:ios:build` then finds a fresh database.
-        run: |
-          built=0
-          for attempt in 1 2 3; do
-            if yarn useful-places:ensure; then
-              built=1
-              break
-            fi
-            echo "::warning::useful places build failed (attempt $attempt of 3)"
-            sleep 20
-          done
-          if [ "$built" != "1" ]; then
-            echo "::error::Could not build the useful places database"
-            exit 1
-          fi
-          # The pipeline only warns when the defibrillator dataset cannot be parsed and
-          # still writes a database. Never ship one without them.
-          dae=$(sqlite3 src/assets/db/useful-places.db "select count(*) from useful_places where type = 'dae'")
-          echo "Defibrillators in the database: $dae"
-          if [ "${dae:-0}" -lt 100000 ]; then
-            echo "::error::Only $dae defibrillators in the useful places database (expected more than 100000)"
             exit 1
           fi
 
