@@ -12,6 +12,18 @@ module.exports = {
     },
   },
   apps: {
+    "ios.debug": {
+      type: "ios.app",
+      // Debug simulator build (expo-dev-client): the bundle is served by
+      // Metro (`yarn start:staging`). No build command here yet: build the
+      // AlerteSecours scheme for the simulator with Xcode 26 and point
+      // E2E_IOS_APP_PATH at the resulting AlerteSecours.app. Keep the build
+      // products outside ios/, where `pod install` chokes on their
+      // Info.plist files.
+      binaryPath:
+        process.env.E2E_IOS_APP_PATH ||
+        "build/ios-e2e/Build/Products/Debug-iphonesimulator/AlerteSecours.app",
+    },
     "android.debug": {
       type: "android.apk",
       // ABI flavor emulatorX86_64 + custom output naming (see android/app/build.gradle)
@@ -35,7 +47,7 @@ module.exports = {
     simulator: {
       type: "ios.simulator",
       device: {
-        type: "iPhone 15",
+        type: process.env.E2E_IOS_DEVICE || "iPhone 17 Pro",
       },
     },
     attached: {
@@ -52,6 +64,10 @@ module.exports = {
     },
   },
   configurations: {
+    "ios.sim.debug": {
+      device: "simulator",
+      app: "ios.debug",
+    },
     "android.emu.debug": {
       device: "emulator",
       app: "android.debug",
