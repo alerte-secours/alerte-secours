@@ -70,6 +70,36 @@ The App Store distribution certificate is cloud-managed: it is used through the 
 export time and is not stored in the repository secrets. The development certificate
 expires after one year and must then be replaced.
 
+# end-to-end test on the simulator
+`e2e/ios/alert-chat-audio.e2e.js` drives a Debug build on the simulator with Detox, against
+staging, with a second user simulated through the API: alert sent and received, text
+messages both ways, playback of a voice message. Recording a voice message is refused by
+the app on the simulator and has to be checked on a device.
+
+One-time setup (`wix/brew` is Detox's own tap; recent Homebrew versions ask to trust it):
+```sh
+brew tap wix/brew && brew trust --formula wix/brew/applesimutils && brew install wix/brew/applesimutils
+yarn detox build-framework-cache
+```
+
+Each run needs Metro serving the staging bundle (`yarn start:staging`) and a Debug build for
+the simulator, made with the app's environment loaded (`.env.default`, `.env.local`):
+```sh
+cd ios && xcodebuild -workspace AlerteSecours.xcworkspace -scheme AlerteSecours -configuration Debug \
+  -sdk iphonesimulator -destination 'generic/platform=iOS Simulator' ARCHS=arm64 ONLY_ACTIVE_ARCH=YES build
+```
+```sh
+export E2E_IOS_APP_PATH=~/Library/Developer/Xcode/DerivedData/<alertesecours-...>/Build/Products/Debug-iphonesimulator/AlerteSecours.app
+export E2E_BACKEND_GRAPHQL_URL=https://hasura-staging.alertesecours.fr/v1/graphql
+export E2E_BACKEND_API_URL=https://api-staging.alertesecours.fr/api/v1/oas
+export E2E_BACKEND_FILES_URL=https://files-staging.alertesecours.fr/api/v1/oas
+export E2E_BACKEND_MINIO_URL=https://minio-staging.alertesecours.fr
+yarn detox test --configuration ios.sim.debug e2e/ios/alert-chat-audio.e2e.js
+```
+Detox reinstalls the app at the start of every run (`--reuse` keeps it, with its data). The
+run sends green alerts around the centre of Paris on staging and closes them; the simulated
+users stay in the staging database.
+
 # troubleshooting
 `pod install` fails with `invalid byte sequence in UTF-8` in its post-install hook when a
 previous release left `ios/AlerteSecours.xcarchive` behind: React Native reads every

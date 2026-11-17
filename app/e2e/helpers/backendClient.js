@@ -3,6 +3,7 @@
 // the app — so bidirectional scenarios don't need a second emulator.
 // Runs in the Jest (node) process: uses localhost, not 10.0.2.2.
 const crypto = require("crypto");
+const fs = require("fs");
 const { default: Base62Str } = require("base62str");
 const sha256 = require("hash.js/lib/hash/sha/256");
 const hmac = require("hash.js/lib/hash/hmac");
@@ -14,6 +15,11 @@ const GRAPHQL_URL =
 const API_OAS_URL =
   process.env.E2E_BACKEND_API_URL || "http://localhost:4200/api/v1/oas";
 const GEOLOC_SYNC_URL = `${API_OAS_URL}/geoloc/sync`;
+// Files service (audio upload) and object storage (audio download), same
+// defaults as the app's src/env.js.
+const FILES_OAS_URL =
+  process.env.E2E_BACKEND_FILES_URL || "http://localhost:4292/api/v1/oas";
+const MINIO_URL = process.env.E2E_BACKEND_MINIO_URL || "http://localhost:4290";
 const HASURA_ADMIN_SECRET = process.env.E2E_HASURA_ADMIN_SECRET || "admin";
 // Local compose leaves EXTERNAL_RINGOVER_CALL_EVENT_WEBHOOK_KEY empty.
 const RINGOVER_WEBHOOK_KEY = process.env.E2E_RINGOVER_WEBHOOK_KEY || "";
@@ -180,6 +186,41 @@ async function sendMessage(bearerJwt, alertId, text) {
   return data.insertOneMessage;
 }
 
+/**
+ * Same multipart upload as the app's chat input (ChatInput.uploadAudio): the
+ * files service stores the file and inserts the audio message itself. The
+ * caller must be a participant of the alert (403 otherwise).
+ */
+async function sendAudioMessage(bearerJwt, alertId, filePath) {
+  const form = new FormData();
+  form.append("data[alertId]", String(alertId));
+  form.append(
+    "data[file]",
+    new Blob([fs.readFileSync(filePath)], { type: "audio/mp4" }),
+    "audioRecord.m4a",
+  );
+  const res = await fetch(`${FILES_OAS_URL}/audio/upload`, {
+    method: "POST",
+    headers: { authorization: `Bearer ${bearerJwt}` },
+    body: form,
+  });
+  if (!res.ok) {
+    throw new Error(`audio upload ${res.status}: ${await res.text()}`);
+  }
+  return res.json(); // { audioFileUuid, messageId }
+}
+
+/** The stored audio file, fetched from the URL the app plays it from. */
+async function fetchAudioFile(audioFileUuid) {
+  const res = await fetch(`${MINIO_URL}/audio/${audioFileUuid}.m4a`);
+  const bytes = res.ok ? (await res.arrayBuffer()).byteLength : 0;
+  return {
+    status: res.status,
+    contentType: res.headers.get("content-type"),
+    bytes,
+  };
+}
+
 /** Messages of an alert as this user sees them (role "other" permission). */
 async function getMessages(bearerJwt, alertId) {
   const data = await gql(
@@ -315,6 +356,8 @@ module.exports = {
   sendAlert,
   closeAlert,
   sendMessage,
+  sendAudioMessage,
+  fetchAudioFile,
   getMessages,
   getAppUserAuth,
   waitForAppFcmToken,
