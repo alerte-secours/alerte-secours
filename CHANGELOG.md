@@ -2,6 +2,26 @@
 
 All notable changes to this project will be documented in this file. See [commit-and-tag-version](https://github.com/absolute-version/commit-and-tag-version) for commit guidelines.
 
+## [2.2.0](https://codeberg.org/alerte-secours/alerte-secours/compare/v2.1.0...v2.2.0) (2026-11-17)
+
+
+### Features
+
+* **ios:** generate Expo.plist from app.config.js on release builds ([f6a7026](https://codeberg.org/alerte-secours/alerte-secours/commit/f6a7026ebc7a22c656eec35e15aaeb6ca37fe236))
+* **ios:** let release scripts sign with an App Store Connect API key ([cc31414](https://codeberg.org/alerte-secours/alerte-secours/commit/cc3141468536f62e777d70524eb9470c7508607a))
+
+
+### Bug Fixes
+
+* **app:** stop the gradient from clipping the alert subject label on iOS ([b4cd8c5](https://codeberg.org/alerte-secours/alerte-secours/commit/b4cd8c53cd273f92f68517c890083ab2a0b5c006))
+* **ios:** embed a canonical OTA certificate and read the Android manifest strictly ([24ac680](https://codeberg.org/alerte-secours/alerte-secours/commit/24ac680c4e343d5037c6998bb21785ff9f1e2ace))
+* **ios:** migrate AppDelegate to the Expo SDK 54 template ([71a7bb3](https://codeberg.org/alerte-secours/alerte-secours/commit/71a7bb3728edeb8f723e32ce13da501b0cd59b43))
+* **ios:** patch react-native-image-resizer podspec for the new architecture ([932020e](https://codeberg.org/alerte-secours/alerte-secours/commit/932020ea59e96e662060741afff425486b8f8533))
+* **ios:** regenerate pods for Expo SDK 54 and fix native build errors ([53e94d6](https://codeberg.org/alerte-secours/alerte-secours/commit/53e94d6859890581ad5d664de9acafd315e61a32))
+* **ios:** resolve the API key path once for archive and export ([06e1efa](https://codeberg.org/alerte-secours/alerte-secours/commit/06e1efa2ed88e2961eb339f7ab2f093e87de4df0))
+* **ios:** stop linking an unrelated third-party React-Codegen pod ([a57fab0](https://codeberg.org/alerte-secours/alerte-secours/commit/a57fab07c9d04f5d9e4185ceb745bb8da2361269))
+* **ios:** validate the OTA code signing certificate when generating Expo.plist ([4e65bb4](https://codeberg.org/alerte-secours/alerte-secours/commit/4e65bb4a77442884792622257c5857119fffa62c))
+
 ## [2.1.0](https://codeberg.org/alerte-secours/alerte-secours/compare/v2.0.0...v2.1.0) (2026-10-23)
 
 
